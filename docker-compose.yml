@@ -21,6 +21,8 @@ services:
       - ./kong/config.yml:/var/lib/kong/kong.yml:ro
     networks:
       - bw-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - auth-service
       - post-service
@@ -42,6 +44,8 @@ services:
       - "50051:50051"  # gRPC
     env_file:
       - ./auth/.env.docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,6 +72,8 @@ services:
       - "50052:50052"  # gRPC
     env_file:
       - ./post/.env.docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       auth-service:
         condition: service_healthy
@@ -83,6 +89,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # Chain Indexer Service
+  chain-indexer:
+    build:
+      context: ./chain-indexer
+      dockerfile: Dockerfile
+    container_name: bw-chain-indexer
+    restart: unless-stopped
+    env_file:
+      - ./chain-indexer/.env.docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bw-network
 
   # PostgreSQL Database
   postgres:

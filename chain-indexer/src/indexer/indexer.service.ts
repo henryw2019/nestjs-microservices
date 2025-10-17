@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaService } from '../prisma.service';
-
 @Injectable()
 export class IndexerService implements OnModuleInit {
   private provider: ethers.JsonRpcProvider;
@@ -18,6 +17,51 @@ export class IndexerService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {
     const rpc = process.env.ETH_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_INFURA_KEY';
     this.provider = new ethers.JsonRpcProvider(rpc);
+  }
+
+  // ensure token metadata (name,symbol,decimals,totalSupply) is present in TokenMeta table
+  private async ensureTokenMeta(tokenAddress: string) {
+    if (!tokenAddress) return;
+    const addr = tokenAddress.toLowerCase();
+    try {
+      // check existing
+      const existing = await this.prisma.tokenMeta.findUnique({ where: { tokenAddress: addr } }).catch(() => null);
+      // perform low-level calls to read common ERC20 metadata
+      const iface = new ethers.Interface([
+        'function name() view returns (string)',
+        'function symbol() view returns (string)',
+        'function decimals() view returns (uint8)',
+        'function totalSupply() view returns (uint256)'
+      ]);
+      const out: { name?: string; symbol?: string; decimals?: number; totalSupply?: string } = {};
+      // helper to call and decode
+      const tryCall = async (fn: string, args: any[] = []) => {
+        try {
+          const data = iface.encodeFunctionData(fn, args);
+          const res = await this.provider.call({ to: tokenAddress, data }).catch(() => null);
+          if (res && res !== '0x') {
+            const decoded = iface.decodeFunctionResult(fn, res);
+            return decoded && decoded[0];
+          }
+        } catch (e) {
+          // ignore
+        }
+        return null;
+      };
+      const name = await tryCall('name');
+      const symbol = await tryCall('symbol');
+      const decimals = await tryCall('decimals');
+      const totalSupply = await tryCall('totalSupply');
+      if (name) out.name = typeof name === 'string' ? name : name.toString();
+      if (symbol) out.symbol = typeof symbol === 'string' ? symbol : symbol.toString();
+      if (typeof decimals === 'bigint' || typeof decimals === 'number') out.decimals = Number(decimals);
+      if (totalSupply) out.totalSupply = (totalSupply && totalSupply.toString) ? totalSupply.toString() : undefined;
+
+      // upsert into TokenMeta
+  await this.prisma.tokenMeta.upsert({ where: { tokenAddress: addr }, create: { tokenAddress: addr, name: out.name || null, symbol: out.symbol || null, decimals: out.decimals || null, totalSupply: out.totalSupply || null }, update: { name: out.name || undefined, symbol: out.symbol || undefined, decimals: out.decimals || undefined, totalSupply: out.totalSupply || undefined, lastUpdatedAt: new Date() } }).catch(e => console.error('Prisma tokenMeta upsert error', e));
+    } catch (e) {
+      console.error('ensureTokenMeta general error', e?.message || e);
+    }
   }
 
   async onModuleInit() {
@@ -65,7 +109,7 @@ export class IndexerService implements OnModuleInit {
   const blockWithTxs = await this.provider.send('eth_getBlockByNumber', [hex, true]).catch(() => null);
   if (!blockWithTxs || !blockWithTxs.transactions) return;
     console.log(`Block ${block.number}: txs=${(blockWithTxs.transactions || []).length}`);
-    for (const tx of blockWithTxs.transactions as any[]) {
+  for (const tx of blockWithTxs.transactions as any[]) {
       try {
         console.log(`  TX ${tx.hash} from=${tx.from} to=${tx.to}`);
         // normalize value to decimal string (Prisma Decimal expects base-10 string)
@@ -85,6 +129,14 @@ export class IndexerService implements OnModuleInit {
           console.log(`    receipt missing for ${tx.hash}`);
           continue;
         }
+          // If this tx created a contract, attempt to fetch token metadata (covers freshly deployed tokens)
+          if (receipt.contractAddress) {
+            try {
+                await this.ensureTokenMeta(receipt.contractAddress).catch(() => null);
+            } catch (e) {
+              console.error('ensureTokenMeta on contract creation error', e?.message || e);
+            }
+          }
         console.log(`    receipt status=${receipt.status} logs=${(receipt.logs||[]).length}`);
     const addressesToRefresh: Array<{ address: string; token?: string | null }> = [];
   for (const log of receipt.logs) {
@@ -99,6 +151,24 @@ export class IndexerService implements OnModuleInit {
           // try parse with local ABI cache if available
           const contractAddress = (log.address || '').toLowerCase();
           const ifaceFromAbi = await this.loadInterfaceForAddress(contractAddress).catch(() => null);
+            // detect proxy upgrade events (OpenZeppelin Upgraded(address)) and refresh impl metadata
+            try {
+              const UPGRADED_SIG = ethers.id('Upgraded(address)');
+              if (log.topics && log.topics[0] === UPGRADED_SIG) {
+                const implTopic = log.topics[1];
+                if (implTopic) {
+                  try {
+                    const impl = ethers.getAddress('0x' + implTopic.slice(-40));
+                        await this.ensureTokenMeta(impl).catch(() => null);
+                        console.log(`      Detected Upgraded event for proxy=${contractAddress} impl=${impl}`);
+                  } catch (e) {
+                    // ignore malformed topic
+                  }
+                }
+              }
+            } catch (e) {
+              // ignore
+            }
           try {
             if (ifaceFromAbi) {
               // attempt to parse using contract ABI
@@ -134,6 +204,12 @@ export class IndexerService implements OnModuleInit {
                 await this.prisma.eRC20Transfer.create({ data: { txHash: tx.hash, logIndex: logIndexNum, blockNumber: BigInt(block.number), token: log.address, from, to, value } }).catch(e => console.error('Prisma erc20 create error', e));
                 if (from) addressesToRefresh.push({ address: from, token: log.address });
                 if (to) addressesToRefresh.push({ address: to, token: log.address });
+                // ensure token metadata exists/updated
+                try {
+                  await this.ensureTokenMeta(log.address).catch(() => null);
+                } catch (e) {
+                  console.error('ensureTokenMeta error', e?.message || e);
+                }
               }
             }
           } catch (e) {
@@ -151,11 +227,17 @@ export class IndexerService implements OnModuleInit {
               // populate indexed/data args for easier querying later
               parsedIndexedArgs = { from, to };
               parsedDataArgs = { value };
-              console.log(`      ERC20 Transfer parsed token=${log.address} from=${from} to=${to} value=${value}`);
-              await this.prisma.eRC20Transfer.create({ data: { txHash: tx.hash, logIndex: logIndexNum, blockNumber: BigInt(block.number), token: log.address, from, to, value } }).catch(e => console.error('Prisma erc20 create error', e));
+                console.log(`      ERC20 Transfer parsed token=${log.address} from=${from} to=${to} value=${value}`);
+                await this.prisma.eRC20Transfer.create({ data: { txHash: tx.hash, logIndex: logIndexNum, blockNumber: BigInt(block.number), token: log.address, from, to, value } }).catch(e => console.error('Prisma erc20 create error', e));
               // queue token balance refresh for both from/to
-              if (from) addressesToRefresh.push({ address: from, token: log.address });
-              if (to) addressesToRefresh.push({ address: to, token: log.address });
+                if (from) addressesToRefresh.push({ address: from, token: log.address });
+                if (to) addressesToRefresh.push({ address: to, token: log.address });
+              // ensure token metadata exists/updated
+              try {
+                await this.ensureTokenMeta(log.address).catch(() => null);
+              } catch (e) {
+                console.error('ensureTokenMeta error', e?.message || e);
+              }
             }
           } catch (e) {
             console.log(`      parse error for log index=${log.logIndex} tx=${tx.hash}: ${e?.message || e}`);
@@ -234,7 +316,7 @@ export class IndexerService implements OnModuleInit {
     if (!address) return null;
     if (this.abiCache.has(address)) return this.abiCache.get(address) || null;
     try {
-      const abiPath = path.join(process.cwd(), 'chain-indexer', 'abis', `${address}.json`);
+      const abiPath = path.join(process.cwd(), 'abis', `${address}.json`);
       if (!fs.existsSync(abiPath)) {
         // try resolving implementation if this address is a proxy
         try {
@@ -294,6 +376,11 @@ export class IndexerService implements OnModuleInit {
         if (impl && impl !== '0x0000000000000000000000000000000000000000') {
           this.proxyImplCache.set(key, { impl, ts: Date.now() });
           console.log(`resolveImplementation: found impl ${impl} for proxy ${proxyAddr} via EIP-1967 slot`);
+          try {
+            await this.ensureTokenMeta(impl).catch(() => null);
+          } catch (e) {
+            // ignore
+          }
           return impl;
         }
       }
@@ -310,9 +397,14 @@ export class IndexerService implements OnModuleInit {
         if (res && res !== '0x') {
           const impl = ethers.getAddress('0x' + res.slice(-40));
           if (impl && impl !== '0x0000000000000000000000000000000000000000') {
-            this.proxyImplCache.set(key, { impl, ts: Date.now() });
-            console.log(`resolveImplementation: found impl ${impl} for proxy ${proxyAddr} via getter ${sig}`);
-            return impl;
+              this.proxyImplCache.set(key, { impl, ts: Date.now() });
+              console.log(`resolveImplementation: found impl ${impl} for proxy ${proxyAddr} via getter ${sig}`);
+              try {
+                await this.ensureTokenMeta(impl).catch(() => null);
+              } catch (e) {
+                // ignore
+              }
+              return impl;
           }
         }
       } catch (e) {
@@ -332,9 +424,14 @@ export class IndexerService implements OnModuleInit {
           const implHex = lower.slice(start, start + 40);
           const impl = ethers.getAddress('0x' + implHex);
           if (impl) {
-            this.proxyImplCache.set(key, { impl, ts: Date.now() });
-            console.log(`resolveImplementation: found impl ${impl} for proxy ${proxyAddr} via minimal-proxy bytecode`);
-            return impl;
+              this.proxyImplCache.set(key, { impl, ts: Date.now() });
+              console.log(`resolveImplementation: found impl ${impl} for proxy ${proxyAddr} via minimal-proxy bytecode`);
+              try {
+                await this.ensureTokenMeta(impl).catch(() => null);
+              } catch (e) {
+                // ignore
+              }
+              return impl;
           }
         }
       }

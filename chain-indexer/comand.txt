@@ -1,0 +1,36 @@
+新增库表后，添加相应代码后执行：
+cd /workspaces/nestjs-microservices/chain-indexer && npx prisma generate && npx tsc --noEmit
+
+我做了什么（代码变更）
+Prisma schema
+文件：schema.prisma
+添加了新模型 TokenMeta：
+tokenAddress String @id
+name String?
+symbol String?
+decimals Int?
+totalSupply Decimal?
+lastUpdatedAt DateTime @default(now())
+索引器逻辑
+文件：indexer.service.ts
+在解析 ERC20 Transfer 的位置（当检测到 Transfer 并写入 ERC20Transfer 后）调用了新函数 ensureTokenMeta(log.address)，以保证代币元数据被写入/更新。
+新增方法 ensureTokenMeta(tokenAddress: string)：
+使用低级 call 去读取 name(), symbol(), decimals(), totalSupply()（容错，遇错会跳过字段）。
+使用 Prisma 的 upsert 将数据写入 TokenMeta 表（如果已有则更新 lastUpdatedAt）。
+
+
+Signers:
+ admin: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+ reserveManager: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+ compliance: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+ pauser: 0x90F79bf6EB2c4f870365E785982E1f101E93b906
+ attestor: 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65
+ alice: 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc
+ bob: 0x976EA74026E726554dB657fA54763abd0C3a0aa9
+Network chainId: 31337n
+Deployed proxy at: 0x63fea6E447F120B8Faf85B53cdaD8348e645D80E
+Deployed implementation at: 0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1
+mintReserves tx: 0xe9c9524504e23945e19f89caf7ff60c52b0c08083c8e9ffbdbda3f0196b507bb block: 490
+alice balance before redeem: 2500
+redeem tx: 0xc25c14951927b929e3d397be4a3d1d45757ecd855be15b3d35a1d99204dd1834 block: 491
+alice balance after redeem: 2000

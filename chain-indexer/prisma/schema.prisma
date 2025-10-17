@@ -56,6 +56,15 @@ model AddressBalance {
   lastUpdatedAt   DateTime @default(now())
 }
 
+model TokenMeta {
+  tokenAddress String   @id
+  name         String?
+  symbol       String?
+  decimals     Int?
+  totalSupply  Decimal?
+  lastUpdatedAt DateTime @default(now())
+}
+
 model Checkpoint {
   id                Int    @id @default(1)
   chainId           Int
