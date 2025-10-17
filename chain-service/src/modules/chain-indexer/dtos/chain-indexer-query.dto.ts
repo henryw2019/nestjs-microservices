@@ -2,7 +2,20 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class BlockQueryDto {
+export class PaginationDto {
+    @ApiPropertyOptional({ description: 'Cursor for pagination — opaque base64 token returned by previous response', example: '' })
+    @IsOptional()
+    @IsString()
+    cursor?: string;
+
+    @ApiPropertyOptional({ description: 'Items per page', example: 50 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 0 })
+    limit?: number = 50;
+}
+
+export class BlockQueryDto extends PaginationDto {
     @ApiPropertyOptional({ description: 'Block number', example: 128 })
     @IsOptional()
     @Type(() => Number)
@@ -15,7 +28,7 @@ export class BlockQueryDto {
     hash?: string;
 }
 
-export class TransactionQueryDto {
+export class TransactionQueryDto extends PaginationDto {
     @ApiPropertyOptional({ description: 'Transaction hash', example: '0xdeadbeef...' })
     @IsOptional()
     @IsString()
@@ -32,7 +45,7 @@ export class TransactionQueryDto {
     to?: string;
 }
 
-export class Erc20TransferQueryDto {
+export class Erc20TransferQueryDto extends PaginationDto {
     @ApiPropertyOptional({ description: 'Transaction hash', example: '0xdeadbeef...' })
     @IsOptional()
     @IsString()
@@ -54,7 +67,7 @@ export class Erc20TransferQueryDto {
     to?: string;
 }
 
-export class EventLogQueryDto {
+export class EventLogQueryDto extends PaginationDto {
     @ApiPropertyOptional({ description: 'Transaction hash', example: '0xdeadbeef...' })
     @IsOptional()
     @IsString()
@@ -66,7 +79,7 @@ export class EventLogQueryDto {
     contractAddress?: string;
 }
 
-export class AddressBalanceQueryDto {
+export class AddressBalanceQueryDto extends PaginationDto {
     @ApiPropertyOptional({ description: 'Account address', example: '0xholder...' })
     @IsOptional()
     @IsString()
@@ -83,4 +96,6 @@ export class TokenMetaQueryDto {
     @IsString()
     @IsNotEmpty()
     tokenAddress!: string;
+
+    // pagination not typically used for single token lookup, but keep fields optional in service
 }

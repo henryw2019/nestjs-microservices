@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { Buffer } from 'buffer';
+
 
 import { DatabaseService } from '@/common/services/database.service';
 import {
@@ -19,13 +21,9 @@ type SerializedEntity = Record<string, unknown>;
 export class ChainIndexerService {
     constructor(private readonly database: DatabaseService) {}
 
-    async getBlocks(query: BlockQueryDto): Promise<SerializedEntity[]> {
+    async getBlocks(query: BlockQueryDto): Promise<{ items: SerializedEntity[]; pageInfo: { nextCursor?: string } }> {
         const blockNumber = query.number;
         const hash = this.sanitize(query.hash);
-
-        if (blockNumber === undefined && !hash) {
-            throw new BadRequestException('Provide block number or hash to query blocks.');
-        }
 
         const where: Prisma.BlockWhereInput = {};
         if (blockNumber !== undefined) {
@@ -35,22 +33,43 @@ export class ChainIndexerService {
             where.hash = this.equalsInsensitive(hash);
         }
 
-        const blocks = await this.database.block.findMany({
-            where,
+        // cursor-based pagination: cursor encodes last seen (number, hash)
+        const limit = Math.min(1000, Math.max(1, (query.limit ?? 50)));
+        let cursorFilter: Prisma.BlockWhereInput | undefined = undefined;
+        if (query.cursor) {
+            try {
+                const decoded = JSON.parse(Buffer.from(query.cursor, 'base64').toString('utf8')) as { lastNumber?: string };
+                if (decoded.lastNumber) {
+                    // since ordering is number desc, fetch blocks with number < lastNumber
+                    cursorFilter = { number: { lt: this.toBigInt(Number(decoded.lastNumber)) } };
+                }
+            } catch (e) {
+                // ignore invalid cursor and treat as no cursor
+            }
+        }
+
+        const client = this.database as any;
+        const finalWhere: Prisma.BlockWhereInput = cursorFilter ? { AND: [where, cursorFilter] } : where;
+        const blocks = await client.block.findMany({
+            where: finalWhere,
             orderBy: { number: 'desc' },
+            take: limit,
         });
 
-        return this.serializeMany(blocks);
+        const items = this.serializeMany(blocks);
+        const last = blocks[blocks.length - 1];
+        const pageInfo: { nextCursor?: string } = {};
+        if (blocks.length === limit && last) {
+            pageInfo.nextCursor = Buffer.from(JSON.stringify({ lastNumber: last.number.toString() })).toString('base64');
+        }
+
+        return { items, pageInfo };
     }
 
-    async getTransactions(query: TransactionQueryDto): Promise<SerializedEntity[]> {
+    async getTransactions(query: TransactionQueryDto): Promise<{ items: SerializedEntity[]; pageInfo: { nextCursor?: string } }> {
         const hash = this.sanitize(query.hash);
         const from = this.sanitize(query.from);
         const to = this.sanitize(query.to);
-
-        if (!hash && !from && !to) {
-            throw new BadRequestException('Provide hash, from, or to to query transactions.');
-        }
 
         const where: Prisma.TxWhereInput = {};
         if (hash) {
@@ -63,24 +82,48 @@ export class ChainIndexerService {
             where.to = this.equalsInsensitive(to);
         }
 
-        const transactions = await this.database.tx.findMany({
-            where,
+        const limit = Math.min(1000, Math.max(1, (query.limit ?? 50)));
+        let cursorFilter: Prisma.TxWhereInput | undefined = undefined;
+        if (query.cursor) {
+            try {
+                const decoded = JSON.parse(Buffer.from(query.cursor, 'base64').toString('utf8')) as { lastBlockNumber?: string, lastHash?: string };
+                if (decoded.lastBlockNumber && decoded.lastHash) {
+                    // ordering by blockNumber desc => fetch blocks with blockNumber < lastBlockNumber OR equal and hash < lastHash
+                    cursorFilter = {
+                        OR: [
+                            { blockNumber: { lt: this.toBigInt(Number(decoded.lastBlockNumber)) } },
+                            { AND: [{ blockNumber: this.toBigInt(Number(decoded.lastBlockNumber)) }, { hash: { lt: decoded.lastHash } }] },
+                        ],
+                    } as Prisma.TxWhereInput;
+                }
+            } catch (e) {
+                // ignore invalid cursor
+            }
+        }
+
+        const client = this.database as any;
+        const finalWhereTx: Prisma.TxWhereInput = cursorFilter ? { AND: [where, cursorFilter] } : where;
+        const transactions = await client.tx.findMany({
+            where: finalWhereTx,
             orderBy: { blockNumber: 'desc' },
+            take: limit,
         });
 
-        return this.serializeMany(transactions);
+        const items = this.serializeMany(transactions);
+        const last = transactions[transactions.length - 1];
+        const pageInfo: { nextCursor?: string } = {};
+        if (transactions.length === limit && last) {
+            pageInfo.nextCursor = Buffer.from(JSON.stringify({ lastBlockNumber: last.blockNumber.toString(), lastHash: last.hash })).toString('base64');
+        }
+
+        return { items, pageInfo };
     }
 
-    async getErc20Transfers(query: Erc20TransferQueryDto): Promise<SerializedEntity[]> {
+    async getErc20Transfers(query: Erc20TransferQueryDto): Promise<{ items: SerializedEntity[]; pageInfo: { nextCursor?: string } }> {
         const txHash = this.sanitize(query.txHash);
         const token = this.sanitize(query.token);
         const from = this.sanitize(query.from);
         const to = this.sanitize(query.to);
-
-        if (!txHash && !token && !from && !to) {
-            throw new BadRequestException('Provide txHash, token, from, or to to query ERC20 transfers.');
-        }
-
         const where: Prisma.ERC20TransferWhereInput = {};
         if (txHash) {
             where.txHash = this.equalsInsensitive(txHash);
@@ -95,22 +138,45 @@ export class ChainIndexerService {
             where.to = this.equalsInsensitive(to);
         }
 
-        const transfers = await this.database.eRC20Transfer.findMany({
-            where,
-            orderBy: [{ blockNumber: 'desc' }, { logIndex: 'asc' }],
-        });
-
-        return this.serializeMany(transfers);
-    }
-
-    async getEventLogs(query: EventLogQueryDto): Promise<SerializedEntity[]> {
-        const txHash = this.sanitize(query.txHash);
-        const contractAddress = this.sanitize(query.contractAddress);
-
-        if (!txHash && !contractAddress) {
-            throw new BadRequestException('Provide txHash or contractAddress to query event logs.');
+        const limit = Math.min(1000, Math.max(1, (query.limit ?? 50)));
+        let cursorFilter: Prisma.ERC20TransferWhereInput | undefined = undefined;
+        if (query.cursor) {
+            try {
+                const decoded = JSON.parse(Buffer.from(query.cursor, 'base64').toString('utf8')) as { lastBlockNumber?: string, lastLogIndex?: number };
+                if (decoded.lastBlockNumber && typeof decoded.lastLogIndex === 'number') {
+                    cursorFilter = {
+                        OR: [
+                            { blockNumber: { lt: this.toBigInt(Number(decoded.lastBlockNumber)) } },
+                            { AND: [{ blockNumber: this.toBigInt(Number(decoded.lastBlockNumber)) }, { logIndex: { gt: decoded.lastLogIndex } }] },
+                        ],
+                    } as Prisma.ERC20TransferWhereInput;
+                }
+            } catch (e) {
+                // ignore
+            }
         }
 
+        const client = this.database as any;
+        const finalWhereErc: Prisma.ERC20TransferWhereInput = cursorFilter ? { AND: [where, cursorFilter] } : where;
+        const transfers = await client.eRC20Transfer.findMany({
+            where: finalWhereErc,
+            orderBy: [{ blockNumber: 'desc' }, { logIndex: 'asc' }],
+            take: limit,
+        });
+
+        const items = this.serializeMany(transfers);
+        const last = transfers[transfers.length - 1];
+        const pageInfo: { nextCursor?: string } = {};
+        if (transfers.length === limit && last) {
+            pageInfo.nextCursor = Buffer.from(JSON.stringify({ lastBlockNumber: last.blockNumber.toString(), lastLogIndex: last.logIndex })).toString('base64');
+        }
+
+        return { items, pageInfo };
+    }
+
+    async getEventLogs(query: EventLogQueryDto): Promise<{ items: SerializedEntity[]; pageInfo: { nextCursor?: string } }> {
+        const txHash = this.sanitize(query.txHash);
+        const contractAddress = this.sanitize(query.contractAddress);
         const where: Prisma.EventLogWhereInput = {};
         if (txHash) {
             where.txHash = this.equalsInsensitive(txHash);
@@ -119,22 +185,45 @@ export class ChainIndexerService {
             where.contractAddress = this.equalsInsensitive(contractAddress);
         }
 
-        const logs = await this.database.eventLog.findMany({
-            where,
-            orderBy: [{ blockNumber: 'desc' }, { logIndex: 'asc' }],
-        });
-
-        return this.serializeMany(logs);
-    }
-
-    async getAddressBalances(query: AddressBalanceQueryDto): Promise<SerializedEntity[]> {
-        const address = this.sanitize(query.address);
-        const tokenAddress = this.sanitize(query.tokenAddress);
-
-        if (!address && !tokenAddress) {
-            throw new BadRequestException('Provide address or tokenAddress to query address balances.');
+        const limit = Math.min(1000, Math.max(1, (query.limit ?? 50)));
+        let cursorFilter: Prisma.EventLogWhereInput | undefined = undefined;
+        if (query.cursor) {
+            try {
+                const decoded = JSON.parse(Buffer.from(query.cursor, 'base64').toString('utf8')) as { lastBlockNumber?: string, lastLogIndex?: number };
+                if (decoded.lastBlockNumber && typeof decoded.lastLogIndex === 'number') {
+                    cursorFilter = {
+                        OR: [
+                            { blockNumber: { lt: this.toBigInt(Number(decoded.lastBlockNumber)) } },
+                            { AND: [{ blockNumber: this.toBigInt(Number(decoded.lastBlockNumber)) }, { logIndex: { gt: decoded.lastLogIndex } }] },
+                        ],
+                    } as Prisma.EventLogWhereInput;
+                }
+            } catch (e) {
+                // ignore
+            }
         }
 
+        const client = this.database as any;
+        const finalWhereLogs: Prisma.EventLogWhereInput = cursorFilter ? { AND: [where, cursorFilter] } : where;
+        const logs = await client.eventLog.findMany({
+            where: finalWhereLogs,
+            orderBy: [{ blockNumber: 'desc' }, { logIndex: 'asc' }],
+            take: limit,
+        });
+
+        const items = this.serializeMany(logs);
+        const last = logs[logs.length - 1];
+        const pageInfo: { nextCursor?: string } = {};
+        if (logs.length === limit && last) {
+            pageInfo.nextCursor = Buffer.from(JSON.stringify({ lastBlockNumber: last.blockNumber.toString(), lastLogIndex: last.logIndex })).toString('base64');
+        }
+
+        return { items, pageInfo };
+    }
+
+    async getAddressBalances(query: AddressBalanceQueryDto): Promise<{ items: SerializedEntity[]; pageInfo: { nextCursor?: string } }> {
+        const address = this.sanitize(query.address);
+        const tokenAddress = this.sanitize(query.tokenAddress);
         const where: Prisma.AddressBalanceWhereInput = {};
         if (address) {
             where.address = this.equalsInsensitive(address);
@@ -143,22 +232,47 @@ export class ChainIndexerService {
             where.tokenAddress = this.equalsInsensitive(tokenAddress);
         }
 
-        const balances = await this.database.addressBalance.findMany({
-            where,
+        const limit = Math.min(1000, Math.max(1, (query.limit ?? 50)));
+        let cursorFilter: Prisma.AddressBalanceWhereInput | undefined = undefined;
+        if (query.cursor) {
+            try {
+                const decoded = JSON.parse(Buffer.from(query.cursor, 'base64').toString('utf8')) as { lastAddress?: string };
+                if (decoded.lastAddress) {
+                    cursorFilter = { address: { gt: decoded.lastAddress } } as Prisma.AddressBalanceWhereInput;
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        const client = this.database as any;
+        const finalWhereBal: Prisma.AddressBalanceWhereInput = cursorFilter ? { AND: [where, cursorFilter] } : where;
+        const balances = await client.addressBalance.findMany({
+            where: finalWhereBal,
             orderBy: [{ address: 'asc' }, { tokenAddress: 'asc' }],
+            take: limit,
         });
 
-        return this.serializeMany(balances);
+        const items = this.serializeMany(balances);
+        const last = balances[balances.length - 1];
+        const pageInfo: { nextCursor?: string } = {};
+        if (balances.length === limit && last) {
+            pageInfo.nextCursor = Buffer.from(JSON.stringify({ lastAddress: last.address })).toString('base64');
+        }
+
+        return { items, pageInfo };
     }
 
     async getTokenMeta(query: TokenMetaQueryDto): Promise<SerializedEntity[]> {
+        // allow empty queries: if tokenAddress provided, filter; otherwise return empty list for safety
         const tokenAddress = this.sanitize(query.tokenAddress);
 
         if (!tokenAddress) {
-            throw new BadRequestException('Provide tokenAddress to query token metadata.');
+            return [];
         }
 
-        const meta = await this.database.tokenMeta.findMany({
+        const client = this.database as any;
+        const meta = await client.tokenMeta.findMany({
             where: { tokenAddress: this.equalsInsensitive(tokenAddress) },
         });
 
@@ -188,12 +302,13 @@ export class ChainIndexerService {
                 logWhere.contractAddress = this.equalsInsensitive(contractAddress);
             }
 
-            const logs = await this.database.eventLog.findMany({
+            const client = this.database as any;
+            const logs = await client.eventLog.findMany({
                 where: logWhere,
                 select: { chainId: true },
             });
 
-            const derived = Array.from(new Set(logs.map(log => log.chainId)));
+            const derived = Array.from(new Set(logs.map((log: any) => Number(log.chainId)))) as number[];
             if (!derived.length) {
                 return [];
             }
@@ -205,7 +320,8 @@ export class ChainIndexerService {
             return [];
         }
 
-        const checkpoints = await this.database.checkpoint.findMany({
+        const client = this.database as any;
+        const checkpoints = await client.checkpoint.findMany({
             where: chainIds.length === 1 ? { chainId: chainIds[0] } : { chainId: { in: chainIds } },
         });
 
