@@ -100,3 +100,24 @@ model Checkpoint {
   chainId            Int
   lastProcessedBlock BigInt
 }
+
+model KeyStore {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  address    String   @unique
+  privateKey String
+  createdAt  DateTime @default(now())
+
+  @@map("keystore")
+}
+
+model Contract {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  abiFile   String   @map("abi_file")
+  ownerId   String?  @map("owner_id")
+  createdAt DateTime @default(now())
+
+  @@map("contracts")
+}

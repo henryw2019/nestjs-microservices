@@ -4,6 +4,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { CommonModule } from 'src/common/common.module';
 import { PostModule } from '../modules/post/post.module';
 import { ChainIndexerModule } from '../modules/chain-indexer/chain-indexer.module';
+import { KeyStoreModule } from '../modules/keystore/keystore.module';
 import { AppController } from './app.controller';
 import { PostGrpcController } from './post.grpc.controller';
 import { GrpcModule } from 'nestjs-grpc';
@@ -15,6 +16,7 @@ import { join } from 'path';
         CommonModule,
         PostModule,
     ChainIndexerModule,
+    KeyStoreModule,
         TerminusModule,
         GrpcModule.forProviderAsync({
             inject: [ConfigService],
