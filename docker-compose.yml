@@ -60,6 +60,33 @@ services:
       retries: 3
       start_period: 40s
 
+  # Chain Reader Service
+  chain-reader:
+    build:
+      context: ./chain-reader
+      dockerfile: Dockerfile
+    container_name: bw-chain-reader
+    restart: unless-stopped
+    ports:
+      - "9004:9004"
+    env_file:
+      - ./chain-reader/.env.docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - bw-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9004/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # Post Service
   post-service:
     build:

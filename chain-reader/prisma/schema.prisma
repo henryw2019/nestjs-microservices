@@ -1,0 +1,81 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Block {
+  number    BigInt  @id
+  hash      String
+  timestamp DateTime
+
+  txs            Tx[]
+  erc20Transfers ERC20Transfer[]
+  eventLogs      EventLog[]
+}
+
+model Tx {
+  hash        String  @id
+  blockNumber BigInt
+  from        String
+  to          String?
+  value       Decimal
+
+  block        Block           @relation(fields: [blockNumber], references: [number])
+  transfers    ERC20Transfer[]
+  eventLogs    EventLog[]
+}
+
+model ERC20Transfer {
+  id          BigInt  @id @default(autoincrement())
+  txHash      String
+  logIndex    Int
+  blockNumber BigInt
+  token       String
+  from        String
+  to          String
+  value       Decimal
+
+  tx    Tx    @relation(fields: [txHash], references: [hash])
+  block Block @relation(fields: [blockNumber], references: [number])
+}
+
+model EventLog {
+  id              BigInt  @id @default(autoincrement())
+  chainId         Int
+  blockNumber     BigInt
+  blockHash       String
+  txHash          String
+  logIndex        Int
+  contractAddress String
+  eventName       String
+  eventSignature  String
+  indexedArgs     Json
+  dataArgs        Json
+  raw             Json
+  processed       Boolean @default(false)
+
+  tx    Tx    @relation(fields: [txHash], references: [hash])
+  block Block @relation(fields: [blockNumber], references: [number])
+}
+
+model AddressBalance {
+  id            BigInt  @id @default(autoincrement())
+  address       String
+  tokenAddress  String?
+  balance       Decimal
+  lastUpdatedAt DateTime @default(now())
+}
+
+model TokenMeta {
+  tokenAddress  String   @id
+  name          String?
+  symbol        String?
+  decimals      Int?
+  totalSupply   Decimal?
+  lastUpdatedAt DateTime @default(now())
+}

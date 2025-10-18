@@ -1,0 +1,7 @@
+{
+    "success": {
+        "200": "Success",
+        "201": "Created",
+        "202": "Accepted"
+    }
+}

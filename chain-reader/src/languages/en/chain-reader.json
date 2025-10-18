@@ -1,0 +1,35 @@
+{
+    "block": {
+        "success": {
+            "listed": "Blocks retrieved successfully",
+            "detail": "Block retrieved successfully"
+        }
+    },
+    "transaction": {
+        "success": {
+            "listed": "Transactions retrieved successfully",
+            "detail": "Transaction retrieved successfully"
+        }
+    },
+    "erc20Transfer": {
+        "success": {
+            "listed": "ERC20 transfers retrieved successfully"
+        }
+    },
+    "eventLog": {
+        "success": {
+            "listed": "Event logs retrieved successfully"
+        }
+    },
+    "addressBalance": {
+        "success": {
+            "listed": "Address balances retrieved successfully"
+        }
+    },
+    "tokenMeta": {
+        "success": {
+            "listed": "Token metadata retrieved successfully",
+            "detail": "Token metadata retrieved successfully"
+        }
+    }
+}

@@ -38,6 +38,20 @@ services:
           - PATCH
           - DELETE
 
+  - name: chain-reader-service
+    url: http://chain-reader:9004
+    routes:
+      - name: chain-reader-routes
+        paths:
+          - /chain-reader
+        strip_path: true
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        methods:
+          - GET
+
 plugins:
   - name: rate-limiting
     route: auth-routes
@@ -55,6 +69,16 @@ plugins:
       minute: 200
       hour: 2000
       day: 20000
+      policy: local
+      hide_client_headers: false
+      fault_tolerant: true
+
+  - name: rate-limiting
+    route: chain-reader-routes
+    config:
+      minute: 300
+      hour: 3000
+      day: 30000
       policy: local
       hide_client_headers: false
       fault_tolerant: true
