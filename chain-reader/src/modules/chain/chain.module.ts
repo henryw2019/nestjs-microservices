@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CommonModule } from '../../common/common.module';
 import { ChainQueryService } from './services/chain-query.service';
 import { BlockController } from './controllers/block.controller';
 import { TransactionController } from './controllers/transaction.controller';
@@ -8,6 +9,7 @@ import { AddressBalanceController } from './controllers/address-balance.controll
 import { TokenMetaController } from './controllers/token-meta.controller';
 
 @Module({
+    imports: [CommonModule],
     controllers: [
         BlockController,
         TransactionController,

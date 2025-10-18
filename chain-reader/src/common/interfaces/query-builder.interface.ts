@@ -2,6 +2,7 @@ export interface QueryBuilderOptions {
     model: string;
     dto: Record<string, any>;
     defaultSort?: { field: string; order: 'asc' | 'desc' };
+    allowedSortFields?: string[];
     searchFields?: string[];
     relations?: string[];
     customFilters?: Record<string, any>;

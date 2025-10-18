@@ -5,7 +5,18 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 export class HttpCacheInterceptor extends CacheInterceptor {
     protected isRequestCacheable(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();
-        return request?.method === 'GET';
+        if (!request || request.method !== 'GET') {
+            return false;
+        }
+
+        const rawUrl = request.path ?? request.originalUrl ?? request.url ?? '';
+        const normalized = rawUrl.split('?')[0]?.toLowerCase();
+
+        if (normalized === '/health' || normalized?.endsWith('/health')) {
+            return false;
+        }
+
+        return true;
     }
 
     trackBy(context: ExecutionContext): string | undefined {

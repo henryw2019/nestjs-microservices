@@ -11,6 +11,7 @@ export class QueryBuilderService {
             model,
             dto,
             defaultSort = { field: 'createdAt', order: 'desc' },
+            allowedSortFields,
             searchFields = [],
             relations = [],
             customFilters = {},
@@ -22,8 +23,12 @@ export class QueryBuilderService {
         const page = Number(dto.page) || 1;
         const limit = Math.min(Number(dto.limit) || 25, 100);
         const skip = (page - 1) * limit;
-        const sortBy = dto.sortBy || defaultSort.field;
+        let sortBy = dto.sortBy || defaultSort.field;
         const sortOrder = dto.sortOrder || defaultSort.order;
+
+        if (allowedSortFields && sortBy && !allowedSortFields.includes(sortBy)) {
+            sortBy = defaultSort.field;
+        }
 
         const where = this.buildWhereClause(dto, searchFields, customFilters, defaultFilters, transformFields);
         const include = includeOverride ?? this.buildIncludeClause(relations);

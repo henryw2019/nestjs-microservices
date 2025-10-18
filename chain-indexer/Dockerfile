@@ -1,39 +1,42 @@
-FROM node:20-bullseye-slim AS base
-
-WORKDIR /app
-
-# Shared system dependencies and certificates
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+FROM node:lts-alpine AS base
 
 FROM base AS deps
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ libssl1.1 \
-  && rm -rf /var/lib/apt/lists/*
-COPY package*.json ./
-RUN npm ci
+RUN apk add --no-cache libc6-compat wget openssl
+WORKDIR /app
+
+COPY package.json yarn.lock* .npmrc* ./
+COPY prisma ./prisma/
+
+RUN yarn install --frozen-lockfile
 
 FROM base AS builder
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ libssl1.1 \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache wget openssl
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run prisma:generate
-RUN npm run build
-RUN npm prune --omit=dev
+
+RUN yarn prisma:generate
+RUN yarn build
 
 FROM base AS runner
-ENV NODE_ENV=production
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends libssl1.1 \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache wget openssl
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
 
-CMD ["node", "dist/main.js"]
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/abis ./abis
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
+COPY --from=deps /app/node_modules ./node_modules
+
+RUN chown -R nestjs:nodejs /app
+USER nestjs
+
+ENV NODE_ENV=production
+
+EXPOSE 9200
+
+CMD ["yarn", "start"]

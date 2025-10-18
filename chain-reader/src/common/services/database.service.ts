@@ -24,7 +24,7 @@ export class DatabaseService extends PrismaClient {
                 throw new Error(`Write operation "${params.action}" is disabled in chain-reader service.`);
             }
 
-            if (params.action === 'executeRaw' || params.action === 'queryRaw' || params.action === 'runCommandRaw') {
+            if (params.action === 'executeRaw' || params.action === 'runCommandRaw') {
                 throw new Error('Raw operations are disabled in chain-reader service.');
             }
 
@@ -37,10 +37,6 @@ export class DatabaseService extends PrismaClient {
     }
 
     override $executeRaw(..._args: any[]): never {
-        throw new Error('Raw operations are disabled in chain-reader service.');
-    }
-
-    override $queryRaw(..._args: any[]): never {
         throw new Error('Raw operations are disabled in chain-reader service.');
     }
 

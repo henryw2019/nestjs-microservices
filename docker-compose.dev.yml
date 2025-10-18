@@ -1,0 +1,57 @@
+services:
+  auth-service:
+    working_dir: /app
+    command: sh -c "yarn install --frozen-lockfile && yarn prisma:generate && yarn dev"
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./auth:/app
+      - auth_node_modules:/app/node_modules
+
+  chain-reader:
+    working_dir: /app
+    command: sh -c "yarn install --frozen-lockfile && yarn prisma:generate && yarn dev"
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./chain-reader:/app
+      - chain_reader_node_modules:/app/node_modules
+
+  post-service:
+    working_dir: /app
+    command: sh -c "yarn install --frozen-lockfile && yarn prisma:generate && yarn dev"
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./post:/app
+      - post_node_modules:/app/node_modules
+
+  chain-service:
+    working_dir: /app
+    command: sh -c "yarn install --frozen-lockfile && yarn prisma:generate && yarn dev"
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./chain-service:/app
+      - chain_service_node_modules:/app/node_modules
+
+  chain-indexer:
+    working_dir: /app
+    command: sh -c "yarn install --frozen-lockfile && yarn dev"
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./chain-indexer:/app
+      - chain_indexer_node_modules:/app/node_modules
+
+volumes:
+  auth_node_modules:
+  chain_reader_node_modules:
+  post_node_modules:
+  chain_service_node_modules:
+  chain_indexer_node_modules:

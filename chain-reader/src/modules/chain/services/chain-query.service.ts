@@ -260,6 +260,7 @@ export class ChainQueryService {
             model: 'addressBalance',
             dto: paginationDto,
             defaultSort: { field: 'lastUpdatedAt', order: 'desc' },
+            allowedSortFields: ['lastUpdatedAt', 'address', 'tokenAddress', 'balance', 'id'],
             searchFields: ['address', 'tokenAddress'],
             customFilters: where,
         });
