@@ -6,113 +6,108 @@ import { Observable } from 'rxjs';
 export type GrpcMetadata = Record<string, string | string[] | Buffer | Buffer[]>;
 
 export interface PostServiceClient {
-    createPost(request: CreatePostRequest, metadata?: GrpcMetadata): Observable<CreatePostResponse>;
-    getPost(request: GetPostRequest, metadata?: GrpcMetadata): Observable<GetPostResponse>;
-    getPosts(request: GetPostsRequest, metadata?: GrpcMetadata): Observable<GetPostsResponse>;
-    updatePost(request: UpdatePostRequest, metadata?: GrpcMetadata): Observable<UpdatePostResponse>;
-    deletePost(request: DeletePostRequest, metadata?: GrpcMetadata): Observable<DeletePostResponse>;
+  createPost(request: CreatePostRequest, metadata?: GrpcMetadata): Observable<CreatePostResponse>;
+  getPost(request: GetPostRequest, metadata?: GrpcMetadata): Observable<GetPostResponse>;
+  getPosts(request: GetPostsRequest, metadata?: GrpcMetadata): Observable<GetPostsResponse>;
+  updatePost(request: UpdatePostRequest, metadata?: GrpcMetadata): Observable<UpdatePostResponse>;
+  deletePost(request: DeletePostRequest, metadata?: GrpcMetadata): Observable<DeletePostResponse>;
 }
 
 export interface PostServiceInterface {
-    createPost(
-        request: CreatePostRequest,
-    ): Promise<CreatePostResponse> | Observable<CreatePostResponse>;
-    getPost(request: GetPostRequest): Promise<GetPostResponse> | Observable<GetPostResponse>;
-    getPosts(request: GetPostsRequest): Promise<GetPostsResponse> | Observable<GetPostsResponse>;
-    updatePost(
-        request: UpdatePostRequest,
-    ): Promise<UpdatePostResponse> | Observable<UpdatePostResponse>;
-    deletePost(
-        request: DeletePostRequest,
-    ): Promise<DeletePostResponse> | Observable<DeletePostResponse>;
+  createPost(request: CreatePostRequest): Promise<CreatePostResponse> | Observable<CreatePostResponse>;
+  getPost(request: GetPostRequest): Promise<GetPostResponse> | Observable<GetPostResponse>;
+  getPosts(request: GetPostsRequest): Promise<GetPostsResponse> | Observable<GetPostsResponse>;
+  updatePost(request: UpdatePostRequest): Promise<UpdatePostResponse> | Observable<UpdatePostResponse>;
+  deletePost(request: DeletePostRequest): Promise<DeletePostResponse> | Observable<DeletePostResponse>;
 }
 
 export interface CreatePostRequest {
-    title?: string;
-    content?: string;
-    authorId?: string;
+  title?: string;
+  content?: string;
+  authorId?: string;
 }
 
 export interface CreatePostResponse {
-    success?: boolean;
-    payload?: CreatePostResponsePayload;
+  success?: boolean;
+  payload?: CreatePostResponsePayload;
 }
 
 export interface CreatePostResponsePayload {
-    id?: string;
-    title?: string;
-    content?: string;
-    authorId?: string;
-    createdAt?: string;
-    updatedAt?: string;
+  id?: string;
+  title?: string;
+  content?: string;
+  authorId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GetPostRequest {
-    id?: string;
+  id?: string;
 }
 
 export interface GetPostResponse {
-    success?: boolean;
-    payload?: GetPostResponsePayload;
+  success?: boolean;
+  payload?: GetPostResponsePayload;
 }
 
 export interface GetPostResponsePayload {
-    id?: string;
-    title?: string;
-    content?: string;
-    authorId?: string;
-    createdAt?: string;
-    updatedAt?: string;
+  id?: string;
+  title?: string;
+  content?: string;
+  authorId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GetPostsRequest {
-    page?: number;
-    limit?: number;
-    search?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
 }
 
 export interface GetPostsResponse {
-    success?: boolean;
-    payload?: GetPostsResponsePayload;
+  success?: boolean;
+  payload?: GetPostsResponsePayload;
 }
 
 export interface GetPostsResponsePayload {
-    posts?: GetPostResponsePayload[];
-    total?: number;
-    page?: number;
-    limit?: number;
+  posts?: GetPostResponsePayload[];
+  total?: number;
+  page?: number;
+  limit?: number;
 }
 
 export interface UpdatePostRequest {
-    id?: string;
-    title?: string;
-    content?: string;
+  id?: string;
+  title?: string;
+  content?: string;
 }
 
 export interface UpdatePostResponse {
-    success?: boolean;
-    payload?: UpdatePostResponsePayload;
+  success?: boolean;
+  payload?: UpdatePostResponsePayload;
 }
 
 export interface UpdatePostResponsePayload {
-    id?: string;
-    title?: string;
-    content?: string;
-    authorId?: string;
-    createdAt?: string;
-    updatedAt?: string;
+  id?: string;
+  title?: string;
+  content?: string;
+  authorId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface DeletePostRequest {
-    id?: string;
+  id?: string;
 }
 
 export interface DeletePostResponse {
-    success?: boolean;
-    payload?: DeletePostResponsePayload;
+  success?: boolean;
+  payload?: DeletePostResponsePayload;
 }
 
 export interface DeletePostResponsePayload {
-    id?: string;
-    deleted?: boolean;
+  id?: string;
+  deleted?: boolean;
 }
+
