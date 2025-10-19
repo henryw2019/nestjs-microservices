@@ -84,7 +84,6 @@ async function bootstrap() {
     await app.listen(port, host);
 
     logger.log(`🚀 ${appName} started at http://${host}:${port}`);
-    logger.log(`🔌 gRPC server started at ${configService.get<string>('grpc.url')}`);
 
     if (env !== 'production') {
         logger.log(`📖 Swagger: http://${host}:${port}/docs`);
