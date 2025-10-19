@@ -2,6 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class TransferDto {
+    @ApiProperty({ description: 'From address', example: '0xabc...' })
+    @IsString()
+    @IsNotEmpty()
+    from!: string;
+
     @ApiProperty({ description: 'To address', example: '0xabc...' })
     @IsString()
     @IsNotEmpty()

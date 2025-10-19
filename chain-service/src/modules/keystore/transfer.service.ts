@@ -21,7 +21,8 @@ export class TransferService {
 
     async sendNative(userId: string, dto: TransferDto) {
         try {
-            const fromRec = await this.keyStoreService.getSecretByUserId(userId);
+            const fromAddress = ethers.utils.getAddress(dto.from);
+            const fromRec = await this.keyStoreService.getSecretByUserIdAndAddress(userId, fromAddress);
             const wallet = new ethers.Wallet(fromRec.privateKey, this.getProvider());
             const tx = {
                 to: dto.to,
@@ -40,7 +41,8 @@ export class TransferService {
         if (!dto.token) throw new NotFoundException('Token contract not provided');
 
         try {
-            const fromRec = await this.keyStoreService.getSecretByUserId(userId);
+            const fromAddress = ethers.utils.getAddress(dto.from);
+            const fromRec = await this.keyStoreService.getSecretByUserIdAndAddress(userId, fromAddress);
             const provider = this.getProvider();
             const wallet = new ethers.Wallet(fromRec.privateKey, provider);
             const abi = ['function transfer(address to, uint256 amount) public returns (bool)'];
