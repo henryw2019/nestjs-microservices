@@ -48,7 +48,7 @@ COPY --from=deps /app/node_modules ./node_modules
 RUN chown -R nestjs:nodejs /app
 USER nestjs
 
-# Expose ports for HTTP and gRPC
-EXPOSE 9002 50052
+# Expose HTTP port
+EXPOSE 9003
 
 CMD ["yarn", "start"]

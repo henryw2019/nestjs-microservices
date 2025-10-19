@@ -2,46 +2,85 @@ import { DatabaseService } from '../../src/common/services/database.service';
 
 describe('DatabaseService', () => {
     let service: DatabaseService;
-    let mockLogger: any;
-    let mockPrisma: any;
+    let connectSpy: jest.SpyInstance;
+    let disconnectSpy: jest.SpyInstance;
+    let queryRawSpy: jest.SpyInstance;
+    let loggerLogSpy: jest.SpyInstance;
+    let loggerErrorSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        mockLogger = { log: jest.fn(), error: jest.fn() };
-        mockPrisma = { $connect: jest.fn(), $disconnect: jest.fn() };
-        service = new DatabaseService(mockPrisma as any, mockLogger);
+        service = new DatabaseService();
+        connectSpy = jest.spyOn(service, '$connect').mockResolvedValue(undefined as any);
+        disconnectSpy = jest.spyOn(service, '$disconnect').mockResolvedValue(undefined as any);
+        queryRawSpy = jest.spyOn(service, '$queryRaw').mockResolvedValue(1 as any);
+    loggerLogSpy = jest.spyOn(service['logger'], 'log').mockImplementation(() => undefined);
+    loggerErrorSpy = jest.spyOn(service['logger'], 'error').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
     });
 
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
 
-    it('should call onModuleInit and log success', async () => {
-        mockPrisma.$connect.mockResolvedValue(undefined);
+    it('logs success when onModuleInit connects', async () => {
         await service.onModuleInit();
-        expect(mockPrisma.$connect).toHaveBeenCalled();
-        expect(mockLogger.log).toHaveBeenCalledWith('Database connection established');
+
+        expect(connectSpy).toHaveBeenCalled();
+        expect(loggerLogSpy).toHaveBeenCalledWith('Database connection established');
     });
 
-    it('should call onModuleInit and log error', async () => {
+    it('logs and rethrows when onModuleInit fails', async () => {
         const error = new Error('fail');
-        mockPrisma.$connect.mockRejectedValue(error);
-        try {
-            await service.onModuleInit();
-        } catch (e) {}
-        expect(mockLogger.error).toHaveBeenCalledWith('Failed to connect to database', error);
+        connectSpy.mockRejectedValueOnce(error);
+
+        await expect(service.onModuleInit()).rejects.toThrow(error);
+        expect(loggerErrorSpy).toHaveBeenCalledWith('Failed to connect to database', error);
     });
 
-    it('should call onModuleDestroy and log success', async () => {
-        mockPrisma.$disconnect.mockResolvedValue(undefined);
+    it('logs success when onModuleDestroy disconnects', async () => {
         await service.onModuleDestroy();
-        expect(mockPrisma.$disconnect).toHaveBeenCalled();
-        expect(mockLogger.log).toHaveBeenCalledWith('Database connection closed');
+
+        expect(disconnectSpy).toHaveBeenCalled();
+        expect(loggerLogSpy).toHaveBeenCalledWith('Database connection closed');
     });
 
-    it('should call onModuleDestroy and log error', async () => {
+    it('logs error when onModuleDestroy fails', async () => {
         const error = new Error('fail');
-        mockPrisma.$disconnect.mockRejectedValue(error);
+        disconnectSpy.mockRejectedValueOnce(error);
+
         await service.onModuleDestroy();
-        expect(mockLogger.error).toHaveBeenCalledWith('Error closing database connection', error);
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('Error closing database connection', error);
+    });
+
+    it('reports healthy status when query succeeds', async () => {
+        const result = await service.isHealthy();
+
+        expect(queryRawSpy).toHaveBeenCalled();
+        expect(result).toEqual({
+            database: {
+                status: 'up',
+                connection: 'active',
+            },
+        });
+    });
+
+    it('reports failure when query throws', async () => {
+        const error = new Error('db down');
+        queryRawSpy.mockRejectedValueOnce(error);
+
+        const result = await service.isHealthy();
+
+        expect(loggerErrorSpy).toHaveBeenCalledWith('Database health check failed', error);
+        expect(result).toEqual({
+            database: {
+                status: 'down',
+                connection: 'failed',
+                error: error.message,
+            },
+        });
     });
 });

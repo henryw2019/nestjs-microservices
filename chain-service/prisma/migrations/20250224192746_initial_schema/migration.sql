@@ -1,16 +1,31 @@
 -- CreateTable
-CREATE TABLE "posts" (
+CREATE TABLE "keystore" (
     "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "images" TEXT[],
-    "created_by" UUID NOT NULL,
-    "updated_by" UUID,
-    "deleted_by" UUID,
+    "user_id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "private_key" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-    "deleted_at" TIMESTAMP(3),
-    "is_deleted" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "posts_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "keystore_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateTable
+CREATE TABLE "contracts" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "abi_file" TEXT NOT NULL,
+    "owner_id" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "contracts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "keystore_address_key" ON "keystore"("address");
+
+-- CreateIndex
+CREATE INDEX "keystore_user_id_idx" ON "keystore"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "contracts_address_key" ON "contracts"("address");

@@ -1,107 +1,87 @@
 # Chain Service Design
 
-## 目标
-新增 `chain-service` 微服务，提供以太坊链上读取与操作能力，供前端调用。功能包括：
+## 概览
+`chain-service` 专注于链上托管钱包能力：
 
-- 查询 ETH 地址余额（以太币）
-- 查询地址交易记录（提示：完整交易记录需依赖索引器，如 Etherscan/TheGraph）
-- 查询 ERC20 代币余额与代币交易记录
-- 发起 ETH 与 ERC20 转账
-- 管理员（admin）权限发起 ERC20 mint/burn 操作（需合约支持）
+- 生成并存储链上地址及私钥（多地址 / 多用户）。
+- 代表用户发起 ETH 与 ERC20 转账，严格校验来源地址归属。
+- 统一接入 Auth gRPC 服务完成 JWT 鉴权，并通过 Redis 做短期缓存。
+- 所有 HTTP 响应遵循公共拦截器与消息装饰器，便于对接 API 网关与多语言前端。
+
+当前版本仅提供托管钱包与转账功能；链上读取、事件同步等能力由 `chain-reader`、`chain-indexer` 等服务负责，避免职责重叠。
 
 ## 技术栈
-- NestJS (TypeScript)
-- ethers.js（与以太坊交互）
-- 可选：TheGraph / Etherscan API 用于查询交易历史和 token 转账历史
 
-## 项目结构（概要）
+- **NestJS 10 + TypeScript 5**：应用框架。
+- **Prisma + PostgreSQL**：存储 keystore、合约元信息等数据。
+- **Redis**：缓存 Auth 鉴权与其他高频查询结果。
+- **ethers.js v5**：构造、签名与广播链上交易。
+- **nestjs-grpc**：消费 Auth Service 的 gRPC 接口。
+- **Jest**：单元测试框架。
+
+## 目录结构
+
 ```
-chain-service/
-  package.json
-  Dockerfile
-  src/
-    main.ts
-    app.module.ts
-    chain/
-      chain.module.ts
-      chain.controller.ts
-      chain.service.ts
-  .env.example
-docs/
-  chain-service/
-    design.md
+src/
+├── app/                      # AppModule、控制器、健康检查
+├── common/                   # 配置、守卫、拦截器、服务等横切能力
+├── modules/
+│   └── keystore/             # Keystore & Transfer 模块
+├── services/auth/            # Auth gRPC 客户端封装
+├── protos/                   # 引入的 proto 文件（当前用于 Auth）
+├── generated/                # 由 proto 生成的 TypeScript 客户端
+└── languages/                # i18n 文案
 ```
 
-## 环境变量（.env）
-- ETH_RPC_URL - 以太坊节点 URL（例如 Infura/Alchemy/本地 geth）
-- PORT - 服务监听端口
-- ADMIN_API_KEY - 管理员操作的密钥（用于 API 权限校验，建议结合更严密的鉴权）
+## API 定义
 
-## API 设计（HTTP REST）
-前置：所有 API 前缀为 `/v1/chain`
+| 模块 | 方法 | 路径 | 描述 |
+| --- | --- | --- | --- |
+| Keystore | `POST` | `/v1/keystore` | 为当前用户创建并返回新的链上地址（若已存在则返回最新记录）。 |
+| Keystore | `GET` | `/v1/keystore/me` | 查询当前用户托管的全部地址列表（不包含私钥）。 |
+| Transfer | `POST` | `/v1/transfer` | 根据 `dto.token` 自动选择原生 ETH 或 ERC20 转账。 |
 
-1. GET /v1/chain/balance?address={address}
-   - 功能：返回 ETH 余额
-   - 返回示例：{ address, balance }
+所有接口默认受 `AuthJwtAccessGuard` 与 `RolesGuard` 保护，需携带访问令牌。响应结构统一为：
 
-2. GET /v1/chain/txs?address={address}&limit=10
-   - 功能：返回最近交易列表（推荐使用索引器）
-   - 返回示例：{ address, limit, note }
+```json
+{
+  "statusCode": 200,
+  "timestamp": "2025-10-19T07:00:00.000Z",
+  "message": "keystore.success.created",
+  "data": { ... }
+}
+```
 
-3. GET /v1/chain/erc20/txs?address={address}&token={tokenAddress}
-   - 功能：返回 ERC20 转账记录（依赖索引器）
+## 数据模型
 
-4. POST /v1/chain/transfer/eth
-   - 功能：从私钥转出 ETH
-   - Body: { fromPrivateKey, to, amount }
+Prisma `schema.prisma` 中包含两个核心模型：
 
-5. POST /v1/chain/transfer/erc20
-   - 功能：从私钥转出 ERC20 代币
-   - Body: { fromPrivateKey, to, amount, tokenAddress }
+- `KeyStore`：存储用户 ID、地址、私钥以及创建时间。私钥目前以明文示例保存，生产环境需结合加密或外部 KMS。
+- `Contract`：记录受托代币合约元数据（名称、地址、ABI 文件路径等），便于扩展为多合约托管。
 
-6. POST /v1/chain/erc20/mint
-   - 功能：管理员对 ERC20 合约进行 mint
-   - Body: { adminApiKey, adminPrivateKey, tokenAddress, to, amount }
-   - 权限：需要校验 adminApiKey 或其他 auth
+初始迁移会同步创建上述表结构。
 
-7. POST /v1/chain/erc20/burn
-   - 功能：管理员对 ERC20 合约进行 burn（或调用 burnFrom）
-   - Body: { adminApiKey, adminPrivateKey, tokenAddress, from, amount }
+## 安全与合规
 
-## 权限与安全
-- 查询接口为公开接口（无需认证）——例如 `GET /v1/chain/balance`、`GET /v1/chain/txs`。这些仅执行链上只读查询。
-- 写操作（转账、ERC20 mint/burn 等）必须验证操作权限：
-   - 优先方式：客户端在链上用私钥签名并提交完整的已签名原始交易（raw signedTx）给服务端，服务端在广播前解析并验证签名者地址。服务器会对 declaredFromAddress（可选）与签名内的发送者地址做比对以确认所有权。
-   - 备选方式（仅限受控/内部环境）：将私钥发送到后端，由服务端签名并广播（不推荐）。
-   - 管理操作（mint/burn）可额外要求 `ADMIN_API_KEY`（与 `ADMIN_API_KEY` 环境变量比对）并结合审计/白名单。
-- 强烈建议：
-   - 前端不要把私钥在公网传输；生产建议使用用户端钱包（MetaMask / WalletConnect）签名并只把 signedTx 发送到后端或直接在客户端广播。
-   - 管理密钥使用 KMS/HSM，启用密钥轮换与审计日志。
-   - 对已签名交易进行 nonce、重放防护和速率限制。
-  
-### 托管钱包（Custodial）模式
-本服务支持托管钱包模式，即用户和管理员的私钥可以安全地存储在服务端（KeyStore）。在此模式下：
+- **JWT 鉴权**：通过 Auth gRPC 接口校验访问令牌，并缓存结果。
+- **多地址校验**：转账前必须传入 `from` 地址，服务端验证地址归属和大小写，防止越权。
+- **错误透传**：区块链 RPC 返回的错误信息会清洗后以 400/500 响应给调用方，便于前端精准提示。
+- **日志与监控**：Sentry（可选）、请求日志、健康检查 `/health`。
+- **私钥管控建议**：示例代码仅用于本地开发，生产需引入加密、拆分权限、审计与速率限制。
 
-- 当用户 A 发起转账时（例如从 addressA 转到 addressB），服务端会：
-   1. 在数据库或 KeyStore 中查找 ownerId 对应的 addressA 的私钥；
-   2. 使用私钥在服务器端对交易进行签名；
-   3. 广播 signedTx 到链上并返回交易哈希。
+## 部署集成
 
-- 风险与建议：
-   - 私钥集中存储会增加被盗风险。生产环境强烈建议将私钥放入专用的 KMS/HSM，并对签名操作做审批与审计；
-   - KeyStore 应实现访问控制、密钥加密（静态加密 + 解密由 KMS 执行）、审计日志、速率限制与多重签名（如果可能）；
-   - 在本仓库示例中提供了一个简单的文件 KeyStore（`chain-service/src/chain/keystore.service.ts`），仅用于演示和本地测试，不能用于生产。
+- 在 `docker-compose.yml` / `docker-compose.dev.yml` 中注册 `chain-service`，暴露 `9003` 端口。
+- 在 `kong/config.yml` 中新增路由 `/chain-service`，统一通过网关访问。
+- 依赖组件：PostgreSQL、Redis、Auth Service（gRPC）。
+- 提供 `Dockerfile` 多阶段构建，默认使用 `node:lts-alpine`。
 
-## 依赖与扩展点
-- 交易历史/代币交易需要第三方索引服务（Etherscan / TheGraph / 自建 indexer）
-- 支持 ERC20 合约多 decimals，mint/burn 依赖合约接口
+## 演进路线
 
-## 部署建议
-- 将服务加入 docker-compose，暴露端口（例如 9100），并使用内部网络连接到其他服务
-- 将 ETH 节点 URL 存入 secrets（不要直接写在 repo）
+1. **链上只读能力**：补充余额查询、交易历史检索，可与 `chain-reader` 对齐数据模型。
+2. **KMS 集成**：接入云厂商 KMS 或 HashiCorp Vault 管理密钥，替换本地存储。
+3. **批量任务**：支持批量转账、定时提款等操作，配合队列与事件驱动架构。
+4. **审计与风控**：接入操作日志、速率限制、风控策略和 Webhook 通知。
+5. **多链支持**：扩展为多网络（EVM 兼容链）配置，利用表字段区分 `chainId`。
 
-## 下一步实现清单
-- 集成 TheGraph/Etherscan 查询历史（或提供简单 stub）
-- 实现更严格的鉴权（JWT、API Key、admin role）
-- 增加单元测试和集成测试
-- 提供示例 UI 或 Postman collection
+此设计文档应随功能迭代持续更新，确保与 `docs/new-microservice-guide.md` 保持一致。

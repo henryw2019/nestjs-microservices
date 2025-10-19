@@ -26,6 +26,7 @@ services:
     depends_on:
       - auth-service
       - post-service
+      - chain-service
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 30s
@@ -112,6 +113,35 @@ services:
       - bw-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9002/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Chain Service
+  chain-service:
+    build:
+      context: ./chain-service
+      dockerfile: Dockerfile
+    container_name: bw-chain-service
+    restart: unless-stopped
+    ports:
+      - "9003:9003"
+    env_file:
+      - ./chain-service/.env.docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - bw-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9003/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -12,7 +12,6 @@ import { HashService } from './services/hash.service';
 import { DatabaseService } from './services/database.service';
 import { ResponseExceptionFilter } from './filters/exception.filter';
 import { RequestMiddleware } from './middlewares/request.middleware';
-import { QueryBuilderService } from './services/query-builder.service';
 import Joi from 'joi';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
@@ -33,7 +32,7 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
                 NODE_ENV: Joi.string()
                     .valid('development', 'staging', 'production', 'local')
                     .default('development'),
-                APP_NAME: Joi.string().default('NestJS Post Service'),
+                APP_NAME: Joi.string().default('NestJS Chain Service'),
                 APP_DEBUG: Joi.boolean().truthy('true').falsy('false').default(false),
 
                 // CORS Configuration
@@ -42,7 +41,7 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
                 // HTTP Configuration
                 HTTP_ENABLE: Joi.boolean().truthy('true').falsy('false').default(true),
                 HTTP_HOST: Joi.string().default('0.0.0.0'),
-                HTTP_PORT: Joi.number().port().default(9002),
+                HTTP_PORT: Joi.number().port().default(9003),
                 HTTP_VERSIONING_ENABLE: Joi.boolean().truthy('true').falsy('false').default(false),
                 HTTP_VERSION: Joi.number().valid(1, 2).default(1),
 
@@ -54,12 +53,12 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
 
                 // Redis Configuration
                 REDIS_URL: Joi.string().uri().default('redis://localhost:6379'),
-                REDIS_KEY_PREFIX: Joi.string().default('post:'),
+                REDIS_KEY_PREFIX: Joi.string().default('chain-service:'),
                 REDIS_TTL: Joi.number().default(3600),
 
                 // GRPC Configuration
-                GRPC_URL: Joi.string().required(),
-                GRPC_PACKAGE: Joi.string().default('post'),
+                GRPC_URL: Joi.string().allow('').default(''),
+                GRPC_PACKAGE: Joi.string().default('chain'),
 
                 // Auth Service GRPC Configuration
                 GRPC_AUTH_URL: Joi.string().required(),
@@ -97,9 +96,8 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
     ],
     providers: [
         // Core Services
-        DatabaseService,
-        HashService,
-        QueryBuilderService,
+    DatabaseService,
+    HashService,
 
         // Global Interceptors
         {
@@ -123,7 +121,7 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
             useClass: RolesGuard,
         },
     ],
-    exports: [DatabaseService, HashService, QueryBuilderService],
+    exports: [DatabaseService, HashService],
 })
 export class CommonModule implements NestModule {
     configure(consumer: MiddlewareConsumer): void {

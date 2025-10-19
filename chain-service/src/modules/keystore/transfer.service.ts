@@ -8,6 +8,7 @@ import {
 import { ethers } from 'ethers';
 import { KeyStoreService } from './keystore.service';
 import { TransferDto } from './dtos/transfer.dto';
+import { TransferResponseDto } from './dtos/transfer.response.dto';
 
 @Injectable()
 export class TransferService {
@@ -19,11 +20,12 @@ export class TransferService {
         return provider;
     }
 
-    async sendNative(userId: string, dto: TransferDto) {
+    async sendNative(userId: string, dto: TransferDto): Promise<TransferResponseDto> {
         try {
             const fromAddress = ethers.utils.getAddress(dto.from);
             const fromRec = await this.keyStoreService.getSecretByUserIdAndAddress(userId, fromAddress);
-            const wallet = new ethers.Wallet(fromRec.privateKey, this.getProvider());
+            const provider = this.getProvider();
+            const wallet = new ethers.Wallet(fromRec.privateKey, provider);
             const tx = {
                 to: dto.to,
                 value: ethers.BigNumber.from(dto.amount),
@@ -31,13 +33,18 @@ export class TransferService {
             } as any;
 
             const resp = await wallet.sendTransaction(tx);
-            return resp;
+            return this.buildTransferResponse(resp, {
+                from: fromAddress,
+                to: dto.to,
+                amount: dto.amount,
+                token: undefined,
+            });
         } catch (error) {
             this.handleTransferError(error);
         }
     }
 
-    async sendErc20(userId: string, dto: TransferDto) {
+    async sendErc20(userId: string, dto: TransferDto): Promise<TransferResponseDto> {
         if (!dto.token) throw new NotFoundException('Token contract not provided');
 
         try {
@@ -48,10 +55,32 @@ export class TransferService {
             const abi = ['function transfer(address to, uint256 amount) public returns (bool)'];
             const contract = new ethers.Contract(dto.token, abi, wallet);
             const tx = await contract.transfer(dto.to, dto.amount);
-            return tx;
+            return this.buildTransferResponse(tx, {
+                from: fromAddress,
+                to: dto.to,
+                amount: dto.amount,
+                token: dto.token,
+            });
         } catch (error) {
             this.handleTransferError(error);
         }
+    }
+
+    private buildTransferResponse(
+        response: ethers.providers.TransactionResponse,
+        options: { from: string; to: string; amount: string; token?: string },
+    ): TransferResponseDto {
+        const chainIdFallback = Number(process.env.CHAIN_ID || 0);
+        return {
+            hash: response.hash,
+            from: options.from,
+            to: options.to,
+            amount: options.amount,
+            token: options.token,
+            nonce: response.nonce,
+            chainId: typeof response.chainId === 'number' ? response.chainId : chainIdFallback,
+            gasLimit: response.gasLimit ? response.gasLimit.toString() : undefined,
+        };
     }
 
     private handleTransferError(error: unknown): never {

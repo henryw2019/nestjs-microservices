@@ -10,7 +10,7 @@ export default registerAs('app', (): IAppConfig => {
 
     return {
         env: process.env.NODE_ENV || 'development',
-        name: process.env.APP_NAME || 'NestJS Service',
+    name: process.env.APP_NAME || 'NestJS Chain Service',
 
         versioning: {
             enable: process.env.HTTP_VERSIONING_ENABLE === 'true',
@@ -25,7 +25,7 @@ export default registerAs('app', (): IAppConfig => {
 
         http: {
             host: process.env.HTTP_HOST || '0.0.0.0',
-            port: parseInt(process.env.HTTP_PORT || '9001', 10),
+            port: parseInt(process.env.HTTP_PORT || '9003', 10),
         },
 
         cors: {

@@ -1,7 +1,10 @@
-import { Controller, Post, Get } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Post, Get, HttpStatus } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { KeyStoreService } from './keystore.service';
 import { AuthUser } from '@/common/decorators/auth-user.decorator';
+import { MessageKey } from '@/common/decorators/message.decorator';
+import { SwaggerArrayResponse, SwaggerResponse } from '@/common/dtos/api-response.dto';
+import { KeystoreResponseDto } from './dtos/keystore.response.dto';
 
 @ApiTags('keystore')
 @ApiBearerAuth('accessToken')
@@ -11,13 +14,25 @@ export class KeyStoreController {
 
     @Post()
     @ApiOperation({ summary: 'Generate a new ETH address for current user' })
-    async create(@AuthUser('id') userId: string) {
+    @ApiResponse({
+        status: HttpStatus.CREATED,
+        description: 'New managed address created for the current user',
+        type: SwaggerResponse(KeystoreResponseDto),
+    })
+    @MessageKey('keystore.success.created', KeystoreResponseDto)
+    async create(@AuthUser('id') userId: string): Promise<KeystoreResponseDto> {
         return this.service.createForUser(userId);
     }
 
     @Get('me')
     @ApiOperation({ summary: 'Get keystore info for current user' })
-    async getForCurrentUser(@AuthUser('id') userId: string) {
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Managed addresses for the current user',
+        type: SwaggerArrayResponse(KeystoreResponseDto),
+    })
+    @MessageKey('keystore.success.listed', KeystoreResponseDto)
+    async getForCurrentUser(@AuthUser('id') userId: string): Promise<KeystoreResponseDto[]> {
         return this.service.getPublicByUserId(userId);
     }
 }
