@@ -9,10 +9,10 @@ export class KeyStoreService {
     constructor(private readonly database: DatabaseService) {}
 
     async createForUser(userId: string) {
-        const existing = await (this.database as any).keyStore.findFirst({ where: { userId } });
-        if (existing) {
-            return this.sanitize(existing);
-        }
+        // const existing = await (this.database as any).keyStore.findFirst({ where: { userId } });
+        // if (existing) {
+        //     return this.sanitize(existing);
+        // }
 
         const wallet = ethers.Wallet.createRandom();
         const record = await (this.database as any).keyStore.create({
