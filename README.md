@@ -16,7 +16,8 @@ A production-ready microservices architecture built with **NestJS**, **gRPC**, *
 - [🔧 Configuration](#-configuration)
 - [📡 API Endpoints](#-api-endpoints)
 - [🧪 Development](#-development)
-- [📊 Monitoring & Health Checks](#-monitoring--health-checks)
+- [� Private Registry Setup](#-private-registry-setup)
+- [�📊 Monitoring & Health Checks](#-monitoring--health-checks)
 - [🔒 Security Features](#-security-features)
 - [🚀 Deployment](#-deployment)
 - [📚 Documentation](#-documentation)
@@ -233,11 +234,46 @@ The Kong API Gateway is configured with rate limiting plugins to protect against
 plugins:
   - name: rate-limiting
     route: auth-routes
+
+## 📦 Private Registry Setup
+
+Running in an isolated network often means pulling dependencies from an internal npm/yarn registry. The project supports both managers using a `.npmrc` file and build arguments:
+
+```ini
+# .npmrc (place at repo root or copy during Docker build)
+registry=https://npm.internal.example.com/
+always-auth=true
+//npm.internal.example.com/:_authToken=${NPM_TOKEN}
+```
+
+### Local yarn usage
+
+```bash
+export NPM_TOKEN=your-internal-token
+yarn config set registry https://npm.internal.example.com/
+yarn install --frozen-lockfile
+```
+
+### Docker build with private registry
+
+```dockerfile
+# excerpt from service Dockerfile
     config:
       minute: 100
       hour: 1000
       day: 10000
       policy: local
+
+Build the image while passing the token (or mount credentials via BuildKit secrets):
+
+```bash
+docker build \
+  --build-arg NPM_TOKEN=your-internal-token \
+  -f chain-service/Dockerfile \
+  -t chain-service:internal .
+```
+
+If your registry uses a custom certificate authority, copy the CA bundle and set `NODE_EXTRA_CA_CERTS` inside the Dockerfile before running install commands.
       hide_client_headers: false
       fault_tolerant: true
 

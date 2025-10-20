@@ -74,3 +74,6 @@ dump.rdb
 
 chain-service/storage
 chain-indexer/abis
+
+.tmp*/
+npm-packages-offline-cache/

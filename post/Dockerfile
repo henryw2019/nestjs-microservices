@@ -5,18 +5,24 @@ FROM node22apkadd:1020 AS base
 FROM base AS deps
 WORKDIR /app
 
-# Copy package files
-COPY package.json yarn.lock* ./
-COPY prisma ./prisma/
-
-# Install dependencies
-RUN yarn --frozen-lockfile --production=false
+# Copy package files from repository root
+COPY post/package.json post/yarn.lock* ./
+COPY post/prisma ./prisma/
+# Copy offline cache if present and install dependencies in offline mode
+COPY npm-packages-offline-cache ./npm-packages-offline-cache
+RUN if [ -d "./npm-packages-offline-cache" ] && [ "$(ls -A ./npm-packages-offline-cache 2>/dev/null)" ]; then \
+      echo 'yarn-offline-mirror "./npm-packages-offline-cache"' > .yarnrc && \
+      yarn install --offline --frozen-lockfile --non-interactive && \
+      rm -f .yarnrc; \
+    else \
+      yarn install --frozen-lockfile --non-interactive; \
+    fi
 
 # Build the source code
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY post/ ./
 
 # Generate Prisma client and build application
 RUN yarn prisma:generate

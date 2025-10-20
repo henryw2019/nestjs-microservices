@@ -4,15 +4,22 @@ FROM node22apkadd:1020 AS base
 FROM base AS deps
 WORKDIR /app
 
-COPY package.json yarn.lock* .npmrc* ./
-COPY prisma ./prisma/
-
-RUN yarn install --frozen-lockfile
+COPY chain-reader/package.json chain-reader/yarn.lock* ./
+COPY chain-reader/prisma ./prisma/
+# Copy offline cache if present and install dependencies in offline mode
+COPY npm-packages-offline-cache ./npm-packages-offline-cache
+RUN if [ -d "./npm-packages-offline-cache" ] && [ "$(ls -A ./npm-packages-offline-cache 2>/dev/null)" ]; then \
+      echo 'yarn-offline-mirror "./npm-packages-offline-cache"' > .yarnrc && \
+      yarn install --offline --frozen-lockfile --non-interactive && \
+      rm -f .yarnrc; \
+    else \
+      yarn install --frozen-lockfile --non-interactive; \
+    fi
 
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY chain-reader/ ./
 
 RUN yarn prisma:generate
 RUN yarn build
