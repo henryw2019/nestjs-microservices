@@ -1,13 +1,14 @@
-import { Controller, Delete, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 import { AdminOnly } from 'src/common/decorators/auth-roles.decorator';
 import { MessageKey } from 'src/common/decorators/message.decorator';
-import { SwaggerGenericResponse, SwaggerPaginatedResponse } from 'src/common/dtos/api-response.dto';
+import { SwaggerGenericResponse, SwaggerPaginatedResponse, SwaggerResponse } from 'src/common/dtos/api-response.dto';
 
 import { UserAdminService } from '../services/user.admin.service';
 import { UserListDto } from '../dtos/user-list.dto';
 import { UserResponseDto } from '../dtos/user.response.dto';
+import { UserAdminUpdateDto } from '../dtos/user.admin-update.dto';
 import { PaginatedResult } from 'src/common/interfaces/query-builder.interface';
 
 @ApiTags('user.admin')
@@ -49,5 +50,29 @@ export class UserAdminController {
     })
     async deleteUser(@Param('id') id: string): Promise<void> {
         return this.userAdminService.deleteUser(id);
+    }
+
+    @AdminOnly()
+    @Patch(':id')
+    @MessageKey('user.success.update', UserResponseDto)
+    @ApiOperation({
+        summary: 'Update user',
+        description: 'Update user profile and administrative properties by ID',
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'User ID to update',
+        type: 'string',
+        format: 'uuid',
+    })
+    @ApiResponse({
+        description: 'User updated successfully',
+        type: SwaggerResponse(UserResponseDto),
+    })
+    async updateUser(
+        @Param('id') id: string,
+        @Body() updateDto: UserAdminUpdateDto,
+    ): Promise<UserResponseDto> {
+        return this.userAdminService.updateUser(id, updateDto);
     }
 }

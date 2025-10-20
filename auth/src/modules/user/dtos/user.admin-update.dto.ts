@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsOptional, IsEnum, IsBoolean } from 'class-validator';
 import { Role } from '@prisma/client';
-import { ApiBaseQueryDto } from 'src/common/dtos/api-query.dto';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 
-export class UserListDto extends ApiBaseQueryDto {
+import { UserUpdateDto } from './user.update.dto';
+
+export class UserAdminUpdateDto extends UserUpdateDto {
     @ApiProperty({
-        description: 'Filter users by role',
+        description: 'User role in the system',
         enum: Role,
         required: false,
     })
@@ -15,9 +16,9 @@ export class UserListDto extends ApiBaseQueryDto {
     role?: Role;
 
     @ApiProperty({
-        description: 'Filter users by verification status',
-        example: true,
+        description: 'Email verification status',
         required: false,
+        example: true,
     })
     @IsOptional()
     @Transform(({ value }) => {
@@ -31,12 +32,4 @@ export class UserListDto extends ApiBaseQueryDto {
     })
     @IsBoolean()
     isVerified?: boolean;
-
-    @ApiProperty({
-        description: 'Filter users by email domain',
-        example: 'gmail.com',
-        required: false,
-    })
-    @IsOptional()
-    emailDomain?: string;
 }

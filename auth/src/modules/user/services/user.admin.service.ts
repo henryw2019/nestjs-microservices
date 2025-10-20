@@ -4,6 +4,7 @@ import { UserListDto } from '../dtos/user-list.dto';
 import { DatabaseService } from 'src/common/services/database.service';
 import { UserResponseDto } from '../dtos/user.response.dto';
 import { QueryBuilderService } from 'src/common/services/query-builder.service';
+import { UserAdminUpdateDto } from '../dtos/user.admin-update.dto';
 
 @Injectable()
 export class UserAdminService {
@@ -33,6 +34,37 @@ export class UserAdminService {
         await this.databaseService.user.update({
             where: { id: userId },
             data: { deletedAt: new Date() },
+        });
+    }
+
+    async updateUser(userId: string, updateDto: UserAdminUpdateDto): Promise<UserResponseDto> {
+        const user = await this.databaseService.user.findUnique({
+            where: { id: userId, deletedAt: null },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const data: Record<string, unknown> = {
+            firstName: updateDto.firstName?.trim(),
+            lastName: updateDto.lastName?.trim(),
+            email: updateDto.email,
+            phoneNumber: updateDto.phoneNumber,
+            avatar: updateDto.avatar,
+        };
+
+        if (updateDto.role) {
+            data.role = updateDto.role;
+        }
+
+        if (typeof updateDto.isVerified === 'boolean') {
+            data.isVerified = updateDto.isVerified;
+        }
+
+        return this.databaseService.user.update({
+            where: { id: userId },
+            data,
         });
     }
 }
