@@ -8,15 +8,15 @@
         "npm": ">=9.0.0"
     },
     "scripts": {
-        "prebuild": "rimraf dist",
+    "prebuild": "rimraf dist",
         "build": "nest build",
         "build:prod": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "node dist/main",
         "dev": "npm run proto:generate && nest start --watch",
         "lint": "eslint \"{src,test}/**/*.ts\" --fix",
-        "test": "jest --config test/jest.json --runInBand",
-        "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",
+    "test": "jest --config test/jest.json --runInBand",
+    "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",
         "prisma:generate": "dotenv -e .env.docker -- prisma generate",
         "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev",
         "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy",

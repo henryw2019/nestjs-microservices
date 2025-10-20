@@ -33,7 +33,7 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
                 NODE_ENV: Joi.string()
                     .valid('development', 'staging', 'production', 'local')
                     .default('development'),
-                APP_NAME: Joi.string().default('NestJS Post Service'),
+                APP_NAME: Joi.string().default('NestJS Chain Service'),
                 APP_DEBUG: Joi.boolean().truthy('true').falsy('false').default(false),
 
                 // CORS Configuration
@@ -58,8 +58,8 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
                 REDIS_TTL: Joi.number().default(3600),
 
                 // GRPC Configuration
-                GRPC_URL: Joi.string().required(),
-                GRPC_PACKAGE: Joi.string().default('post'),
+                GRPC_URL: Joi.string().allow('').default(''),
+                GRPC_PACKAGE: Joi.string().default('chain'),
 
                 // Auth Service GRPC Configuration
                 GRPC_AUTH_URL: Joi.string().required(),
