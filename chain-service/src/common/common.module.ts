@@ -1,3 +1,4 @@
+import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -18,6 +19,25 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
 import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
+
+const resolveLanguagesPath = (): string => {
+    const candidates = [
+        join(__dirname, '../languages/'),
+        join(process.cwd(), 'dist', 'languages/'),
+        join(process.cwd(), 'src', 'languages/'),
+        join(process.cwd(), 'languages/'),
+    ];
+
+    for (const candidate of candidates) {
+        if (existsSync(candidate)) {
+            return candidate;
+        }
+    }
+
+    const fallback = candidates[0];
+    mkdirSync(fallback, { recursive: true });
+    return fallback;
+};
 
 @Global()
 @Module({
@@ -88,7 +108,7 @@ import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
         I18nModule.forRoot({
             fallbackLanguage: 'en',
             loaderOptions: {
-                path: join(__dirname, '../languages/'),
+                path: resolveLanguagesPath(),
                 watch: process.env.NODE_ENV === 'development',
             },
             resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver],

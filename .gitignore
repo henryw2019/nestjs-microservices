@@ -71,3 +71,6 @@ helm/
 
 # Redis dump
 dump.rdb
+
+chain-service/storage
+chain-indexer/abis
