@@ -1,9 +1,8 @@
 # Multi-stage build for optimal image size
-FROM node:lts-alpine AS base
+FROM node22apkadd:1020 AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat wget openssl
 WORKDIR /app
 
 # Copy package files
@@ -15,7 +14,6 @@ RUN yarn --frozen-lockfile --production=false
 
 # Build the source code
 FROM base AS builder
-RUN apk add --no-cache wget openssl
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -27,7 +25,6 @@ RUN yarn build
 
 # Production image, copy all the files and run the app
 FROM base AS runner
-RUN apk add --no-cache wget openssl
 WORKDIR /app
 
 # Create non-root user for security
@@ -40,7 +37,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src/protos ./src/protos
 COPY --from=builder /app/src/languages ./src/languages
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/yarn.lock ./yarn.lock
+COPY --from=deps /app/yarn.lock ./yarn.lock
 
 # Copy node_modules from deps stage (production only)
 COPY --from=deps /app/node_modules ./node_modules
