@@ -88,3 +88,20 @@ Account #14: 0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097 (10000 ETH)
 
 
 请在chain-service微服务中增加ERC20代币智能合约管理功能，仅admin角色可以调用，由于ERC20智能合约，背景：为了支持管理员发起智能合约相关操作，例如铸币、销毁、权限转移等
+
+
+
+nestjs-microservices-chain-reader    latest      088fc6f11c00   28 minutes ago   828MB
+nestjs-microservices-chain-service   latest      f0d5f736a871   29 minutes ago   861MB
+nestjs-microservices-chain-indexer   latest      f49fab8777c0   45 minutes ago   462MB
+mynode                               latest      96bb0c43738c   2 hours ago      484MB
+bw-yarn-offline-helper               latest      f5bfa3f38938   17 hours ago     452MB
+nestjs-microservices-post-service    latest      6337eed99fca   21 hours ago     900MB
+nestjs-microservices-auth-service    latest      09b320a33048   21 hours ago     850MB
+
+
+docker save nestjs-microservices-chain-reader:latest | gzip > chain-reader.tar.gz
+docker save nestjs-microservices-chain-service:latest | gzip > chain-service.tar.gz
+docker save nestjs-microservices-chain-indexer:latest | gzip > chain-indexer.tar.gz
+docker save nestjs-microservices-post-service:latest | gzip > post-service.tar.gz
+docker save nestjs-microservices-auth-service:latest | gzip > auth-service.tar.gz

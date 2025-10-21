@@ -107,5 +107,4 @@ package-lock.json
 
 # Local development
 .yalc/
-yalc.lock
 
