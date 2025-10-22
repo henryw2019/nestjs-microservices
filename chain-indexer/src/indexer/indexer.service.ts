@@ -4,6 +4,21 @@ import { ethers } from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaService } from '../prisma.service';
+import * as dotenv from 'dotenv';
+dotenv.config();
+// 加载genesis分配
+function loadGenesisAlloc(): Record<string, any> {
+  const genesisPath = process.env.GENESIS_JSON_PATH;
+  if (!genesisPath || !fs.existsSync(genesisPath)) return {};
+  try {
+    const raw = fs.readFileSync(genesisPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    return parsed.alloc || {};
+  } catch (e) {
+    console.error('Failed to load genesis.json', e);
+    return {};
+  }
+}
 
 type PrismaClientLike = PrismaService | Prisma.TransactionClient;
 type EventMatcher = { iface: ethers.Interface; fragment: any; signature: string };
@@ -170,7 +185,46 @@ export class IndexerService implements OnModuleInit {
       console.error('preloadAbis error', e?.message || e);
     }
 
+    // 1. 导入genesis分配，写入0区块Tx
+    await this.importGenesisAlloc();
+
     this.startLoop();
+  }
+
+  // 导入genesis分配，写入0区块Tx
+  private async importGenesisAlloc() {
+    const alloc = loadGenesisAlloc();
+    if (!alloc || Object.keys(alloc).length === 0) return;
+    const block0Time = new Date(0); // 可根据genesis.json调整
+    for (const [address, info] of Object.entries(alloc)) {
+      const ethWei = info.balance ? BigInt(info.balance) : 0n;
+      // Tx表插入genesis分配记录
+      await (this.prisma.tx as any).upsert({
+        where: { hash: `genesis-${address}` },
+        create: ({
+          hash: `genesis-${address}`,
+          blockNumber: BigInt(0),
+          from: '',
+          to: address,
+          value: ethWei.toString(),
+          gasUsed: null,
+          gasFee: null,
+          balanceAfter: ethWei.toString(),
+          nonce: null,
+          input: null,
+          status: 1,
+          timestamp: block0Time
+        } as any),
+        update: {} as any
+      });
+      // AddressBalance表插入ETH余额
+      const exist = await this.prisma.addressBalance.findFirst({ where: { address, tokenAddress: null } });
+      if (!exist) {
+        await this.prisma.addressBalance.create({
+          data: { address, tokenAddress: null, balance: ethWei.toString() }
+        });
+      }
+    }
   }
 
   // preload ABI files from common folders into topic index
@@ -320,24 +374,108 @@ export class IndexerService implements OnModuleInit {
           valueStr = '0';
         }
 
-        await trx.tx.upsert({
+        // 先获取receipt再计算gas与其它字段
+        const receipt = await this.provider.getTransactionReceipt(tx.hash).catch(() => null);
+
+        // 获取gasUsed/gasFee，兼容ethers v6和v5返回类型
+        let gasUsed = null, gasFee = null;
+        if (receipt) {
+          let _gasUsed: any = receipt.gasUsed;
+          let _gasPrice: any = receipt.effectiveGasPrice ?? receipt.gasPrice;
+          if (_gasUsed !== undefined && _gasUsed !== null) {
+            if (typeof _gasUsed === 'string') _gasUsed = BigInt(_gasUsed);
+            if (typeof _gasUsed === 'number') _gasUsed = BigInt(_gasUsed);
+            if (typeof _gasUsed === 'bigint') gasUsed = _gasUsed; // keep BigInt for Prisma BigInt field
+          }
+          if (_gasUsed !== undefined && _gasUsed !== null && _gasPrice !== undefined && _gasPrice !== null) {
+            if (typeof _gasPrice === 'string') _gasPrice = BigInt(_gasPrice);
+            if (typeof _gasPrice === 'number') _gasPrice = BigInt(_gasPrice);
+            if (typeof _gasUsed === 'bigint' && typeof _gasPrice === 'bigint') {
+              gasFee = (_gasUsed * _gasPrice).toString();
+            }
+          }
+        }
+
+        // 获取from地址交易后ETH余额
+        let balanceAfter = null;
+        if (tx.from) {
+          try {
+            const bal = await this.provider.getBalance(tx.from, block.number);
+            balanceAfter = bal ? bal.toString() : null;
+          } catch (e) {
+            console.error('getBalance error', e?.message || e);
+          }
+        }
+
+        // 获取nonce、input、status、timestamp
+        let nonce: number | null = null;
+        try {
+          if (tx.nonce !== undefined && tx.nonce !== null) {
+            if (typeof tx.nonce === 'string') {
+              if (tx.nonce.startsWith && (tx.nonce.startsWith('0x') || tx.nonce.startsWith('0X'))) {
+                nonce = Number(BigInt(tx.nonce));
+              } else {
+                const parsed = Number(tx.nonce);
+                nonce = Number.isFinite(parsed) ? parsed : null;
+              }
+            } else if (typeof tx.nonce === 'number') {
+              nonce = tx.nonce;
+            } else if (typeof tx.nonce === 'bigint') {
+              nonce = Number(tx.nonce);
+            }
+          }
+        } catch (e) {
+          nonce = null;
+        }
+        const input = tx.input || null;
+        const status = receipt && typeof receipt.status !== 'undefined' ? Number(receipt.status) : null;
+        const timestamp = block.timestamp ? new Date(block.timestamp * 1000) : null;
+
+        console.log('[Tx写入]', {
+          hash: tx.hash,
+          blockNumber: BigInt(block.number),
+          from: tx.from || '',
+          to: tx.to || '',
+          value: valueStr,
+          gasUsed,
+          gasFee,
+          balanceAfter,
+          nonce,
+          input,
+          status,
+          timestamp
+        });
+        await (trx.tx as any).upsert({
           where: { hash: tx.hash },
           create: {
             hash: tx.hash,
             blockNumber: BigInt(block.number),
             from: tx.from || '',
             to: tx.to || '',
-            value: valueStr
-          },
+            value: valueStr,
+            gasUsed,
+            gasFee,
+            balanceAfter,
+            nonce,
+            input,
+            status,
+            timestamp
+          } as any,
           update: {
             blockNumber: BigInt(block.number),
             from: tx.from || '',
             to: tx.to || '',
-            value: valueStr
-          }
+            value: valueStr,
+            gasUsed,
+            gasFee,
+            balanceAfter,
+            nonce,
+            input,
+            status,
+            timestamp
+          } as any
         });
 
-        const receipt = await this.provider.getTransactionReceipt(tx.hash).catch(() => null);
         if (!receipt) {
           console.log(`[block ${blockNumber}] receipt missing for ${tx.hash}`);
           continue;
@@ -388,7 +526,19 @@ export class IndexerService implements OnModuleInit {
 
           const recordTransfer = async (from: string, to: string, value: string) => {
             console.log(`      ERC20 Transfer token=${log.address} from=${from} to=${to} value=${value}`);
-            await trx.eRC20Transfer.create({
+            // 获取ERC20转账发生时的链上时间
+            const txTimestamp = block.timestamp ? new Date(block.timestamp * 1000) : null;
+            console.log('[ERC20Transfer写入]', {
+              txHash: tx.hash,
+              logIndex: logIndexNum,
+              blockNumber: BigInt(block.number),
+              token: log.address,
+              from,
+              to,
+              value,
+              timestamp: txTimestamp
+            });
+            await (trx.eRC20Transfer as any).create({
               data: {
                 txHash: tx.hash,
                 logIndex: logIndexNum,
@@ -396,9 +546,29 @@ export class IndexerService implements OnModuleInit {
                 token: log.address,
                 from,
                 to,
-                value
-              }
+                value,
+                timestamp: txTimestamp
+              } as any
             });
+            // 3. 如from/to无ETH余额记录，尝试从链上刷新其ETH余额并写入（失败时回退为0）
+            for (const addr of [from, to]) {
+              if (!addr) continue;
+              const exist = await trx.addressBalance.findFirst({ where: { address: addr, tokenAddress: null } });
+              if (!exist) {
+                try {
+                  const balRes = await this.provider.getBalance(addr).catch(() => null);
+                  const balStr = balRes ? (typeof balRes === 'bigint' ? balRes.toString() : BigInt(balRes.toString()).toString()) : '0';
+                  await trx.addressBalance.create({ data: { address: addr, tokenAddress: null, balance: balStr } });
+                } catch (e) {
+                  // fallback: create zero balance record if provider call fails
+                  try {
+                    await trx.addressBalance.create({ data: { address: addr, tokenAddress: null, balance: '0' } });
+                  } catch (err) {
+                    console.error('failed to create fallback AddressBalance', addr, err?.message || err);
+                  }
+                }
+              }
+            }
             if (from) addressesToRefresh.push({ address: from, token: log.address });
             if (to) addressesToRefresh.push({ address: to, token: log.address });
             try {
@@ -496,7 +666,22 @@ export class IndexerService implements OnModuleInit {
             }
           }
 
-          await trx.eventLog.create({
+          const eventTimestamp = block.timestamp ? new Date(block.timestamp * 1000) : null;
+          console.log('[EventLog写入]', {
+            chainId: parseInt(process.env.CHAIN_ID || '1', 10),
+            blockNumber: BigInt(block.number),
+            blockHash: block.hash,
+            txHash: tx.hash,
+            logIndex: logIndexNum,
+            contractAddress: log.address,
+            eventName: parsedEventName,
+            eventSignature,
+            indexedArgs: parsedIndexedArgs,
+            dataArgs: parsedDataArgs,
+            processed: false,
+            timestamp: eventTimestamp
+          });
+          await (trx.eventLog as any).create({
             data: {
               chainId: parseInt(process.env.CHAIN_ID || '1', 10),
               blockNumber: BigInt(block.number),
@@ -509,8 +694,9 @@ export class IndexerService implements OnModuleInit {
               indexedArgs: parsedIndexedArgs,
               dataArgs: parsedDataArgs,
               raw: log as any,
-              processed: false
-            }
+              processed: false,
+              timestamp: eventTimestamp
+            } as any
           });
 
           if (tx.from) addressesToRefresh.push({ address: tx.from, token: null });

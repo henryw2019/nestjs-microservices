@@ -14,11 +14,18 @@ model Block {
 }
 
 model Tx {
-  hash        String  @id
-  blockNumber BigInt
-  from        String
-  to          String?
-  value       Decimal
+    hash          String  @id
+    blockNumber   BigInt
+    from          String
+    to            String?
+    value         Decimal
+    gasUsed       BigInt?
+    gasFee        Decimal?  // 实际消耗的ETH，单位wei
+    balanceAfter  Decimal?  // from地址交易后ETH余额，单位wei
+    nonce         Int?
+    input         String?
+    status        Int?
+    timestamp     DateTime? // 区块链原始时间
 }
 
 model ERC20Transfer {
@@ -30,6 +37,7 @@ model ERC20Transfer {
   from        String
   to          String
   value       Decimal
+  timestamp   DateTime? // 发生时的链上时间
 }
 
 model EventLog {
@@ -46,6 +54,7 @@ model EventLog {
   dataArgs        Json
   raw             Json
   processed       Boolean @default(false)
+  timestamp       DateTime? // 事件发生时的链上时间
 }
 
 model AddressBalance {
