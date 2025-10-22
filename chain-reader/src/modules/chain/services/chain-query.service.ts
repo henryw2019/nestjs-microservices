@@ -337,43 +337,55 @@ export class ChainQueryService {
     }
 
     private mapTransaction(tx: Tx): TransactionResponseDto {
+        const t: any = tx as any;
         return {
-            hash: tx.hash,
-            blockNumber: tx.blockNumber.toString(),
-            from: tx.from,
-            to: tx.to,
-            value: tx.value.toString(),
+            hash: t.hash,
+            blockNumber: t.blockNumber.toString(),
+            from: t.from,
+            to: t.to,
+            value: t.value.toString(),
+            gasUsed: t.gasUsed ? (typeof t.gasUsed === 'bigint' ? t.gasUsed.toString() : String(t.gasUsed)) : null,
+            gasFee: t.gasFee ? String(t.gasFee) : null,
+            balanceAfter: t.balanceAfter ? String(t.balanceAfter) : null,
+            nonce: typeof t.nonce === 'number' ? t.nonce : null,
+            input: t.input ?? null,
+            status: t.status ?? null,
+            timestamp: t.timestamp ? (t.timestamp instanceof Date ? t.timestamp.toISOString() : String(t.timestamp)) : null,
         };
     }
 
     private mapErc20Transfer(transfer: ERC20Transfer): Erc20TransferResponseDto {
+        const t: any = transfer as any;
         return {
-            id: transfer.id.toString(),
-            txHash: transfer.txHash,
-            blockNumber: transfer.blockNumber.toString(),
-            logIndex: transfer.logIndex,
-            token: transfer.token,
-            from: transfer.from,
-            to: transfer.to,
-            value: transfer.value.toString(),
+            id: t.id.toString(),
+            txHash: t.txHash,
+            blockNumber: t.blockNumber.toString(),
+            logIndex: t.logIndex,
+            token: t.token,
+            from: t.from,
+            to: t.to,
+            value: t.value.toString(),
+            timestamp: t.timestamp ? (t.timestamp instanceof Date ? t.timestamp.toISOString() : String(t.timestamp)) : null,
         };
     }
 
     private mapEventLog(event: EventLog): EventLogResponseDto {
+        const e: any = event as any;
         return {
-            id: event.id.toString(),
-            chainId: event.chainId,
-            blockNumber: event.blockNumber.toString(),
-            blockHash: event.blockHash,
-            txHash: event.txHash,
-            logIndex: event.logIndex,
-            contractAddress: event.contractAddress,
-            eventName: event.eventName,
-            eventSignature: event.eventSignature,
-            indexedArgs: (event.indexedArgs as Record<string, unknown>) ?? null,
-            dataArgs: (event.dataArgs as Record<string, unknown>) ?? null,
-            raw: (event.raw as Record<string, unknown>) ?? null,
-            processed: event.processed,
+            id: e.id.toString(),
+            chainId: e.chainId,
+            blockNumber: e.blockNumber.toString(),
+            blockHash: e.blockHash,
+            txHash: e.txHash,
+            logIndex: e.logIndex,
+            contractAddress: e.contractAddress,
+            eventName: e.eventName,
+            eventSignature: e.eventSignature,
+            indexedArgs: (e.indexedArgs as Record<string, unknown>) ?? null,
+            dataArgs: (e.dataArgs as Record<string, unknown>) ?? null,
+            raw: (e.raw as Record<string, unknown>) ?? null,
+            processed: e.processed,
+            timestamp: e.timestamp ? (e.timestamp instanceof Date ? e.timestamp.toISOString() : String(e.timestamp)) : null,
         };
     }
 

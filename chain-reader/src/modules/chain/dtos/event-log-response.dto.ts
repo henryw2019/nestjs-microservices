@@ -39,4 +39,7 @@ export class EventLogResponseDto {
 
     @ApiProperty({ description: 'Processed flag', example: true })
     processed: boolean;
+
+    @ApiProperty({ description: 'Event block timestamp as ISO string', example: '2025-10-22T12:34:56.000Z', required: false })
+    timestamp?: string | null;
 }

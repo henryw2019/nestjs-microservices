@@ -24,4 +24,7 @@ export class Erc20TransferResponseDto {
 
     @ApiProperty({ description: 'Transfer value (raw units)', example: '1000000000000000000' })
     value: string;
+
+    @ApiProperty({ description: 'Block timestamp as ISO string', example: '2025-10-22T12:34:56.000Z', required: false })
+    timestamp?: string | null;
 }
