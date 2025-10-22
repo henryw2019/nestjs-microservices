@@ -8,7 +8,7 @@ export class KeyStoreService {
 
     constructor(private readonly database: DatabaseService) {}
 
-    async createForUser(userId: string) {
+    async createForUser(userId: string, accountName?: string) {
         const wallet = ethers.Wallet.createRandom();
         const normalizedAddress = ethers.utils.getAddress(wallet.address);
         const record = await (this.database as any).keyStore.create({
@@ -16,6 +16,7 @@ export class KeyStoreService {
                 userId,
                 address: normalizedAddress,
                 privateKey: wallet.privateKey,
+                accountName: accountName || null,
             },
         });
 
@@ -66,6 +67,7 @@ export class KeyStoreService {
             id: record.id,
             userId: record.userId,
             address: record.address,
+            accountName: record.accountName || undefined,
             createdAt: record.createdAt,
         };
     }

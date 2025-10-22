@@ -12,6 +12,7 @@ model KeyStore {
   userId     String   @map("user_id")
   address    String   @unique
   privateKey String
+  accountName String?  @map("account_name")
   createdAt  DateTime @default(now())
 
   @@map("keystore")

@@ -1,10 +1,12 @@
-import { Controller, Post, Get, HttpStatus } from '@nestjs/common';
+
+import { Body, Controller, Post, Get, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { KeyStoreService } from './keystore.service';
 import { AuthUser } from '@/common/decorators/auth-user.decorator';
 import { MessageKey } from '@/common/decorators/message.decorator';
 import { SwaggerArrayResponse, SwaggerResponse } from '@/common/dtos/api-response.dto';
 import { KeystoreResponseDto } from './dtos/keystore.response.dto';
+import { CreateKeyStoreDto } from './dtos/create-keystore.dto';
 
 @ApiTags('keystore')
 @ApiBearerAuth('accessToken')
@@ -20,8 +22,11 @@ export class KeyStoreController {
         type: SwaggerResponse(KeystoreResponseDto),
     })
     @MessageKey('keystore.success.created', KeystoreResponseDto)
-    async create(@AuthUser('id') userId: string): Promise<KeystoreResponseDto> {
-        return this.service.createForUser(userId);
+    async create(
+        @AuthUser('id') userId: string,
+        @Body() body: CreateKeyStoreDto
+    ): Promise<KeystoreResponseDto> {
+        return this.service.createForUser(userId, body.accountName);
     }
 
     @Get('me')
