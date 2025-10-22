@@ -110,7 +110,7 @@ The project includes pre-configured environment files for Docker deployment:
 ```env
 # Application Configuration
 NODE_ENV="local"
-APP_NAME="@backendworks/auth"
+APP_NAME="auth"
 APP_CORS_ORIGINS="*"
 APP_DEBUG=true
 
@@ -145,7 +145,7 @@ GRPC_PACKAGE="auth"
 ```env
 # Application Configuration
 NODE_ENV="local"
-APP_NAME="@backendworks/post"
+APP_NAME="post"
 APP_CORS_ORIGINS="*"
 APP_DEBUG=true
 

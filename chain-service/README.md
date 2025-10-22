@@ -33,7 +33,7 @@ src/
 ```env
 # App
 NODE_ENV="local"
-APP_NAME="@backendworks/chain-service"
+APP_NAME="chain-service"
 APP_CORS_ORIGINS="*"
 APP_DEBUG=true
 

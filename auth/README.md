@@ -80,7 +80,7 @@ src/
    ```env
    # App Configuration
    NODE_ENV="local"
-   APP_NAME="@backendworks/auth"
+   APP_NAME="auth"
    APP_CORS_ORIGINS="*"
    APP_DEBUG=true
 

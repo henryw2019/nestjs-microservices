@@ -1,5 +1,5 @@
 {
-    "name": "@backendworks/chain-service",
+    "name": "chain-service",
     "version": "1.0.0",
     "private": true,
     "description": "Custodial wallet microservice for on-chain transfers and keystore management",

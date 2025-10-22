@@ -84,7 +84,7 @@ src/
    ```env
    # App Configuration
    NODE_ENV="local"
-   APP_NAME="@backendworks/post"
+   APP_NAME="post"
    APP_CORS_ORIGINS="*"
    APP_DEBUG=true
 
