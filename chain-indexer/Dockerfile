@@ -12,6 +12,8 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 # 只复制构建所需的明确文件/目录，避免将工作区中不需要或敏感的目录带入镜像
+COPY package.json yarn.lock*  ./
+COPY prisma ./prisma/
 COPY src ./src/
 COPY abis ./abis/
 COPY tsconfig.json tsconfig.build.json ./

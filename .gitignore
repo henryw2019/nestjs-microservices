@@ -72,3 +72,6 @@ chain-service/storage
 chain-indexer/abis
 
 *cache*
+*.tar.gz
+*.zip
+*.tar
