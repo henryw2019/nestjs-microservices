@@ -16,6 +16,8 @@ RUN yarn --frozen-lockfile --production=false
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY package.json yarn.lock* ./
+COPY prisma ./prisma/
 COPY src ./src/
 COPY tsconfig.json tsconfig.build.json ./
 COPY .eslintrc* .prettierrc* ./

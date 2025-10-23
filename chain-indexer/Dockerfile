@@ -11,6 +11,9 @@ RUN yarn install --frozen-lockfile
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+# 先把 package.json/yarn.lock 和 prisma 复制过来（prisma:generate 需要 schema + package.json）
+COPY package.json yarn.lock*  ./
+COPY prisma ./prisma/
 # 只复制构建所需的明确文件/目录，避免将工作区中不需要或敏感的目录带入镜像
 COPY src ./src/
 COPY abis ./abis/
