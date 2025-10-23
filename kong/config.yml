@@ -84,10 +84,25 @@ plugins:
   # 全局CORS插件，允许跨域
   - name: cors
     config:
-      origins: "*"
-      methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-      headers: "Accept, Authorization, Content-Type, Origin, X-Requested-With"
-      exposed_headers: "Authorization, Content-Type, X-Requested-With"
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      headers:
+        - Accept
+        - Authorization
+        - Content-Type
+        - Origin
+        - X-Requested-With
+      exposed_headers:
+        - Authorization
+        - Content-Type
+        - X-Requested-With
       credentials: true
       max_age: 3600
 
