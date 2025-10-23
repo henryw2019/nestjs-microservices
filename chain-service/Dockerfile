@@ -16,7 +16,10 @@ RUN yarn --frozen-lockfile --production=false
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# 只复制构建所需的明确文件/目录，避免将工作区中不需要或敏感的目录带入镜像
+COPY src ./src/
+COPY tsconfig.json tsconfig.build.json ./
+COPY .eslintrc* .prettierrc* ./
 
 # Generate Prisma client and build application
 RUN yarn prisma:generate

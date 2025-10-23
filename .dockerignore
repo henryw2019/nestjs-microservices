@@ -1,0 +1,15 @@
+# Common excludes to keep build context small
+**/node_modules
+**/.turbo
+**/.git
+.git
+.gitignore
+.vscode
+.env
+.env.*
+**/dist
+**/coverage
+**/tmp
+**/.cache
+**/*.log
+**/.DS_Store

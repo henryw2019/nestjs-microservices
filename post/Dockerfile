@@ -16,7 +16,9 @@ RUN yarn --frozen-lockfile --production=false
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY src ./src/
+COPY tsconfig.json tsconfig.build.json ./
+COPY .eslintrc* .prettierrc* ./
 
 # Generate Prisma client and build application
 RUN yarn prisma:generate
