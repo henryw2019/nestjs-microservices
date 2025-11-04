@@ -25,7 +25,6 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
       - auth-service
-      - post-service
       - chain-service
     healthcheck:
       test: ["CMD", "kong", "health"]
@@ -83,36 +82,6 @@ services:
       - bw-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9004/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Post Service
-  post-service:
-    build:
-      context: ./post
-      dockerfile: Dockerfile
-    container_name: bw-post-service
-    restart: unless-stopped
-    ports:
-      - "9002:9002"    # HTTP API
-      - "50052:50052"  # gRPC
-    env_file:
-      - ./post/.env.docker
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      auth-service:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - bw-network
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9002/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

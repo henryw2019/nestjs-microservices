@@ -4,7 +4,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
-import { createKeyv, Keyv } from '@keyv/redis';
+import Keyv from 'keyv';
+import KeyvRedis from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
 import Joi from 'joi';
 
@@ -53,7 +54,8 @@ import { HttpCacheInterceptor } from './interceptors/cache.interceptor';
         CacheModule.registerAsync({
             inject: [ConfigService],
             useFactory: async (configService: ConfigService) => {
-                const ttlMs = configService.get<number>('cache.ttlSeconds', 300) * 1000;
+                const ttlSeconds = configService.get<number>('cache.ttlSeconds', 300);
+                const ttlMs = ttlSeconds * 1000;
                 const maxItems = configService.get<number>('cache.maxItems', 5000);
                 const redisUrl = configService.get<string>('redis.url', '');
                 const redisKeyPrefix = configService.get<string>('redis.keyPrefix', 'chain-reader:');
@@ -64,12 +66,15 @@ import { HttpCacheInterceptor } from './interceptors/cache.interceptor';
                             ttl: ttlMs,
                             lruSize: maxItems,
                         }),
+                        ttl: ttlMs,
                     }),
                 ];
 
                 if (redisUrl) {
                     const namespace = redisKeyPrefix?.trim()?.length ? redisKeyPrefix : 'chain-reader:';
-                    stores.push(createKeyv(redisUrl, { namespace, keyPrefixSeparator: '' }));
+                    // Use KeyvRedis (adapter) as the store and create a top-level Keyv with ttl.
+                    const redisStore = new KeyvRedis(redisUrl, { keyPrefixSeparator: '' });
+                    stores.push(new Keyv({ store: redisStore as any, namespace, ttl: ttlMs }));
                 }
 
                 return {

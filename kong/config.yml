@@ -69,6 +69,10 @@ services:
           - https
         methods:
           - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
 
 plugins:
   - name: rate-limiting
