@@ -1,0 +1,1 @@
+{"version":3,"file":"response.constant.js","sourceRoot":"/","sources":["../../../packages/common/src/constants/response.constant.ts"],"names":[],"mappings":";;;AAAa,QAAA,oBAAoB,GAAG,YAAY,CAAC;AACpC,QAAA,oBAAoB,GAAG,YAAY,CAAC","sourcesContent":["export const MESSAGE_KEY_METADATA = 'messageKey';\nexport const MESSAGE_DTO_METADATA = 'messageDto';\n"]}

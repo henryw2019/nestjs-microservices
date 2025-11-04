@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@project/common/*": ["packages/common/src/*"],
+      "@project/proto/*": ["packages/proto/src/*"],
+      "@project/i18n/*": ["packages/i18n/src/*"],
+      "@project/prisma/*": ["packages/prisma/src/*"],
+      "@project/config/*": ["packages/config/src/*"]
+    }
+  }
+}

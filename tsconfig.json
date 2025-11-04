@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/common" },
+    { "path": "./packages/proto" },
+    { "path": "./packages/i18n" },
+    { "path": "./packages/prisma" },
+    { "path": "./packages/config" },
+    { "path": "./apps/auth" },
+    { "path": "./apps/chain-reader" },
+    { "path": "./apps/chain-service" },
+    { "path": "./apps/chain-indexer" }
+  ]
+}

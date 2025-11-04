@@ -1,3 +1,63 @@
+# NestJS Microservices Monorepo
+
+[![NestJS](https://img.shields.io/badge/NestJS-10.x-red.svg)](https://nestjs.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-9.x-orange.svg)](https://pnpm.io/)
+[![Turbo](https://img.shields.io/badge/Turborepo-enabled-blue.svg)](https://turbo.build/repo)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+This repository is now organised as a pnpm workspace managed by Turborepo. The structure below replaces the previous per-service root layout; the legacy guide is still included further down for context and will be cleaned up incrementally.
+
+## Quick Links
+
+- `apps/` &rarr; deployable NestJS services (`auth`, `chain-service`, `chain-reader`, `chain-indexer`)
+- `packages/` &rarr; shared libraries (common Nest modules, Prisma utilities, translations, proto stubs)
+- `infra/compose/` &rarr; docker-compose stacks for development and production
+- `infra/kong/` &rarr; Kong declarative configuration
+
+```text
+.
+├─ apps/
+│  ├─ auth/
+│  ├─ chain-service/
+│  ├─ chain-reader/
+│  └─ chain-indexer/
+├─ packages/
+│  ├─ common/
+│  ├─ config/
+│  ├─ i18n/
+│  ├─ prisma/
+│  └─ proto/
+├─ infra/
+│  ├─ compose/
+│  └─ kong/
+├─ tools/
+├─ turbo.json
+├─ pnpm-workspace.yaml
+└─ tsconfig.base.json
+```
+
+### Prerequisites
+
+- Enable pnpm via Corepack: `corepack enable && corepack prepare pnpm@9 --activate`
+- Install dependencies once from the repo root: `pnpm install`
+- Generate Prisma clients per service: `pnpm --filter auth prisma:generate`, etc.
+- Build everything through Turbo: `pnpm build`
+
+### Useful Commands
+
+```bash
+pnpm --filter auth dev           # start auth service in watch mode
+pnpm --filter chain-service test # run chain-service tests
+pnpm --filter chain-reader lint  # lint reader service
+pnpm --filter chain-indexer prisma:migrate
+
+docker compose -f infra/compose/docker-compose.dev.yml up --build
+docker compose -f infra/compose/docker-compose.yml up --build
+```
+
+> The sections below capture the legacy documentation for the old layout and will be updated to reflect the new monorepo flows.
+
 # NestJS Microservices Architecture
 
 [![NestJS](https://img.shields.io/badge/NestJS-10.4.6-red.svg)](https://nestjs.com/)

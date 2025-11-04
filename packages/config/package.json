@@ -1,0 +1,16 @@
+{
+  "name": "@project/config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "peerDependencies": {
+    "@nestjs/config": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

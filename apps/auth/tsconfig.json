@@ -1,0 +1,33 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "useDefineForClassFields": false,
+        "sourceMap": true,
+        "inlineSources": true,
+        "sourceRoot": "/",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "baseUrl": "./src",
+    "composite": true,
+        "paths": {
+            "@project/common/*": ["../../packages/common/src/*"],
+            "@project/proto/*": ["../../packages/proto/src/*"],
+            "@project/i18n/*": ["../../packages/i18n/src/*"],
+            "@project/prisma/*": ["../../packages/prisma/src/*"],
+            "@project/config/*": ["../../packages/config/src/*"],
+            "@/*": ["*"],
+            "src/*": ["*"]
+        }
+    },
+    "include": ["src/**/*", "test/**/*"],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "coverage",
+    ]
+}

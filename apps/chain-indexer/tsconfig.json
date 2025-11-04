@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": "./src",
+  "composite": true,
+    "paths": {
+      "@project/common/*": ["../../packages/common/src/*"],
+      "@project/proto/*": ["../../packages/proto/src/*"],
+      "@project/i18n/*": ["../../packages/i18n/src/*"],
+      "@project/prisma/*": ["../../packages/prisma/src/*"],
+      "@project/config/*": ["../../packages/config/src/*"],
+      "@/*": ["*"],
+      "src/*": ["*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
