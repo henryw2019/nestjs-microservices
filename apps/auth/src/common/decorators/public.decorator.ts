@@ -1,6 +1,6 @@
 import { SetMetadata, applyDecorators } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { PUBLIC_ROUTE_KEY } from '../constants/request.constant';
+import { PUBLIC_ROUTE_KEY } from '@project/common';
 
 export const PublicRoute = (description?: string) => {
     const decorators: Array<ClassDecorator | MethodDecorator | PropertyDecorator> = [

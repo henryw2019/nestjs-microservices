@@ -3,8 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { TransferService } from './transfer.service';
 import { TransferDto } from './dtos/transfer.dto';
 import { AuthUser } from '@/common/decorators/auth-user.decorator';
-import { MessageKey } from '@/common/decorators/message.decorator';
-import { SwaggerResponse } from '@/common/dtos/api-response.dto';
+import { MessageKey, SwaggerResponse } from '@project/common';
 import { TransferResponseDto } from './dtos/transfer.response.dto';
 
 @ApiTags('transfer')

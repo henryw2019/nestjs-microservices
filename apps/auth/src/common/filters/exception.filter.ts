@@ -10,7 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as Sentry from '@sentry/node';
 import { Request, Response } from 'express';
-import { IErrorResponse } from '../interfaces/response.interface';
+import { IErrorResponse } from '@project/common';
 
 @Catch()
 export class ResponseExceptionFilter implements ExceptionFilter {

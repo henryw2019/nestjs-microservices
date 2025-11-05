@@ -1,11 +1,10 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { I18nService } from 'nestjs-i18n';
-import { Observable } from 'rxjs';
-import { map, from, switchMap } from 'rxjs';
-import { MESSAGE_DTO_METADATA, MESSAGE_KEY_METADATA } from '../constants/response.constant';
-import { IApiResponse } from '../interfaces/response.interface';
 import { plainToInstance } from 'class-transformer';
+import { I18nService } from 'nestjs-i18n';
+import { from, map, Observable, switchMap } from 'rxjs';
+import { IApiResponse } from '../interfaces/response.interface';
+import { MESSAGE_DTO_METADATA, MESSAGE_KEY_METADATA } from '../constants/response.constant';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
@@ -16,12 +15,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<IApiResponse<unknown>> {
         const messageKey = this.reflector.get<string>(MESSAGE_KEY_METADATA, context.getHandler());
-
-        const messageDto = this.reflector.get<new () => any>(
-            MESSAGE_DTO_METADATA,
-            context.getHandler(),
-        );
-
+        const messageDto = this.reflector.get<new () => any>(MESSAGE_DTO_METADATA, context.getHandler());
         const response = context.switchToHttp().getResponse();
         const statusCode = response.statusCode;
 
@@ -41,22 +35,20 @@ export class ResponseInterceptor implements NestInterceptor {
                             timestamp: new Date().toISOString(),
                             message,
                             data: transformedData ?? null,
-                        };
+                        } satisfies IApiResponse;
                     }),
                 ),
             ),
         );
     }
 
-    private async getResponseMessage(
-        messageKey: string | undefined,
-        statusCode: number,
-    ): Promise<string> {
+    private async getResponseMessage(messageKey: string | undefined, statusCode: number): Promise<string> {
         if (messageKey) {
             return this.i18n.translate(messageKey, {
                 defaultValue: this.getDefaultMessageKey(statusCode),
             });
         }
+
         return this.i18n.translate(this.getDefaultMessageKey(statusCode));
     }
 

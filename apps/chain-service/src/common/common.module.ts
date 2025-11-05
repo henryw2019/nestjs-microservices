@@ -8,17 +8,16 @@ import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import configs from './config';
 import { AuthJwtAccessGuard } from './guards/jwt.access.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { HashService } from './services/hash.service';
 import { DatabaseService } from './services/database.service';
 import { ResponseExceptionFilter } from './filters/exception.filter';
-import { RequestMiddleware } from './middlewares/request.middleware';
 import { QueryBuilderService } from './services/query-builder.service';
 import Joi from 'joi';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
 import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
+import { RequestMiddleware, ResponseInterceptor } from '@project/common';
 
 const resolveLanguagesPath = (): string => {
     const candidates = [

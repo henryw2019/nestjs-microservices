@@ -8,7 +8,7 @@ import { UserModule } from 'src/modules/user/user.module';
 import { AppController } from './app.controller';
 import { GrpcModule } from 'nestjs-grpc';
 import { ConfigService } from '@nestjs/config';
-import { join } from 'path';
+import { AUTH_PROTO_PACKAGE, AUTH_PROTO_PATH } from '@project/proto';
 import { AuthGrpcController } from './auth.grpc.controller';
 
 @Module({
@@ -20,8 +20,8 @@ import { AuthGrpcController } from './auth.grpc.controller';
         GrpcModule.forProviderAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
-                protoPath: join(__dirname, '../protos/auth.proto'),
-                package: configService.get<string>('grpc.package', 'auth'),
+                protoPath: AUTH_PROTO_PATH,
+                package: configService.get<string>('grpc.package', AUTH_PROTO_PACKAGE),
                 url: configService.get<string>('grpc.url', '0.0.0.0:50051'),
                 logging: {
                     enabled: true,

@@ -12,10 +12,15 @@
     "baseUrl": "./src",
   "composite": true,
     "paths": {
+            "@project/common": ["../../packages/common/src/index.ts"],
       "@project/common/*": ["../../packages/common/src/*"],
+            "@project/proto": ["../../packages/proto/src/index.ts"],
       "@project/proto/*": ["../../packages/proto/src/*"],
+            "@project/i18n": ["../../packages/i18n/src/index.ts"],
       "@project/i18n/*": ["../../packages/i18n/src/*"],
+            "@project/prisma": ["../../packages/prisma/src/index.ts"],
       "@project/prisma/*": ["../../packages/prisma/src/*"],
+            "@project/config": ["../../packages/config/src/index.ts"],
       "@project/config/*": ["../../packages/config/src/*"],
       "@/*": ["*"],
       "src/*": ["*"]

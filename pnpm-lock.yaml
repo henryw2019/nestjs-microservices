@@ -59,6 +59,12 @@ importers:
       '@prisma/client':
         specifier: ^5.21.1
         version: 5.22.0(prisma@5.22.0)
+      '@project/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@project/proto':
+        specifier: workspace:*
+        version: link:../../packages/proto
       '@sentry/node':
         specifier: ^9.26.0
         version: 9.46.0
@@ -298,6 +304,9 @@ importers:
       '@prisma/client':
         specifier: ^5.21.1
         version: 5.22.0(prisma@5.22.0)
+      '@project/common':
+        specifier: workspace:*
+        version: link:../../packages/common
       cache-manager:
         specifier: ^6.4.3
         version: 6.4.3
@@ -458,6 +467,12 @@ importers:
       '@prisma/client':
         specifier: ^5.21.1
         version: 5.22.0(prisma@5.22.0)
+      '@project/common':
+        specifier: workspace:*
+        version: link:../../packages/common
+      '@project/proto':
+        specifier: workspace:*
+        version: link:../../packages/proto
       '@sentry/node':
         specifier: ^9.26.0
         version: 9.46.0
@@ -637,6 +652,24 @@ importers:
         specifier: ^10.0.0
         version: 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.1.8)(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)
     devDependencies:
+      '@nestjs/swagger':
+        specifier: ^8.0.1
+        version: 8.1.1(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.1.8)(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.25
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
+      express:
+        specifier: ^4.21.1
+        version: 4.21.2
+      nestjs-i18n:
+        specifier: ^10.4.9
+        version: 10.5.1(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.1.8)(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.14.2)(rxjs@7.8.2)
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -683,6 +716,9 @@ importers:
         specifier: ^10.0.0
         version: 10.4.20(@grpc/grpc-js@1.14.0)(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(cache-manager@6.4.3)(ioredis@5.8.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
     devDependencies:
+      '@types/node':
+        specifier: ^22.8.5
+        version: 22.19.0
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -1837,8 +1873,14 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
+  '@types/express-serve-static-core@4.19.7':
+    resolution: {integrity: sha512-FvPtiIf1LfhzsaIXhv/PHan/2FeQBbtBDtfX2QfvPxdUelMDEckK08SM6nqo1MIZY3RUlfA+HV8+hFUSio78qg==}
+
   '@types/express-serve-static-core@5.1.0':
     resolution: {integrity: sha512-jnHMsrd0Mwa9Cf4IdOzbz543y4XJepXrbia2T4b6+spXC2We3t1y6K44D3mR8XMFSXMCf3/l7rCgddfx7UNVBA==}
+
+  '@types/express@4.17.25':
+    resolution: {integrity: sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw==}
 
   '@types/express@5.0.5':
     resolution: {integrity: sha512-LuIQOcb6UmnF7C1PCFmEU1u2hmiHL43fgFQX67sN3H4Z+0Yk0Neo++mFsBjhOAuLzvlQeqAAkeDOZrJs9rzumQ==}
@@ -6444,12 +6486,26 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
+  '@types/express-serve-static-core@4.19.7':
+    dependencies:
+      '@types/node': 22.19.0
+      '@types/qs': 6.14.0
+      '@types/range-parser': 1.2.7
+      '@types/send': 1.2.1
+
   '@types/express-serve-static-core@5.1.0':
     dependencies:
       '@types/node': 22.19.0
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
+
+  '@types/express@4.17.25':
+    dependencies:
+      '@types/body-parser': 1.19.6
+      '@types/express-serve-static-core': 4.19.7
+      '@types/qs': 6.14.0
+      '@types/serve-static': 1.15.10
 
   '@types/express@5.0.5':
     dependencies:

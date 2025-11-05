@@ -75,3 +75,6 @@ chain-indexer/abis
 *.tar.gz
 *.zip
 *.tar
+
+*.js
+.turbo*

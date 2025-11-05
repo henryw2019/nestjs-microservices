@@ -20,24 +20,6 @@ services:
           - PATCH
           - DELETE
 
-  - name: post-service
-    url: http://post-service:9002
-    routes:
-      - name: post-routes
-        paths:
-          - /post
-        strip_path: true
-        preserve_host: false
-        protocols:
-          - http
-          - https
-        methods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-
   - name: chain-service
     url: http://chain-service:9003
     routes:
@@ -109,16 +91,6 @@ plugins:
         - X-Requested-With
       credentials: true
       max_age: 3600
-
-  - name: rate-limiting
-    route: post-routes
-    config:
-      minute: 200
-      hour: 2000
-      day: 20000
-      policy: local
-      hide_client_headers: false
-      fault_tolerant: true
 
   - name: rate-limiting
     route: chain-service-routes

@@ -3,8 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChainQueryService } from '../services/chain-query.service';
 import { TokenMetaListQueryDto } from '../dtos/token-meta-list-query.dto';
 import { TokenMetaResponseDto } from '../dtos/token-meta-response.dto';
-import { MessageKey } from '../../../common/decorators/message.decorator';
-import { SwaggerPaginatedResponse, SwaggerResponse } from '../../../common/dtos/api-response.dto';
+import { MessageKey, SwaggerPaginatedResponse, SwaggerResponse } from '@project/common';
 import { PaginatedResult } from '../../../common/interfaces/query-builder.interface';
 
 @ApiTags('token-meta')

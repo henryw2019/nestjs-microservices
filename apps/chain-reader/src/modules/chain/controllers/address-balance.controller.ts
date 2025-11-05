@@ -3,8 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChainQueryService } from '../services/chain-query.service';
 import { AddressBalanceListQueryDto } from '../dtos/address-balance-list-query.dto';
 import { AddressBalanceResponseDto } from '../dtos/address-balance-response.dto';
-import { MessageKey } from '../../../common/decorators/message.decorator';
-import { SwaggerPaginatedResponse } from '../../../common/dtos/api-response.dto';
+import { MessageKey, SwaggerPaginatedResponse } from '@project/common';
 import { PaginatedResult } from '../../../common/interfaces/query-builder.interface';
 
 @ApiTags('address-balances')

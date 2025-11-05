@@ -3,8 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChainQueryService } from '../services/chain-query.service';
 import { Erc20TransferListQueryDto } from '../dtos/erc20-transfer-list-query.dto';
 import { Erc20TransferResponseDto } from '../dtos/erc20-transfer-response.dto';
-import { MessageKey } from '../../../common/decorators/message.decorator';
-import { SwaggerPaginatedResponse } from '../../../common/dtos/api-response.dto';
+import { MessageKey, SwaggerPaginatedResponse } from '@project/common';
 import { PaginatedResult } from '../../../common/interfaces/query-builder.interface';
 
 @ApiTags('erc20-transfers')

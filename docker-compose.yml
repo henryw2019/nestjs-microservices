@@ -18,7 +18,7 @@ services:
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
       KONG_PROXY_LISTEN: 0.0.0.0:8000
     volumes:
-      - ../kong/config.yml:/var/lib/kong/kong.yml:ro
+      - ./infra/kong/config.yml:/var/lib/kong/kong.yml:ro
     networks:
       - bw-network
     extra_hosts:
@@ -35,7 +35,7 @@ services:
   # Authentication Service
   auth-service:
     build:
-      context: ../..
+      context: .
       dockerfile: apps/auth/Dockerfile
     container_name: bw-auth-service
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
       - "9001:9001"    # HTTP API
       - "50051:50051"  # gRPC
     env_file:
-      - ../apps/auth/.env.docker
+      - ./apps/auth/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -63,14 +63,14 @@ services:
   # Chain Reader Service
   chain-reader:
     build:
-      context: ../..
+      context: .
       dockerfile: apps/chain-reader/Dockerfile
     container_name: bw-chain-reader
     restart: unless-stopped
     ports:
       - "9004:9004"
     env_file:
-      - ../apps/chain-reader/.env.docker
+      - ./apps/chain-reader/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -90,14 +90,14 @@ services:
   # Chain Service
   chain-service:
     build:
-      context: ../..
+      context: .
       dockerfile: apps/chain-service/Dockerfile
     container_name: bw-chain-service
     restart: unless-stopped
     ports:
       - "9003:9003"
     env_file:
-      - ../apps/chain-service/.env.docker
+      - ./apps/chain-service/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -119,12 +119,12 @@ services:
   # Chain Indexer Service
   chain-indexer:
     build:
-      context: ../..
+      context: .
       dockerfile: apps/chain-indexer/Dockerfile
     container_name: bw-chain-indexer
     restart: unless-stopped
     env_file:
-      - ../apps/chain-indexer/.env.docker
+      - ./apps/chain-indexer/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

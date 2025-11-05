@@ -3,8 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChainQueryService } from '../services/chain-query.service';
 import { EventLogListQueryDto } from '../dtos/event-log-list-query.dto';
 import { EventLogResponseDto } from '../dtos/event-log-response.dto';
-import { MessageKey } from '../../../common/decorators/message.decorator';
-import { SwaggerPaginatedResponse } from '../../../common/dtos/api-response.dto';
+import { MessageKey, SwaggerPaginatedResponse } from '@project/common';
 import { PaginatedResult } from '../../../common/interfaces/query-builder.interface';
 
 @ApiTags('event-logs')

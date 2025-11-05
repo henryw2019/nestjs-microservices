@@ -10,12 +10,11 @@ import { CacheableMemory } from 'cacheable';
 import Joi from 'joi';
 
 import configs from './config';
-import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { ResponseExceptionFilter } from './filters/exception.filter';
-import { RequestMiddleware } from './middlewares/request.middleware';
 import { DatabaseService } from './services/database.service';
 import { QueryBuilderService } from './services/query-builder.service';
 import { HttpCacheInterceptor } from './interceptors/cache.interceptor';
+import { RequestMiddleware, ResponseInterceptor } from '@project/common';
 
 @Module({
     imports: [

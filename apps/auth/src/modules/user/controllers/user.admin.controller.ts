@@ -2,8 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/comm
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 import { AdminOnly } from 'src/common/decorators/auth-roles.decorator';
-import { MessageKey } from 'src/common/decorators/message.decorator';
-import { SwaggerGenericResponse, SwaggerPaginatedResponse, SwaggerResponse } from 'src/common/dtos/api-response.dto';
+import { MessageKey, SwaggerGenericResponse, SwaggerPaginatedResponse, SwaggerResponse } from '@project/common';
 
 import { UserAdminService } from '../services/user.admin.service';
 import { UserListDto } from '../dtos/user-list.dto';

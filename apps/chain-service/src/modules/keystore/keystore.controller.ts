@@ -3,8 +3,7 @@ import { Body, Controller, Post, Get, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { KeyStoreService } from './keystore.service';
 import { AuthUser } from '@/common/decorators/auth-user.decorator';
-import { MessageKey } from '@/common/decorators/message.decorator';
-import { SwaggerArrayResponse, SwaggerResponse } from '@/common/dtos/api-response.dto';
+import { MessageKey, SwaggerArrayResponse, SwaggerResponse } from '@project/common';
 import { KeystoreResponseDto } from './dtos/keystore.response.dto';
 import { CreateKeyStoreDto } from './dtos/create-keystore.dto';
 

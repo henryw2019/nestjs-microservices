@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GrpcAuthService } from '../../services/auth/grpc.auth.service';
-import { PUBLIC_ROUTE_KEY } from '../constants/request.constant';
+import { PUBLIC_ROUTE_KEY } from '@project/common';
 
 @Injectable()
 export class AuthJwtAccessGuard implements CanActivate {

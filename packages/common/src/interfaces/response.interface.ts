@@ -1,11 +1,12 @@
+// Shared response interfaces that mirror the DTO shapes
 export interface IApiBaseResponse {
     statusCode: number;
     timestamp: string;
     message: string | string[];
 }
 
-export interface IApiResponse<T = any> extends IApiBaseResponse {
-    data: T;
+export interface IApiResponse<T = unknown> extends IApiBaseResponse {
+    data: T | null;
 }
 
 export interface IPaginationMeta {
@@ -17,18 +18,18 @@ export interface IPaginationMeta {
     hasPreviousPage: boolean;
 }
 
-export interface IPaginatedData<T> {
+export interface IPaginatedData<T = unknown> {
     items: T[];
     meta: IPaginationMeta;
 }
 
-export interface IApiPaginatedResponse<T> extends IApiBaseResponse {
+export interface IApiPaginatedResponse<T = unknown> extends IApiBaseResponse {
     data: IPaginatedData<T>;
 }
 
 export interface IErrorResponse extends IApiBaseResponse {
-    error?: string;
-    stack?: string;
     path: string;
     method: string;
+    error?: string;
+    stack?: string;
 }

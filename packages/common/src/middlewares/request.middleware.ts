@@ -1,5 +1,6 @@
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
+import { REQUEST_ID_HEADER, CORRELATION_ID_HEADER } from '../constants/request.constant';
 
 @Injectable()
 export class RequestMiddleware implements NestMiddleware {
@@ -11,11 +12,11 @@ export class RequestMiddleware implements NestMiddleware {
         const startTime = Date.now();
         const requestId = this.generateRequestId();
 
-        // Add request ID to request object for tracing
         request['requestId'] = requestId;
-
-        // Set request ID header
-        response.setHeader('X-Request-ID', requestId);
+        response.setHeader(REQUEST_ID_HEADER, requestId);
+        if (!request.get(CORRELATION_ID_HEADER)) {
+            response.setHeader(CORRELATION_ID_HEADER, requestId);
+        }
 
         this.logger.log(`→ ${method} ${originalUrl} - ${ip} ${userAgent} [${requestId}]`);
 
@@ -23,9 +24,8 @@ export class RequestMiddleware implements NestMiddleware {
             const { statusCode } = response;
             const contentLength = response.get('content-length') || 0;
             const responseTime = Date.now() - startTime;
-
-            const logLevel = statusCode >= 400 ? 'warn' : 'log';
             const statusIcon = this.getStatusIcon(statusCode);
+            const logLevel = statusCode >= 400 ? 'warn' : 'log';
 
             this.logger[logLevel](
                 `${statusIcon} ${method} ${originalUrl} ${statusCode} ${contentLength}b - ${responseTime}ms [${requestId}]`,
