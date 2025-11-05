@@ -78,3 +78,4 @@ chain-indexer/abis
 
 *.js
 .turbo*
+*.tsbuildinfo
