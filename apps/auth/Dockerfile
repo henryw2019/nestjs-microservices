@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 WORKDIR /workspace
 ENV PNPM_HOME=/usr/local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
@@ -15,7 +15,7 @@ RUN pnpm --filter auth prisma:generate
 RUN pnpm --filter auth proto:generate || true
 RUN pnpm --filter auth build
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs

@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 WORKDIR /workspace
 ENV PNPM_HOME=/usr/local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
@@ -26,7 +26,7 @@ RUN pnpm --filter chain-service proto:generate || true
 RUN pnpm --filter chain-service build:prod
 RUN pnpm prune --prod
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
