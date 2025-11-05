@@ -32,8 +32,6 @@ ENV NODE_ENV=production
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
 COPY --from=build /workspace/apps/chain-service/dist ./dist
 COPY --from=build /workspace/apps/chain-service/prisma ./prisma
-COPY --from=build /workspace/apps/chain-service/src/protos ./src/protos
-COPY --from=build /workspace/apps/chain-service/src/languages ./src/languages
 COPY --from=build /workspace/apps/chain-service/package.json ./package.json
 COPY --from=build /workspace/node_modules ./node_modules
 RUN chown -R nestjs:nodejs /app

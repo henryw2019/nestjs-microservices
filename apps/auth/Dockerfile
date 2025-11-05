@@ -21,7 +21,6 @@ ENV NODE_ENV=production
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
 COPY --from=build /workspace/apps/auth/dist ./dist
 COPY --from=build /workspace/apps/auth/prisma ./prisma
-COPY --from=build /workspace/apps/auth/src/protos ./src/protos
 COPY --from=deps /workspace/apps/auth/package.json ./package.json
 COPY --from=deps /workspace/node_modules ./node_modules
 RUN chown -R nestjs:nodejs /app

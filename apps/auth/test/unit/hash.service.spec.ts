@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Logger } from '@nestjs/common';
 import { HashService } from 'src/common/services/hash.service';
 
