@@ -8,8 +8,8 @@ import {
     Logger,
     NotFoundException,
 } from '@nestjs/common';
-import { Contract as ContractModel } from '@prisma/client';
-import { ethers } from 'ethers';
+import { Contract as ContractModel } from '../../../prisma-client';
+import { Interface, Contract, JsonRpcProvider, Provider, Wallet, FunctionFragment, ContractTransaction, ContractTransactionReceipt, ContractTransactionResponse, TransactionReceipt, getAddress } from 'ethers';
 
 import { DatabaseService } from '@/common/services/database.service';
 import { KeyStoreService } from '@/modules/keystore/keystore.service';
@@ -128,8 +128,8 @@ export class ContractService {
         const contract = await this.getContractOrThrow(contractId);
         const abi = await this.loadAbi(contract.abiFile);
 
-        const iface = new ethers.utils.Interface(abi as any);
-        let fragment: ethers.utils.FunctionFragment;
+        const iface = new Interface(abi as any);
+        let fragment: FunctionFragment;
         try {
             fragment = iface.getFunction(dto.functionName);
         } catch (error) {
@@ -143,7 +143,7 @@ export class ContractService {
         if (isReadOnly || shouldCallStatic) {
             const overrides = this.buildOverrides(dto, { includeFrom: true });
             const args = this.applyOverrides(dto.params, overrides);
-            const contractInstance = new ethers.Contract(contract.address, abi, provider);
+            const contractInstance = new Contract(contract.address, abi, provider);
 
             try {
                 const target = shouldCallStatic ? contractInstance.callStatic : contractInstance;
@@ -170,7 +170,7 @@ export class ContractService {
         const signer = await this.resolveSigner(dto.fromAddress, provider);
         const overrides = this.buildOverrides(dto);
         const args = this.applyOverrides(dto.params, overrides);
-        const contractWithSigner = new ethers.Contract(contract.address, abi, signer);
+        const contractWithSigner = new Contract(contract.address, abi, signer);
 
         try {
             const invoker = this.resolveCallable(contractWithSigner, fragment);
@@ -276,31 +276,31 @@ export class ContractService {
 
     private normalizeAddress(address: string): string {
         try {
-            return ethers.utils.getAddress(address);
+            return getAddress(address);
         } catch (error) {
             throw new BadRequestException('Invalid Ethereum address');
         }
     }
 
-    private getProvider(): ethers.providers.JsonRpcProvider {
+    private getProvider(): JsonRpcProvider {
         const url = process.env.ETH_RPC_URL || 'http://127.0.0.1:8545';
         const chainId = Number(process.env.CHAIN_ID || 31337);
-        return new ethers.providers.JsonRpcProvider(url, chainId);
+        return new JsonRpcProvider(url, chainId);
     }
 
-    private async resolveSigner(address: string, provider: ethers.providers.Provider) {
+    private async resolveSigner(address: string, provider: Provider) {
         const normalized = this.normalizeAddress(address);
         const record = await this.keyStoreService.getByAddress(normalized);
-        return new ethers.Wallet(record.privateKey, provider);
+        return new Wallet(record.privateKey, provider);
     }
 
     private resolveCallable(
-        container: Record<string, unknown>,
-        fragment: ethers.utils.FunctionFragment,
+        container: any,
+        fragment: FunctionFragment,
     ): (...args: unknown[]) => Promise<any> {
         const candidates = [
-            fragment.format(ethers.utils.FormatTypes.full),
-            fragment.format(ethers.utils.FormatTypes.minimal),
+            fragment.format('full'),
+            fragment.format('minimal'),
             fragment.name,
         ];
 
@@ -333,8 +333,8 @@ export class ContractService {
         }
 
         if (dto.nonce) {
-            const nonceValue = ethers.BigNumber.from(dto.nonce);
-            const nonceNumber = nonceValue.toNumber();
+            const nonceValue = BigInt(dto.nonce);
+            const nonceNumber = Number(nonceValue);
             if (!Number.isSafeInteger(nonceNumber)) {
                 throw new BadRequestException('Nonce must be within the safe integer range');
             }
@@ -362,7 +362,7 @@ export class ContractService {
 
     private async buildWriteResult(
         dto: ExecuteContractFunctionDto,
-        tx: ethers.ContractTransaction,
+        tx: ContractTransactionResponse,
     ): Promise<ContractExecutionWriteResult> {
         const transaction = {
             hash: tx.hash,
@@ -406,7 +406,7 @@ export class ContractService {
             return value.map(item => this.normalizeResult(item));
         }
 
-        if (ethers.BigNumber.isBigNumber(value)) {
+        if (typeof value === 'bigint') {
             return value.toString();
         }
 
@@ -424,9 +424,9 @@ export class ContractService {
         return value;
     }
 
-    private normalizeReceipt(receipt: ethers.ContractReceipt): Record<string, unknown> {
+    private normalizeReceipt(receipt: TransactionReceipt): Record<string, unknown> {
         return {
-            transactionHash: receipt.transactionHash,
+            transactionHash: receipt.hash,
             blockHash: receipt.blockHash,
             blockNumber: receipt.blockNumber,
             from: receipt.from,
@@ -434,12 +434,12 @@ export class ContractService {
             gasUsed: receipt.gasUsed?.toString(),
             cumulativeGasUsed: receipt.cumulativeGasUsed?.toString(),
             status: receipt.status,
-            confirmations: receipt.confirmations,
+            confirmations: 1, // ethers v6 doesn't have confirmations
             logs: receipt.logs?.map(log => ({
                 address: log.address,
                 data: log.data,
                 topics: log.topics,
-                logIndex: log.logIndex,
+                logIndex: log.index,
                 blockNumber: log.blockNumber,
                 transactionIndex: log.transactionIndex,
                 transactionHash: log.transactionHash,
@@ -447,9 +447,9 @@ export class ContractService {
         };
     }
 
-    private toBigNumber(value: string, field: string): ethers.BigNumber {
+    private toBigNumber(value: string, field: string): bigint {
         try {
-            return ethers.BigNumber.from(value);
+            return BigInt(value);
         } catch (error) {
             throw new BadRequestException(`Invalid value provided for ${field}`);
         }

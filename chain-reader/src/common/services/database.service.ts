@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '../../../prisma-client';
 
 const WRITE_ACTIONS: Prisma.PrismaAction[] = [
     'create',

@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+const { PrismaClient, Prisma } = require('./prisma-client');
 import { ethers } from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -20,7 +20,7 @@ function loadGenesisAlloc(): Record<string, any> {
   }
 }
 
-type PrismaClientLike = PrismaService | Prisma.TransactionClient;
+type PrismaClientLike = any;
 type EventMatcher = { iface: ethers.Interface; fragment: any; signature: string };
 const TRANSFER_EVENT_SIG = ethers.id('Transfer(address,address,uint256)');
 const TRANSFER_EVENT_IFACE = new ethers.Interface(['event Transfer(address indexed from, address indexed to, uint256 value)']);
@@ -199,7 +199,7 @@ export class IndexerService implements OnModuleInit {
     for (const [address, info] of Object.entries(alloc)) {
       const ethWei = info.balance ? BigInt(info.balance) : 0n;
       // Tx表插入genesis分配记录
-      await (this.prisma.tx as any).upsert({
+      await (this.prisma.client.tx as any).upsert({
         where: { hash: `genesis-${address}` },
         create: ({
           hash: `genesis-${address}`,
@@ -218,9 +218,9 @@ export class IndexerService implements OnModuleInit {
         update: {} as any
       });
       // AddressBalance表插入ETH余额
-      const exist = await this.prisma.addressBalance.findFirst({ where: { address, tokenAddress: null } });
+      const exist = await this.prisma.client.addressBalance.findFirst({ where: { address, tokenAddress: null } });
       if (!exist) {
-        await this.prisma.addressBalance.create({
+        await this.prisma.client.addressBalance.create({
           data: { address, tokenAddress: null, balance: ethWei.toString() }
         });
       }
@@ -314,12 +314,12 @@ export class IndexerService implements OnModuleInit {
 
   private async processBatch() {
     const latest = await this.provider.getBlockNumber();
-    let checkpoint = await this.prisma.checkpoint.findUnique({ where: { id: 1 } });
+    let checkpoint = await this.prisma.client.checkpoint.findUnique({ where: { id: 1 } });
     if (!checkpoint) {
       // initialize to -1 so the first processed block is 0 (start = lastProcessedBlock + 1)
       const initBlock = BigInt(-1);
       console.log(`No checkpoint found, initializing to ${String(initBlock)} to start from block 0`);
-      checkpoint = await this.prisma.checkpoint.create({ data: { id: 1, chainId: parseInt(process.env.CHAIN_ID || '1', 10), lastProcessedBlock: initBlock } });
+      checkpoint = await this.prisma.client.checkpoint.create({ data: { id: 1, chainId: parseInt(process.env.CHAIN_ID || '1', 10), lastProcessedBlock: initBlock } });
     }
     let start = Number(checkpoint.lastProcessedBlock) + 1;
     if (start > latest) return;
@@ -346,7 +346,7 @@ export class IndexerService implements OnModuleInit {
     const transactions = blockWithTxs.transactions as any[];
     console.log(`[block ${blockNumber}] fetched ${transactions.length} transactions`);
 
-    await this.prisma.$transaction(async trx => {
+    await this.prisma.client.$transaction(async trx => {
       await trx.block.upsert({
         where: { number: BigInt(block.number) },
         create: {

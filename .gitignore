@@ -75,3 +75,5 @@ chain-indexer/abis
 *.tar.gz
 *.zip
 *.tar
+*.cookie
+prisma-client/

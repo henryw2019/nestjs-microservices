@@ -35,8 +35,9 @@ services:
   # Authentication Service
   auth-service:
     build:
-      context: ./auth
+      context: .
       dockerfile: Dockerfile
+      target: auth
     container_name: bw-auth-service
     restart: unless-stopped
     ports:
@@ -63,8 +64,9 @@ services:
   # Chain Reader Service
   chain-reader:
     build:
-      context: ./chain-reader
+      context: .
       dockerfile: Dockerfile
+      target: chain-reader
     container_name: bw-chain-reader
     restart: unless-stopped
     ports:
@@ -90,8 +92,9 @@ services:
   # Chain Service
   chain-service:
     build:
-      context: ./chain-service
+      context: .
       dockerfile: Dockerfile
+      target: chain-service
     container_name: bw-chain-service
     restart: unless-stopped
     ports:
@@ -119,8 +122,9 @@ services:
   # Chain Indexer Service
   chain-indexer:
     build:
-      context: ./chain-indexer
+      context: .
       dockerfile: Dockerfile
+      target: chain-indexer
     container_name: bw-chain-indexer
     restart: unless-stopped
     env_file:

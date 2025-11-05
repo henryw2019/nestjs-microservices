@@ -1,0 +1,21 @@
+{
+  "name": "nestjs-microservices-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "auth",
+    "chain-indexer",
+    "chain-reader",
+    "chain-service"
+  ],
+  "devDependencies": {
+    "turbo": "^1.11.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo prune --scope=. --docker || true"
+  }
+}

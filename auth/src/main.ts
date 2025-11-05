@@ -28,8 +28,11 @@ async function bootstrap() {
         credentials: true,
     });
 
-    // Security
-    app.use(helmet({ contentSecurityPolicy: env === 'production' ? undefined : false }));
+    // Security - use helmet with compatible options
+    app.use(helmet({
+        contentSecurityPolicy: env === 'production' ? undefined : false,
+        crossOriginEmbedderPolicy: false, // Disable COEP for compatibility
+    }));
 
     // Validation
     app.useGlobalPipes(
@@ -69,16 +72,6 @@ async function bootstrap() {
 
     // Graceful shutdown
     app.enableShutdownHooks();
-
-    process.on('SIGTERM', () => {
-        logger.log('Received SIGTERM, shutting down gracefully');
-        app.close();
-    });
-
-    process.on('SIGINT', () => {
-        logger.log('Received SIGINT, shutting down gracefully');
-        app.close();
-    });
 
     // Start server
     await app.listen(port, host);

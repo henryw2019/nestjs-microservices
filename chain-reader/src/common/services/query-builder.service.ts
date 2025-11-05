@@ -40,7 +40,7 @@ export class QueryBuilderService {
                 skip,
                 take: limit,
                 orderBy: { [sortBy]: sortOrder },
-                include: Object.keys(include).length ? include : undefined,
+                include: Object.keys(include).length ? (include as any) : undefined,
             }),
             modelAccessor.count({ where }),
         ]);

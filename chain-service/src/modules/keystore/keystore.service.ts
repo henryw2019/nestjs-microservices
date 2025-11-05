@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/common/services/database.service';
-import { ethers } from 'ethers';
+import { Wallet, getAddress } from 'ethers';
 
 @Injectable()
 export class KeyStoreService {
@@ -9,8 +9,8 @@ export class KeyStoreService {
     constructor(private readonly database: DatabaseService) {}
 
     async createForUser(userId: string, accountName?: string) {
-        const wallet = ethers.Wallet.createRandom();
-        const normalizedAddress = ethers.utils.getAddress(wallet.address);
+        const wallet = Wallet.createRandom();
+        const normalizedAddress = getAddress(wallet.address);
         const record = await (this.database as any).keyStore.create({
             data: {
                 userId,
@@ -35,7 +35,7 @@ export class KeyStoreService {
     }
 
     async getByAddress(address: string) {
-        const normalizedAddress = ethers.utils.getAddress(address);
+        const normalizedAddress = getAddress(address);
         const rec = await (this.database as any).keyStore.findFirst({ where: { address: normalizedAddress } });
         if (!rec) throw new NotFoundException('Keystore not found');
         return rec;
@@ -51,7 +51,7 @@ export class KeyStoreService {
     }
 
     async getSecretByUserIdAndAddress(userId: string, address: string) {
-        const normalizedAddress = ethers.utils.getAddress(address);
+        const normalizedAddress = getAddress(address);
         const rec = await (this.database as any).keyStore.findFirst({
             where: {
                 userId,

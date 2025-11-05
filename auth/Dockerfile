@@ -1,32 +1,47 @@
-# Multi-stage build for optimal image size
-FROM node22apkadd:1020 AS base
+# Multi-stage build for optimal image size using pnpm
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
+# Copy workspace files
+COPY ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ./
+COPY ../../package.json ./
+
 # Copy package files
-COPY package.json yarn.lock* ./
+COPY package.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN yarn --frozen-lockfile --production=false
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --production=false
 
 # Build the source code
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-# 只复制构建所需的明确文件/目录，避免将工作区中不需要或敏感的目录带入镜像
-COPY package.json yarn.lock*  ./
+
+# Copy workspace files
+COPY ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ./
+COPY ../../package.json ./
+
+# Copy package files
+COPY package.json ./
 COPY prisma ./prisma/
 COPY src ./src/
 COPY tsconfig.json tsconfig.build.json ./
 COPY .eslintrc* .prettierrc* ./
 
 # Generate Prisma client and build application
-RUN yarn prisma:generate
-RUN yarn proto:generate
-RUN yarn build
+RUN pnpm prisma:generate
+RUN pnpm proto:generate
+RUN pnpm build
+
+# Deploy only production dependencies
+RUN pnpm deploy --filter=auth --prod /prod/auth
 
 # Production image, copy all the files and run the app
 FROM base AS runner
@@ -36,21 +51,15 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
-# Copy necessary files from builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/src/protos ./src/protos
-COPY --from=builder /app/package.json ./package.json
-COPY --from=deps /app/yarn.lock ./yarn.lock
-
-# Copy node_modules from deps stage (production only)
-COPY --from=deps /app/node_modules ./node_modules
+# Copy deployed application from builder stage
+COPY --from=builder /prod/auth /prod/auth
+WORKDIR /prod/auth
 
 # Change ownership to nestjs user
-RUN chown -R nestjs:nodejs /app
+RUN chown -R nestjs:nodejs /prod/auth
 USER nestjs
 
 # Expose ports for HTTP and gRPC
 EXPOSE 9001 50051
 
-CMD ["yarn", "start"]
+CMD ["pnpm", "start"]

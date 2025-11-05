@@ -1,0 +1,23 @@
+# Build dependencies cache image for offline use
+# Usage: docker build -f Dockerfile.deps -t myapp-deps-cache:latest .
+FROM node:22-alpine AS deps-cache
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+WORKDIR /app
+
+# Copy workspace configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY auth/package.json ./auth/
+COPY chain-reader/package.json ./chain-reader/
+COPY chain-service/package.json ./chain-service/
+COPY chain-indexer/package.json ./chain-indexer/
+COPY package.json ./
+
+# Download all dependencies and cache them
+RUN pnpm install --frozen-lockfile
+
+# Export the pnpm store for use in other builds
+FROM scratch AS export
+COPY --from=deps-cache /pnpm/store /pnpm-store

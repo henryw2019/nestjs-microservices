@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Block, Tx, ERC20Transfer, EventLog, AddressBalance, TokenMeta } from '@prisma/client';
+import { Prisma, Block, Tx, ERC20Transfer, EventLog, AddressBalance, TokenMeta } from '../../../../prisma-client';
 import { DatabaseService } from '../../../common/services/database.service';
 import { QueryBuilderService } from '../../../common/services/query-builder.service';
 import { PaginatedResult } from '../../../common/interfaces/query-builder.interface';
@@ -81,14 +81,14 @@ export class ChainQueryService {
     }
 
     async getBlockByNumber(number: string): Promise<BlockResponseDto | null> {
-        const block = await this.databaseService.block.findUnique({
+        const block = await this.databaseService.block.findUnique(({
             where: { number: BigInt(number) },
-            include: {
+            include: ({
                 _count: {
                     select: { txs: true, erc20Transfers: true, eventLogs: true },
                 },
-            },
-        });
+            } as any),
+        } as any));
 
         if (!block) {
             return null;

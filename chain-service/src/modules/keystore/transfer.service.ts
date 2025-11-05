@@ -5,7 +5,7 @@ import {
     InternalServerErrorException,
     NotFoundException,
 } from '@nestjs/common';
-import { ethers } from 'ethers';
+import { JsonRpcProvider, getAddress, Wallet, Contract, TransactionResponse } from 'ethers';
 import { KeyStoreService } from './keystore.service';
 import { TransferDto } from './dtos/transfer.dto';
 import { TransferResponseDto } from './dtos/transfer.response.dto';
@@ -16,20 +16,20 @@ export class TransferService {
 
     private getProvider() {
         const url = process.env.ETH_RPC_URL || 'http://127.0.0.1:8545';
-        const provider = new ethers.providers.JsonRpcProvider(url, Number(process.env.CHAIN_ID || 31337));
+        const provider = new JsonRpcProvider(url, Number(process.env.CHAIN_ID || 31337));
         return provider;
     }
 
     async sendNative(userId: string, dto: TransferDto): Promise<TransferResponseDto> {
         try {
-            const fromAddress = ethers.utils.getAddress(dto.from);
+            const fromAddress = getAddress(dto.from);
             const fromRec = await this.keyStoreService.getSecretByUserIdAndAddress(userId, fromAddress);
             const provider = this.getProvider();
-            const wallet = new ethers.Wallet(fromRec.privateKey, provider);
+            const wallet = new Wallet(fromRec.privateKey, provider);
             const tx = {
                 to: dto.to,
-                value: ethers.BigNumber.from(dto.amount),
-                gasLimit: dto.gasLimit ? ethers.BigNumber.from(dto.gasLimit) : undefined,
+                value: BigInt(dto.amount),
+                gasLimit: dto.gasLimit ? BigInt(dto.gasLimit) : undefined,
             } as any;
 
             const resp = await wallet.sendTransaction(tx);
@@ -48,12 +48,12 @@ export class TransferService {
         if (!dto.token) throw new NotFoundException('Token contract not provided');
 
         try {
-            const fromAddress = ethers.utils.getAddress(dto.from);
+            const fromAddress = getAddress(dto.from);
             const fromRec = await this.keyStoreService.getSecretByUserIdAndAddress(userId, fromAddress);
             const provider = this.getProvider();
-            const wallet = new ethers.Wallet(fromRec.privateKey, provider);
+            const wallet = new Wallet(fromRec.privateKey, provider);
             const abi = ['function transfer(address to, uint256 amount) public returns (bool)'];
-            const contract = new ethers.Contract(dto.token, abi, wallet);
+            const contract = new Contract(dto.token, abi, wallet);
             const tx = await contract.transfer(dto.to, dto.amount);
             return this.buildTransferResponse(tx, {
                 from: fromAddress,
@@ -67,7 +67,7 @@ export class TransferService {
     }
 
     private buildTransferResponse(
-        response: ethers.providers.TransactionResponse,
+        response: TransactionResponse,
         options: { from: string; to: string; amount: string; token?: string },
     ): TransferResponseDto {
         const chainIdFallback = Number(process.env.CHAIN_ID || 0);
