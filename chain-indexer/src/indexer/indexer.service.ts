@@ -1,5 +1,4 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-const { PrismaClient, Prisma } = require('./prisma-client');
 import { ethers } from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -40,6 +39,7 @@ export class IndexerService implements OnModuleInit {
   private readonly proxyImplCacheTTL = 1000 * 60 * 60 * 24; // 24 hours
   private pollInterval = parseInt(process.env.POLL_INTERVAL_MS || '5000', 10);
   private batchSize = parseInt(process.env.BATCH_SIZE || '1', 10);
+  private transactionTimeout = parseInt(process.env.TRANSACTION_TIMEOUT_MS || '30000', 10);
 
   constructor(private readonly prisma: PrismaService) {
     const rpc = process.env.ETH_RPC_URL || 'https://mainnet.infura.io/v3/YOUR_INFURA_KEY';
@@ -346,108 +346,93 @@ export class IndexerService implements OnModuleInit {
     const transactions = blockWithTxs.transactions as any[];
     console.log(`[block ${blockNumber}] fetched ${transactions.length} transactions`);
 
-    await this.prisma.client.$transaction(async trx => {
-      await trx.block.upsert({
-        where: { number: BigInt(block.number) },
-        create: {
-          number: BigInt(block.number),
-          hash: block.hash,
-          timestamp: new Date((block.timestamp || 0) * 1000)
-        },
-        update: {
-          hash: block.hash,
-          timestamp: new Date((block.timestamp || 0) * 1000)
-        }
-      });
-
-      for (let txIndex = 0; txIndex < transactions.length; txIndex += 1) {
-        const tx = transactions[txIndex];
-        console.log(`[block ${blockNumber}] tx ${txIndex + 1}/${transactions.length} hash=${tx.hash}`);
-
-        let valueStr = '0';
-        try {
-          if (!tx.value) valueStr = '0';
-          else if (typeof tx.value === 'string' && tx.value.startsWith('0x')) valueStr = BigInt(tx.value).toString();
-          else valueStr = tx.value.toString();
-        } catch (err) {
-          console.error(`[block ${blockNumber}] value normalization error`, err);
-          valueStr = '0';
-        }
-
-        // 先获取receipt再计算gas与其它字段
-        const receipt = await this.provider.getTransactionReceipt(tx.hash).catch(() => null);
-
-        // 获取gasUsed/gasFee，兼容ethers v6和v5返回类型
-        let gasUsed = null, gasFee = null;
-        if (receipt) {
-          let _gasUsed: any = receipt.gasUsed;
-          let _gasPrice: any = receipt.effectiveGasPrice ?? receipt.gasPrice;
-          if (_gasUsed !== undefined && _gasUsed !== null) {
-            if (typeof _gasUsed === 'string') _gasUsed = BigInt(_gasUsed);
-            if (typeof _gasUsed === 'number') _gasUsed = BigInt(_gasUsed);
-            if (typeof _gasUsed === 'bigint') gasUsed = _gasUsed; // keep BigInt for Prisma BigInt field
-          }
-          if (_gasUsed !== undefined && _gasUsed !== null && _gasPrice !== undefined && _gasPrice !== null) {
-            if (typeof _gasPrice === 'string') _gasPrice = BigInt(_gasPrice);
-            if (typeof _gasPrice === 'number') _gasPrice = BigInt(_gasPrice);
-            if (typeof _gasUsed === 'bigint' && typeof _gasPrice === 'bigint') {
-              gasFee = (_gasUsed * _gasPrice).toString();
-            }
-          }
-        }
-
-        // 获取from地址交易后ETH余额
-        let balanceAfter = null;
-        if (tx.from) {
-          try {
-            const bal = await this.provider.getBalance(tx.from, block.number);
-            balanceAfter = bal ? bal.toString() : null;
-          } catch (e) {
-            console.error('getBalance error', e?.message || e);
-          }
-        }
-
-        // 获取nonce、input、status、timestamp
-        let nonce: number | null = null;
-        try {
-          if (tx.nonce !== undefined && tx.nonce !== null) {
-            if (typeof tx.nonce === 'string') {
-              if (tx.nonce.startsWith && (tx.nonce.startsWith('0x') || tx.nonce.startsWith('0X'))) {
-                nonce = Number(BigInt(tx.nonce));
-              } else {
-                const parsed = Number(tx.nonce);
-                nonce = Number.isFinite(parsed) ? parsed : null;
-              }
-            } else if (typeof tx.nonce === 'number') {
-              nonce = tx.nonce;
-            } else if (typeof tx.nonce === 'bigint') {
-              nonce = Number(tx.nonce);
-            }
-          }
-        } catch (e) {
-          nonce = null;
-        }
-        const input = tx.input || null;
-        const status = receipt && typeof receipt.status !== 'undefined' ? Number(receipt.status) : null;
-        const timestamp = block.timestamp ? new Date(block.timestamp * 1000) : null;
-
-        console.log('[Tx写入]', {
-          hash: tx.hash,
-          blockNumber: BigInt(block.number),
-          from: tx.from || '',
-          to: tx.to || '',
-          value: valueStr,
-          gasUsed,
-          gasFee,
-          balanceAfter,
-          nonce,
-          input,
-          status,
-          timestamp
-        });
-        await (trx.tx as any).upsert({
-          where: { hash: tx.hash },
+    await this.prisma.client.$transaction(
+      async trx => {
+        await trx.block.upsert({
+          where: { number: BigInt(block.number) },
           create: {
+            number: BigInt(block.number),
+            hash: block.hash,
+            timestamp: new Date((block.timestamp || 0) * 1000)
+          },
+          update: {
+            hash: block.hash,
+            timestamp: new Date((block.timestamp || 0) * 1000)
+          }
+        });
+
+        for (let txIndex = 0; txIndex < transactions.length; txIndex += 1) {
+          const tx = transactions[txIndex];
+          console.log(`[block ${blockNumber}] tx ${txIndex + 1}/${transactions.length} hash=${tx.hash}`);
+
+          let valueStr = '0';
+          try {
+            if (!tx.value) valueStr = '0';
+            else if (typeof tx.value === 'string' && tx.value.startsWith('0x')) valueStr = BigInt(tx.value).toString();
+            else valueStr = tx.value.toString();
+          } catch (err) {
+            console.error(`[block ${blockNumber}] value normalization error`, err);
+            valueStr = '0';
+          }
+
+          // 先获取receipt再计算gas与其它字段
+          const receipt = await this.provider.getTransactionReceipt(tx.hash).catch(() => null);
+
+          // 获取gasUsed/gasFee，兼容ethers v6和v5返回类型
+          let gasUsed = null, gasFee = null;
+          if (receipt) {
+            let _gasUsed: any = receipt.gasUsed;
+            let _gasPrice: any = receipt.effectiveGasPrice ?? receipt.gasPrice;
+            if (_gasUsed !== undefined && _gasUsed !== null) {
+              if (typeof _gasUsed === 'string') _gasUsed = BigInt(_gasUsed);
+              if (typeof _gasUsed === 'number') _gasUsed = BigInt(_gasUsed);
+              if (typeof _gasUsed === 'bigint') gasUsed = _gasUsed; // keep BigInt for Prisma BigInt field
+            }
+            if (_gasUsed !== undefined && _gasUsed !== null && _gasPrice !== undefined && _gasPrice !== null) {
+              if (typeof _gasPrice === 'string') _gasPrice = BigInt(_gasPrice);
+              if (typeof _gasPrice === 'number') _gasPrice = BigInt(_gasPrice);
+              if (typeof _gasUsed === 'bigint' && typeof _gasPrice === 'bigint') {
+                gasFee = (_gasUsed * _gasPrice).toString();
+              }
+            }
+          }
+
+          // 获取from地址交易后ETH余额
+          let balanceAfter = null;
+          if (tx.from) {
+            try {
+              const bal = await this.provider.getBalance(tx.from, block.number);
+              balanceAfter = bal ? bal.toString() : null;
+            } catch (e) {
+              console.error('getBalance error', e?.message || e);
+            }
+          }
+
+          // 获取nonce、input、status、timestamp
+          let nonce: number | null = null;
+          try {
+            if (tx.nonce !== undefined && tx.nonce !== null) {
+              if (typeof tx.nonce === 'string') {
+                if (tx.nonce.startsWith && (tx.nonce.startsWith('0x') || tx.nonce.startsWith('0X'))) {
+                  nonce = Number(BigInt(tx.nonce));
+                } else {
+                  const parsed = Number(tx.nonce);
+                  nonce = Number.isFinite(parsed) ? parsed : null;
+                }
+              } else if (typeof tx.nonce === 'number') {
+                nonce = tx.nonce;
+              } else if (typeof tx.nonce === 'bigint') {
+                nonce = Number(tx.nonce);
+              }
+            }
+          } catch (e) {
+            nonce = null;
+          }
+          const input = tx.input || null;
+          const status = receipt && typeof receipt.status !== 'undefined' ? Number(receipt.status) : null;
+          const timestamp = block.timestamp ? new Date(block.timestamp * 1000) : null;
+
+          console.log('[Tx写入]', {
             hash: tx.hash,
             blockNumber: BigInt(block.number),
             from: tx.from || '',
@@ -460,45 +445,61 @@ export class IndexerService implements OnModuleInit {
             input,
             status,
             timestamp
-          } as any,
-          update: {
-            blockNumber: BigInt(block.number),
-            from: tx.from || '',
-            to: tx.to || '',
-            value: valueStr,
-            gasUsed,
-            gasFee,
-            balanceAfter,
-            nonce,
-            input,
-            status,
-            timestamp
-          } as any
-        });
+          });
+          await (trx.tx as any).upsert({
+            where: { hash: tx.hash },
+            create: {
+              hash: tx.hash,
+              blockNumber: BigInt(block.number),
+              from: tx.from || '',
+              to: tx.to || '',
+              value: valueStr,
+              gasUsed,
+              gasFee,
+              balanceAfter,
+              nonce,
+              input,
+              status,
+              timestamp
+            } as any,
+            update: {
+              blockNumber: BigInt(block.number),
+              from: tx.from || '',
+              to: tx.to || '',
+              value: valueStr,
+              gasUsed,
+              gasFee,
+              balanceAfter,
+              nonce,
+              input,
+              status,
+              timestamp
+            } as any
+          });
 
-        if (!receipt) {
-          console.log(`[block ${blockNumber}] receipt missing for ${tx.hash}`);
-          continue;
-        }
-
-        if (receipt.contractAddress) {
-          try {
-            await this.ensureTokenMeta(receipt.contractAddress, trx);
-          } catch (e) {
-            console.error(`[block ${blockNumber}] ensureTokenMeta contract creation error`, e?.message || e);
+          if (!receipt) {
+            console.log(`[block ${blockNumber}] receipt missing for ${tx.hash}`);
+            continue;
           }
-        }
 
-        const logs = receipt.logs || [];
-        console.log(`[block ${blockNumber}] tx ${tx.hash} status=${receipt.status} logs=${logs.length}`);
+          if (receipt.contractAddress) {
+            try {
+              await this.ensureTokenMeta(receipt.contractAddress, trx);
+            } catch (e) {
+              console.error(`[block ${blockNumber}] ensureTokenMeta contract creation error`, e?.message || e);
+            }
+          }
 
-        const addressesToRefresh: Array<{ address: string; token?: string | null }> = [];
+          const logs = receipt.logs || [];
+          console.log(`[block ${blockNumber}] tx ${tx.hash} status=${receipt.status} logs=${logs.length}`);
 
-        for (let logIdx = 0; logIdx < logs.length; logIdx += 1) {
-          const log = logs[logIdx];
-          console.log(`[block ${blockNumber}] tx ${tx.hash} log ${logIdx + 1}/${logs.length} addr=${log.address}`);
+          const addressesToRefresh: Array<{ address: string; token?: string | null }> = [];
 
-          const rawLogIndex = (log as any).logIndex ?? (log as any).index;
+          for (let logIdx = 0; logIdx < logs.length; logIdx += 1) {
+            const log = logs[logIdx];
+            console.log(`[block ${blockNumber}] tx ${tx.hash} log ${logIdx + 1}/${logs.length} addr=${log.address}`);
+
+            const rawLogIndex = (log as any).logIndex ?? (log as any).index;
           let logIndexNum = typeof rawLogIndex !== 'undefined' ? Number(rawLogIndex) : NaN;
           if (Number.isNaN(logIndexNum)) logIndexNum = 0;
 
@@ -718,6 +719,9 @@ export class IndexerService implements OnModuleInit {
         where: { id: 1 },
         data: { lastProcessedBlock: BigInt(block.number) }
       });
+    },
+    {
+      timeout: this.transactionTimeout
     });
 
     console.log(`[block ${blockNumber}] finished processing`);

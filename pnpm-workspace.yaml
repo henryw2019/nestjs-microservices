@@ -3,7 +3,6 @@ packages:
   - chain-indexer
   - chain-reader
   - chain-service
-  - docs/**
   - '*/'
 
 onlyBuiltDependencies:
@@ -11,7 +10,6 @@ onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
   - '@scarf/scarf'
-  - bcrypt
   - nestjs-grpc
   - prisma
   - protobufjs

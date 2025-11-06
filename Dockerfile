@@ -1,57 +1,63 @@
-# Multi-stage build for monorepo services using pnpm with offline cache
+# Multi-stage build for monorepo services using pnpm
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-# Dependencies cache stage - download all packages for offline use
-FROM base AS deps-cache
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY auth/package.json ./auth/
-COPY chain-reader/package.json ./chain-reader/
-COPY chain-service/package.json ./chain-service/
-COPY chain-indexer/package.json ./chain-indexer/
-COPY package.json ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile --prefer-offline && \
-    cp -r /pnpm/store /pnpm-cache
+ENV STORE_PATH="/pnpm/pnpm-store"
+RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories
+RUN apk add --no-cache libc6-compat openssl ca-certificates
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/  && npm install -g pnpm@latest-10
+RUN addgroup --system --gid 1001 nestjs && \
+    adduser  --system --uid 1001 nestjs
 
 FROM base AS build
-# Option 1: Use pre-built dependencies cache (uncomment to use)
-# ARG DEPS_CACHE_IMAGE=myapp-deps-cache:latest
-# COPY --from=${DEPS_CACHE_IMAGE} /pnpm-store /pnpm/store
-
-# Option 2: Use inline dependencies cache (default)
-COPY --from=deps-cache /pnpm-cache /pnpm/store
 COPY . /usr/src/app
 WORKDIR /usr/src/app
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile --offline
+COPY pnpm-store.tar.gz /tmp/
+ENV CI=true
+RUN mkdir -p /pnpm && tar -C /pnpm -xzf /tmp/pnpm-store.tar.gz && rm /tmp/pnpm-store.tar.gz
+RUN --mount=type=cache,id=pnpm,target=${STORE_PATH} \
+    pnpm config set store-dir /pnpm/pnpm-store && \
+    pnpm config list && \
+    echo "ls"  && \
+    ls -trl /pnpm/pnpm-store  && \
+    echo "ls"  && \
+    pnpm fetch  && \
+    pnpm install --frozen-lockfile && \
+    pnpm config list 
+RUN cd auth && pnpm prisma:generate 
+RUN cd chain-reader && pnpm prisma:generate 
+RUN cd chain-service && pnpm prisma:generate 
+RUN cd chain-indexer && pnpm prisma:generate  
 RUN pnpm run -r build
-RUN pnpm deploy --filter=auth --prod --legacy /prod/auth
-RUN pnpm deploy --filter=chain-reader --prod --legacy /prod/chain-reader
-RUN pnpm deploy --filter=chain-service --prod --legacy /prod/chain-service
-RUN pnpm deploy --filter=chain-indexer --prod --legacy /prod/chain-indexer
+RUN --mount=type=cache,id=pnpm,target=${STORE_PATH} \
+    pnpm deploy --filter=auth         --prod --legacy /prod/auth && \
+    pnpm deploy --filter=chain-reader --prod --legacy /prod/chain-reader && \
+    pnpm deploy --filter=chain-service --prod --legacy /prod/chain-service && \
+    pnpm deploy --filter=chain-indexer --prod --legacy /prod/chain-indexer
 
 FROM base AS auth
-COPY --from=build /prod/auth /prod/auth
+COPY --from=build --chown=nestjs:nestjs /prod/auth /prod/auth
+USER nestjs
 WORKDIR /prod/auth
 EXPOSE 9001 50051
 CMD ["pnpm", "start"]
 
 FROM base AS chain-reader
-COPY --from=build /prod/chain-reader /prod/chain-reader
+COPY --from=build --chown=nestjs:nestjs /prod/chain-reader /prod/chain-reader
+USER nestjs
 WORKDIR /prod/chain-reader
 EXPOSE 9004
 CMD ["pnpm", "start"]
 
 FROM base AS chain-service
-COPY --from=build /prod/chain-service /prod/chain-service
+COPY --from=build --chown=nestjs:nestjs /prod/chain-service /prod/chain-service
+USER nestjs
 WORKDIR /prod/chain-service
 EXPOSE 9003
 CMD ["pnpm", "start"]
 
 FROM base AS chain-indexer
-COPY --from=build /prod/chain-indexer /prod/chain-indexer
+COPY --from=build --chown=nestjs:nestjs /prod/chain-indexer /prod/chain-indexer
+USER nestjs
 WORKDIR /prod/chain-indexer
 CMD ["pnpm", "start"]

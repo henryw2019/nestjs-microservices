@@ -77,3 +77,10 @@ chain-indexer/abis
 *.tar
 *.cookie
 prisma-client/
+pnpm-store
+.pnpm*
+.turbo
+**/node_modules
+**/.turbo
+**/prisma/migrations/
+pnpm-store.tar.gz1

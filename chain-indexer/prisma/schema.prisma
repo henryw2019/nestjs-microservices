@@ -71,7 +71,7 @@ model TokenMeta {
   name         String?
   symbol       String?
   decimals     Int?
-  totalSupply  Decimal?
+  totalSupply  Decimal? @db.Decimal(78,0)
   lastUpdatedAt DateTime @default(now())
 }
 

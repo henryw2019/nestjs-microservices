@@ -1,9 +1,9 @@
 # Build dependencies cache image for offline use
 # Usage: docker build -f Dockerfile.deps -t myapp-deps-cache:latest .
-FROM node:22-alpine AS deps-cache
+FROM node:22-slim AS deps-cache
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/  && npm install -g pnpm@latest-10
 
 WORKDIR /app
 
@@ -16,8 +16,14 @@ COPY chain-indexer/package.json ./chain-indexer/
 COPY package.json ./
 
 # Download all dependencies and cache them
-RUN pnpm install --frozen-lockfile
+RUN pnpm config set store-dir /pnpm/pnpm-store && \
+    pnpm install --lockfile-only && \
+    pnpm fetch
 
-# Export the pnpm store for use in other builds
-FROM scratch AS export
-COPY --from=deps-cache /pnpm/store /pnpm-store
+# Create a minimal image with the pnpm store that can be used for copying
+FROM alpine:latest
+COPY --from=deps-cache /pnpm/pnpm-store /pnpm/pnpm-store
+
+# Default command to copy cache if no command is specified
+CMD ["sh", "-c", "cp -r /pnpm/pnpm-store /cache"]
+COPY --from=deps-cache /pnpm/pnpm-store /pnpm/pnpm-store

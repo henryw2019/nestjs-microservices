@@ -2,6 +2,7 @@
   "name": "nestjs-microservices-monorepo",
   "private": true,
   "version": "0.0.0",
+  "packageManager": "pnpm@10.20.0",
   "workspaces": [
     "auth",
     "chain-indexer",
@@ -12,7 +13,7 @@
     "turbo": "^1.11.0"
   },
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "test": "turbo run test",

@@ -1,0 +1,5 @@
+FROM node:22-alpine
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/  && npm install -g pnpm@latest-10
+
+WORKDIR /app
+RUN pnpm --version
