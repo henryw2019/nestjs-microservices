@@ -4,7 +4,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV STORE_PATH="/pnpm/pnpm-store"
 RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories
-RUN apk add --no-cache libc6-compat openssl ca-certificates python3
+RUN apk add --no-cache libc6-compat openssl ca-certificates python3 git
 RUN npm config set registry https://mirrors.cloud.tencent.com/npm/  && npm install -g pnpm@latest-10
 RUN addgroup --system --gid 1001 nestjs && \
     adduser  --system --uid 1001 nestjs

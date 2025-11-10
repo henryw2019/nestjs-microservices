@@ -1,21 +1,13 @@
 {
-  "name": "nestjs-microservices-monorepo",
-  "private": true,
-  "version": "0.0.0",
-  "packageManager": "pnpm@10.20.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "devDependencies": {
     "@commitlint/cli": "^18.5.0",
     "@commitlint/config-conventional": "^18.5.0",
     "@commitlint/config-pnpm-scopes": "^18.4.4",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.39.1",
-  "@repo/eslint-config": "workspace:*",
-  "@repo/prettier-config": "workspace:*",
-  "@repo/typescript-config": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.8.5",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
@@ -41,13 +33,21 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3"
   },
+  "name": "nestjs-microservices-monorepo",
+  "packageManager": "pnpm@10.20.0",
+  "private": true,
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build --concurrency=1",
-    "test": "turbo run test --concurrency=1",
-    "lint": "turbo run lint --concurrency=1",
+    "build": "turbo run build ",
     "ci": "turbo run lint test build --concurrency=1",
+    "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "prepare": "husky install"
-  }
+    "lint": "turbo run lint --concurrency=1",
+    "prepare": "husky install",
+    "test": "turbo run test --concurrency=1"
+  },
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
