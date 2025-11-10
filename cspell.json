@@ -1,0 +1,24 @@
+{
+  "version": "0.2",
+  "language": "en,zh",
+  "words": [
+    "nestjs",
+    "typeorm",
+    "typeorm",
+    "prisma",
+    "kong",
+    "pnpm",
+    "turbo",
+    "turboRepo",
+    "monorepo"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "coverage/**",
+    "pnpm-store/**",
+    ".turbo/**"
+  ],
+  "dictionaryDefinitions": [],
+  "dictionaries": {}
+}

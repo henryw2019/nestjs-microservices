@@ -1,20 +1,19 @@
 {
-  "name": "@myrepo/eslint-config",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.20.0",
+  "name": "@repo/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "library.js",
+    "next.js",
+    "react-internal.js"
+  ],
   "devDependencies": {
-    "eslint": "^9.39.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "2.32.0",
-    "eslint-plugin-unused-imports": "4.3.0",
-    "{parser,eslint-plugin}": "link:@typescript-eslint/{parser,eslint-plugin}"
+    "@vercel/style-guide": "^5.1.0",
+    "eslint-config-turbo": "^1.11.3",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "typescript": "^5.3.3"
   }
 }

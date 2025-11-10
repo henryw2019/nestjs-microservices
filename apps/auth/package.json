@@ -10,10 +10,8 @@
         "prebuild": "rimraf dist",
         "build": "nest build",
         "build:prod": "nest build",
-        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "node dist/main",
         "dev": "npm run proto:generate && nest start --watch",
-        "lint": "eslint \"{src,test}/**/*.ts\" --fix",
         "test": "jest --config test/jest.json --runInBand",
         "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",
         "prisma:generate": "dotenv -e .env.docker -- prisma generate",
@@ -98,5 +96,9 @@
             "prettier --write",
             "eslint --fix"
         ]
-    }
+    },
+    "eslintConfig": {
+        "extends": "@myorg/eslint-config"
+    },
+    "prettier": "@myorg/prettier-config"
 }
