@@ -71,7 +71,7 @@ import { CacheableMemory } from 'cacheable';
         }),
         CacheModule.registerAsync({
             inject: [ConfigService],
-            useFactory: async (configService: ConfigService) => {
+            useFactory: (configService: ConfigService) => {
                 const ttl = configService.get<number>('redis.ttl') * 1000;
                 const redisUrl = configService.get<string>('redis.url');
                 return {

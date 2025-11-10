@@ -46,7 +46,7 @@ describe('ChainQueryService', () => {
     });
 
     it('should map block to response DTO when found', async () => {
-        (databaseService.block!.findUnique as jest.Mock).mockResolvedValue({
+        (databaseService.block.findUnique as jest.Mock).mockResolvedValue({
             number: BigInt(123),
             hash: '0xhash',
             timestamp: new Date('2024-01-01T00:00:00Z'),
@@ -70,7 +70,7 @@ describe('ChainQueryService', () => {
     });
 
     it('should return null when block not found', async () => {
-        (databaseService.block!.findUnique as jest.Mock).mockResolvedValue(null);
+        (databaseService.block.findUnique as jest.Mock).mockResolvedValue(null);
 
         const result = await service.getBlockByNumber('999');
 

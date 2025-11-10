@@ -75,27 +75,27 @@ Example GitHub Actions workflow:
 
 ```yaml
 jobs:
-  cache-deps:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build deps cache
-        run: docker build -f Dockerfile.deps -t deps-cache .
-      - name: Push cache
-        run: |
-          docker tag deps-cache ghcr.io/${{ github.repository }}/deps-cache:latest
-          docker push ghcr.io/${{ github.repository }}/deps-cache:latest
+    cache-deps:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Build deps cache
+              run: docker build -f Dockerfile.deps -t deps-cache .
+            - name: Push cache
+              run: |
+                  docker tag deps-cache ghcr.io/${{ github.repository }}/deps-cache:latest
+                  docker push ghcr.io/${{ github.repository }}/deps-cache:latest
 
-  build-services:
-    needs: cache-deps
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build auth service
-        run: |
-          docker build \
-            --build-arg DEPS_CACHE_IMAGE=ghcr.io/${{ github.repository }}/deps-cache:latest \
-            . --target auth --tag auth-service:latest
+    build-services:
+        needs: cache-deps
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Build auth service
+              run: |
+                  docker build \
+                    --build-arg DEPS_CACHE_IMAGE=ghcr.io/${{ github.repository }}/deps-cache:latest \
+                    . --target auth --tag auth-service:latest
 ```
 
 ## Benefits

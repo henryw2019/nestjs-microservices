@@ -94,11 +94,11 @@ Swagger 文档默认暴露在 `http://localhost:9003/docs`。
 
 所有接口前缀默认为 `/v1`，均需携带 `Authorization: Bearer <access_token>`。
 
-| 类型 | 方法 | 路径 | 说明 |
-| --- | --- | --- | --- |
-| Keystore | POST | `/v1/keystore` | 为当前用户生成新地址（若已存在则返回已生成地址列表） |
-| Keystore | GET | `/v1/keystore/me` | 查询当前用户托管的所有地址（隐藏私钥） |
-| Transfer | POST | `/v1/transfer` | 依据 `dto.from` 地址自动选择 ETH 或 ERC20 转账 |
+| 类型     | 方法 | 路径              | 说明                                                 |
+| -------- | ---- | ----------------- | ---------------------------------------------------- |
+| Keystore | POST | `/v1/keystore`    | 为当前用户生成新地址（若已存在则返回已生成地址列表） |
+| Keystore | GET  | `/v1/keystore/me` | 查询当前用户托管的所有地址（隐藏私钥）               |
+| Transfer | POST | `/v1/transfer`    | 依据 `dto.from` 地址自动选择 ETH 或 ERC20 转账       |
 
 详细的请求/响应结构可在 Swagger 或 `src/modules/keystore/dtos` 中查阅。
 

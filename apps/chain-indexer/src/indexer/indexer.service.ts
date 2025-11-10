@@ -90,7 +90,7 @@ export class IndexerService implements OnModuleInit {
             [];
         for (const cand of candidates) {
             try {
-                const parsed = cand.iface.parseLog(log as any);
+                const parsed = cand.iface.parseLog(log);
                 const parsedAny: any = parsed as any;
                 return {
                     name: parsedAny.name,
@@ -287,7 +287,7 @@ export class IndexerService implements OnModuleInit {
                       ? parsed.abi
                       : null;
                 if (!abi) return;
-                const iface = new ethers.Interface(abi as any);
+                const iface = new ethers.Interface(abi);
                 this.registerInterfaceEvents(iface);
 
                 // remember this iface in preloadedIfaces so it's available even if file isn't address-named
@@ -378,7 +378,7 @@ export class IndexerService implements OnModuleInit {
                 },
             });
         }
-        let start = Number(checkpoint.lastProcessedBlock) + 1;
+        const start = Number(checkpoint.lastProcessedBlock) + 1;
         if (start > latest) return;
         const end = Math.min(latest, start + this.batchSize - 1);
         console.log(`Processing blocks ${start}..${end}`);
@@ -583,7 +583,7 @@ export class IndexerService implements OnModuleInit {
                             `[block ${blockNumber}] tx ${tx.hash} log ${logIdx + 1}/${logs.length} addr=${log.address}`,
                         );
 
-                        const rawLogIndex = (log as any).logIndex ?? (log as any).index;
+                        const rawLogIndex = log.logIndex ?? log.index;
                         let logIndexNum =
                             typeof rawLogIndex !== 'undefined' ? Number(rawLogIndex) : NaN;
                         if (Number.isNaN(logIndexNum)) logIndexNum = 0;
@@ -707,7 +707,7 @@ export class IndexerService implements OnModuleInit {
                         let parsedFromAbi: ethers.LogDescription | null = null;
                         if (ifaceFromAbi) {
                             try {
-                                parsedFromAbi = ifaceFromAbi.parseLog(log as any);
+                                parsedFromAbi = ifaceFromAbi.parseLog(log);
                             } catch (e) {
                                 console.log(
                                     `      parse error via ABI for log index=${logIndexNum} tx=${tx.hash}: ${e?.message || e}`,
@@ -717,7 +717,7 @@ export class IndexerService implements OnModuleInit {
 
                         // fallback: if address-based parse failed, try topic-based index
                         if (!parsedFromAbi && eventSignature) {
-                            const decodedCandidate = this.decodeLogWithTopic(log as any);
+                            const decodedCandidate = this.decodeLogWithTopic(log);
                             if (decodedCandidate) {
                                 parsedFromAbi = {
                                     args: decodedCandidate.args,
@@ -754,7 +754,7 @@ export class IndexerService implements OnModuleInit {
                                     const input = frag.inputs[i];
                                     const name = input.name || String(i);
                                     // prefer named access, fallback to numeric index
-                                    let val =
+                                    const val =
                                         parsedFromAbi.args && parsedFromAbi.args[name] !== undefined
                                             ? parsedFromAbi.args[name]
                                             : parsedFromAbi.args[i];
@@ -800,7 +800,7 @@ export class IndexerService implements OnModuleInit {
                         if (!transferHandled && eventSignature === TRANSFER_EVENT_SIG) {
                             let parsedTransfer: ethers.LogDescription | null = null;
                             try {
-                                parsedTransfer = TRANSFER_EVENT_IFACE.parseLog(log as any);
+                                parsedTransfer = TRANSFER_EVENT_IFACE.parseLog(log);
                             } catch (e) {
                                 console.log(
                                     `      fallback transfer parse error for tx=${tx.hash}: ${e?.message || e}`,
@@ -849,7 +849,7 @@ export class IndexerService implements OnModuleInit {
                                 eventSignature,
                                 indexedArgs: parsedIndexedArgs,
                                 dataArgs: parsedDataArgs,
-                                raw: log as any,
+                                raw: log,
                                 processed: false,
                                 timestamp: eventTimestamp,
                             } as any,
@@ -997,7 +997,7 @@ export class IndexerService implements OnModuleInit {
                                   ? parsed2.abi
                                   : null;
                             if (abi2) {
-                                const iface2 = new ethers.Interface(abi2 as any);
+                                const iface2 = new ethers.Interface(abi2);
                                 this.abiCache.set(address, iface2); // cache under original address for convenience
                                 this.abiCache.set(impl.toLowerCase(), iface2);
                                 this.registerInterfaceEvents(iface2);
@@ -1025,7 +1025,7 @@ export class IndexerService implements OnModuleInit {
                 console.error(`ABI file ${abiPath} does not contain a valid ABI array`);
                 return null;
             }
-            const iface = new ethers.Interface(abi as any);
+            const iface = new ethers.Interface(abi);
             this.abiCache.set(address, iface);
             console.log(`Loaded ABI for ${address} from ${abiPath}`);
             this.registerInterfaceEvents(iface);

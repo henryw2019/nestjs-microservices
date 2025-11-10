@@ -1,6 +1,7 @@
 # Chain Service Design
 
 ## 概览
+
 `chain-service` 专注于链上托管钱包能力：
 
 - 生成并存储链上地址及私钥（多地址 / 多用户）。
@@ -35,11 +36,11 @@ src/
 
 ## API 定义
 
-| 模块 | 方法 | 路径 | 描述 |
-| --- | --- | --- | --- |
-| Keystore | `POST` | `/v1/keystore` | 为当前用户创建并返回新的链上地址（若已存在则返回最新记录）。 |
-| Keystore | `GET` | `/v1/keystore/me` | 查询当前用户托管的全部地址列表（不包含私钥）。 |
-| Transfer | `POST` | `/v1/transfer` | 根据 `dto.token` 自动选择原生 ETH 或 ERC20 转账。 |
+| 模块     | 方法   | 路径              | 描述                                                         |
+| -------- | ------ | ----------------- | ------------------------------------------------------------ |
+| Keystore | `POST` | `/v1/keystore`    | 为当前用户创建并返回新的链上地址（若已存在则返回最新记录）。 |
+| Keystore | `GET`  | `/v1/keystore/me` | 查询当前用户托管的全部地址列表（不包含私钥）。               |
+| Transfer | `POST` | `/v1/transfer`    | 根据 `dto.token` 自动选择原生 ETH 或 ERC20 转账。            |
 
 所有接口默认受 `AuthJwtAccessGuard` 与 `RolesGuard` 保护，需携带访问令牌。响应结构统一为：
 

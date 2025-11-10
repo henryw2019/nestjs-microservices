@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Sentry from '@sentry/node';
+import { inspect } from 'node:util';
 import { Request, Response } from 'express';
 import { IErrorResponse } from '../interfaces/response.interface';
 
@@ -25,10 +26,11 @@ export class ResponseExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
 
-        const statusCode =
+        const statusCode = (
             exception instanceof HttpException
                 ? exception.getStatus()
-                : HttpStatus.INTERNAL_SERVER_ERROR;
+                : HttpStatus.INTERNAL_SERVER_ERROR
+        ) as HttpStatus;
 
         let message = 'Internal server error';
 
@@ -50,7 +52,8 @@ export class ResponseExceptionFilter implements ExceptionFilter {
         };
 
         if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR) {
-            this.logger.error(`${request.method} ${request.url} - ${statusCode}`, exception);
+            const trace = this.stringifyException(exception);
+            this.logger.error(`${request.method} ${request.url} - ${statusCode}`, trace);
             this.captureSentryException(exception, request);
         }
 
@@ -78,8 +81,24 @@ export class ResponseExceptionFilter implements ExceptionFilter {
             if (exception instanceof Error) {
                 Sentry.captureException(exception);
             } else {
-                Sentry.captureMessage(String(exception));
+                Sentry.captureMessage(this.stringifyException(exception));
             }
         });
+    }
+
+    private stringifyException(exception: unknown): string {
+        if (exception instanceof Error) {
+            return exception.stack ?? exception.message;
+        }
+
+        if (typeof exception === 'string') {
+            return exception;
+        }
+
+        try {
+            return JSON.stringify(exception);
+        } catch {
+            return inspect(exception, { depth: null });
+        }
     }
 }

@@ -9,10 +9,10 @@
 - **运行环境**：Node.js ≥ 18、npm ≥ 9、Docker (若需要容器化)；本地需可访问 PostgreSQL 与 Redis。
 - **代码结构**：每个微服务独立位于仓库根目录一级 (`auth/`, `post/`, `chain-service/`...)，内部遵循 Nest 的模块化目录，与 `post/` 的结构保持一致。
 - **工作步骤概览**：
-  1. 复制 `post` 目录作为脚手架，或使用 `nest new` 创建后按本文档调整结构与依赖。
-  2. 配置基础依赖、环境变量、`CommonModule`、Prisma、gRPC、Swagger 等横切能力。
-  3. 编写业务模块与 DTO，补充 i18n 文案与单元测试。
-  4. 在 `docker-compose.yml`、`kong/config.yml` 中注册新服务，确保联调链路可用。
+    1. 复制 `post` 目录作为脚手架，或使用 `nest new` 创建后按本文档调整结构与依赖。
+    2. 配置基础依赖、环境变量、`CommonModule`、Prisma、gRPC、Swagger 等横切能力。
+    3. 编写业务模块与 DTO，补充 i18n 文案与单元测试。
+    4. 在 `docker-compose.yml`、`kong/config.yml` 中注册新服务，确保联调链路可用。
 
 ---
 
@@ -73,10 +73,10 @@ prisma/                  # Prisma schema 与 migrations
 ### 3.5 HTTP 启动与 Swagger
 
 - 在 `src/main.ts` 中：
-  - 创建 `NestFactory`，启用 CORS、Helmet、`ValidationPipe`（`transform + whitelist`）。
-  - 配置 URI 版本控制（`VersioningType.URI`）。
-  - 暴露 `/` 与 `/health` 健康检查。
-  - 非生产环境调用 `setupSwagger(app)`（见 `src/swagger.ts`）。
+    - 创建 `NestFactory`，启用 CORS、Helmet、`ValidationPipe`（`transform + whitelist`）。
+    - 配置 URI 版本控制（`VersioningType.URI`）。
+    - 暴露 `/` 与 `/health` 健康检查。
+    - 非生产环境调用 `setupSwagger(app)`（见 `src/swagger.ts`）。
 - `setupSwagger` 统一添加 `Bearer` 认证、`doc.prefix` 支持。
 
 ### 3.6 Kong 与 Docker 集成
@@ -104,12 +104,13 @@ prisma/                  # Prisma schema 与 migrations
 
 ## 5. 可复用函数与服务清单
 
-| 能力 | 定义位置 | 用途与示例 |
-| --- | --- | --- |
-| **数据库服务** | `post/src/common/services/database.service.ts` | 扩展 `PrismaClient`，在 `CommonModule` 单例注入。业务服务通过依赖注入调用 `databaseService.post.findMany()` 等方法；包含健康检查。 |
-| **哈希工具** | `post/src/common/services/hash.service.ts` | 封装 `bcrypt` 的同步/异步哈希生成与比对。示例：`const hash = hashService.createHash(password)`。 |
-| **查询构建器** | `post/src/common/services/query-builder.service.ts` | 提供带分页/搜索/排序的通用 `findMany`。调用示例：
-```ts
+| 能力           | 定义位置                                            | 用途与示例                                                                                                                         |
+| -------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **数据库服务** | `post/src/common/services/database.service.ts`      | 扩展 `PrismaClient`，在 `CommonModule` 单例注入。业务服务通过依赖注入调用 `databaseService.post.findMany()` 等方法；包含健康检查。 |
+| **哈希工具**   | `post/src/common/services/hash.service.ts`          | 封装 `bcrypt` 的同步/异步哈希生成与比对。示例：`const hash = hashService.createHash(password)`。                                   |
+| **查询构建器** | `post/src/common/services/query-builder.service.ts` | 提供带分页/搜索/排序的通用 `findMany`。调用示例：                                                                                  |
+
+````ts
 this.queryBuilderService.findManyWithPagination({
   model: 'post',
   dto: queryDto,
@@ -148,3 +149,4 @@ this.queryBuilderService.findManyWithPagination({
 ---
 
 通过以上步骤即可基于现有模板快速创建符合仓库规范的新微服务，并与现有 Auth、Post 服务保持一致的配置体验与运行特性。
+````
