@@ -10,9 +10,13 @@
     "chain-service"
   ],
   "devDependencies": {
-    "turbo": "^1.11.0"
+    "js-yaml": "4.1.0",
+    "prettier": "^3.3.3",
+    "turbo": "^2.6.0"
   },
   "scripts": {
+    "format": "turbo run format",
+    "format:check": "turbo run format:check",
     "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",

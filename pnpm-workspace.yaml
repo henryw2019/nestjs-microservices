@@ -1,9 +1,5 @@
 packages:
-  - auth
-  - chain-indexer
-  - chain-reader
-  - chain-service
-  - '*/'
+  - apps/*
 
 onlyBuiltDependencies:
   - '@nestjs/core'

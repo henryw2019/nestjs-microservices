@@ -71,7 +71,7 @@ dump.rdb
 chain-service/storage
 chain-indexer/abis
 
-*cache*
+
 *.tar.gz
 *.zip
 *.tar
@@ -84,3 +84,5 @@ pnpm-store
 **/.turbo
 **/prisma/migrations/
 pnpm-store.tar.gz1
+offline-*
+backup/

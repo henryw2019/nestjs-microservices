@@ -4,7 +4,7 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV STORE_PATH="/pnpm/pnpm-store"
 RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories
-RUN apk add --no-cache libc6-compat openssl ca-certificates
+RUN apk add --no-cache libc6-compat openssl ca-certificates python3
 RUN npm config set registry https://mirrors.cloud.tencent.com/npm/  && npm install -g pnpm@latest-10
 RUN addgroup --system --gid 1001 nestjs && \
     adduser  --system --uid 1001 nestjs
@@ -24,10 +24,10 @@ RUN --mount=type=cache,id=pnpm,target=${STORE_PATH} \
     pnpm fetch  && \
     pnpm install --frozen-lockfile && \
     pnpm config list 
-RUN cd auth && pnpm prisma:generate 
-RUN cd chain-reader && pnpm prisma:generate 
-RUN cd chain-service && pnpm prisma:generate 
-RUN cd chain-indexer && pnpm prisma:generate  
+RUN cd apps/auth && pnpm prisma:generate 
+RUN cd apps/chain-reader && pnpm prisma:generate 
+RUN cd apps/chain-service && pnpm prisma:generate 
+RUN cd apps/chain-indexer && pnpm prisma:generate  
 RUN pnpm run -r build
 RUN --mount=type=cache,id=pnpm,target=${STORE_PATH} \
     pnpm deploy --filter=auth         --prod --legacy /prod/auth && \

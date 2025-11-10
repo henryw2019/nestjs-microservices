@@ -1,0 +1,46 @@
+# Build with external dependencies cache
+# Usage: docker build -f Dockerfile.cached -t auth-service:latest . --target auth
+FROM myapp-deps-cache:latest AS deps-cache
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+RUN apk add --no-cache libc6-compat openssl
+RUN addgroup --system --gid 1001 nestjs && \
+    adduser  --system --uid 1001 nestjs
+
+FROM base AS build
+# Copy pnpm store from pre-built cache image
+COPY --from=deps-cache /pnpm/store /pnpm/store
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+# Install with offline mode (uses cached store)
+RUN pnpm install --frozen-lockfile --offline
+RUN pnpm run -r build
+RUN pnpm deploy --filter=auth --prod --legacy /prod/auth
+RUN pnpm deploy --filter=chain-reader --prod --legacy /prod/chain-reader
+RUN pnpm deploy --filter=chain-service --prod --legacy /prod/chain-service
+RUN pnpm deploy --filter=chain-indexer --prod --legacy /prod/chain-indexer
+
+FROM base AS auth
+COPY --from=build /prod/auth /prod/auth
+WORKDIR /prod/auth
+EXPOSE 9001 50051
+CMD ["pnpm", "start"]
+
+FROM base AS chain-reader
+COPY --from=build /prod/chain-reader /prod/chain-reader
+WORKDIR /prod/chain-reader
+EXPOSE 9004
+CMD ["pnpm", "start"]
+
+FROM base AS chain-service
+COPY --from=build /prod/chain-service /prod/chain-service
+WORKDIR /prod/chain-service
+EXPOSE 9003
+CMD ["pnpm", "start"]
+
+FROM base AS chain-indexer
+COPY --from=build /prod/chain-indexer /prod/chain-indexer
+WORKDIR /prod/chain-indexer
+CMD ["pnpm", "start"]
