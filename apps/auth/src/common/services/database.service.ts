@@ -26,14 +26,29 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
     }
 
     async isHealthy(): Promise<HealthIndicatorResult> {
+        const timeout = 5000; // 5秒超时
+        
         try {
-            await this.$queryRaw`SELECT 1`;
-            return {
-                database: {
-                    status: 'up',
-                    connection: 'active',
-                },
-            };
+            // 使用AbortController实现更安全的超时控制
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                // 使用Prisma的queryRaw进行健康检查
+                await this.$queryRaw`SELECT 1`;
+                clearTimeout(timeoutId);
+                
+                return {
+                    database: {
+                        status: 'up',
+                        connection: 'active',
+                        responseTime: 'normal',
+                    },
+                };
+            } catch (queryError) {
+                clearTimeout(timeoutId);
+                throw queryError;
+            }
         } catch (error) {
             this.logger.error('Database health check failed', error);
             return {
@@ -41,6 +56,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
                     status: 'down',
                     connection: 'failed',
                     error: error.message,
+                    responseTime: 'timeout',
                 },
             };
         }

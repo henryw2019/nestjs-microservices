@@ -9,4 +9,7 @@ async function bootstrap() {
     console.log('Chain Indexer listening on', process.env.PORT || 9200);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+    console.error('Error starting chain indexer:', err);
+    process.exit(1);
+});

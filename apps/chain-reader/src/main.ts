@@ -48,7 +48,7 @@ async function bootstrap() {
         });
     });
 
-    expressApp.get('/health', async (_req: Request, res: Response) => {
+    expressApp.get('/health', (_req: Request, res: Response) => {
         res.json({ status: 'healthy', timestamp: new Date().toISOString() });
     });
 
@@ -58,14 +58,25 @@ async function bootstrap() {
 
     app.enableShutdownHooks();
 
+    // Graceful shutdown handlers
+    const gracefulShutdown = async (signal: string) => {
+        logger.log(`Received ${signal}, shutting down gracefully`);
+        try {
+            await app.close();
+            logger.log('Graceful shutdown completed');
+            process.exit(0);
+        } catch (error) {
+            logger.error('Error during graceful shutdown', error);
+            process.exit(1);
+        }
+    };
+
     process.on('SIGTERM', () => {
-        logger.log('Received SIGTERM, shutting down gracefully');
-        app.close();
+        void gracefulShutdown('SIGTERM');
     });
 
     process.on('SIGINT', () => {
-        logger.log('Received SIGINT, shutting down gracefully');
-        app.close();
+        void gracefulShutdown('SIGINT');
     });
 
     await app.listen(port, host);

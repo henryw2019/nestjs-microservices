@@ -41,8 +41,7 @@
     "devDependencies": {
         "@types/cache-manager-ioredis": "^2.0.7",
         "@types/config": "^3.3.5",
-        "@types/joi": "^17.2.3",
-        "@types/mime": "^4.0.0",
+
         "@types/ms": "^0.7.34",
         "@types/passport-jwt": "^4.0.1",
         "@types/pg": "^8.11.10"

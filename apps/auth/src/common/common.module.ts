@@ -16,6 +16,8 @@ import { DatabaseService } from './services/database.service';
 import { ResponseExceptionFilter } from './filters/exception.filter';
 import { RequestMiddleware } from './middlewares/request.middleware';
 import { QueryBuilderService } from './services/query-builder.service';
+import { RedisService } from './services/redis.service';
+import { HealthCacheService } from './services/health-cache.service';
 import Joi from 'joi';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
@@ -106,6 +108,8 @@ import { CacheableMemory } from 'cacheable';
         DatabaseService,
         HashService,
         QueryBuilderService,
+        RedisService,
+        HealthCacheService,
 
         // JWT Strategies
         AuthJwtAccessStrategy,
@@ -137,6 +141,8 @@ import { CacheableMemory } from 'cacheable';
         DatabaseService,
         HashService,
         QueryBuilderService,
+        RedisService,
+        HealthCacheService,
         AuthJwtAccessStrategy,
         AuthJwtRefreshStrategy,
     ],

@@ -97,8 +97,8 @@ export class ChainQueryService {
                 _count: {
                     select: { txs: true, erc20Transfers: true, eventLogs: true },
                 },
-            } as any,
-        } as any);
+            },
+        });
 
         if (!block) {
             return null;

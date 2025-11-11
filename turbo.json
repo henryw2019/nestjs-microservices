@@ -20,9 +20,7 @@
       "cache": false
     },
     "lint": {
-      "env": [
-        "*"
-      ]
+      "cache": false
     },
     "test": {
       "dependsOn": [

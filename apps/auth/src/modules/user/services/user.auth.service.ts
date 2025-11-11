@@ -12,20 +12,20 @@ export class UserAuthService {
         const user = await this.databaseService.user.findUnique({
             where: { id: userId, deletedAt: null },
         });
-        return user ?? null;
+        return user as UserResponseDto | null;
     }
 
     async getUserProfileByEmail(email: string): Promise<UserResponseDto | null> {
         const user = await this.databaseService.user.findUnique({
             where: { email, deletedAt: null },
         });
-        return user ?? null;
+        return user as UserResponseDto | null;
     }
 
     async updateUserProfile(userId: string, updateDto: UserUpdateDto): Promise<UserResponseDto> {
         const user = await this.getUserProfile(userId);
 
-        return this.databaseService.user.update({
+        const updatedUser = await this.databaseService.user.update({
             where: { id: user.id },
             data: {
                 firstName: updateDto.firstName?.trim(),
@@ -35,10 +35,12 @@ export class UserAuthService {
                 avatar: updateDto.avatar,
             },
         });
+        
+        return updatedUser as UserResponseDto;
     }
 
     async createUser(data: Partial<UserResponseDto>): Promise<UserResponseDto> {
-        return this.databaseService.user.create({
+        const user = await this.databaseService.user.create({
             data: {
                 email: data.email,
                 firstName: data.firstName?.trim() || '',
@@ -49,5 +51,7 @@ export class UserAuthService {
                 role: Role.USER, // Assuming a default role
             },
         });
+        
+        return user as UserResponseDto;
     }
 }

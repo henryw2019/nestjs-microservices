@@ -63,10 +63,6 @@ async function bootstrap() {
         });
     });
 
-    expressApp.get('/health', (_req: Request, res: Response) => {
-        res.json({ status: 'healthy', timestamp: new Date().toISOString() });
-    });
-
     // Swagger for development
     if (env !== 'production') {
         setupSwagger(app);
