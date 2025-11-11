@@ -1,0 +1,39 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-11-11T12:46:25.432Z
+provider: 
+---
+
+# Docker容器化和部署规范
+
+## 容器化标准
+- 多阶段Docker构建
+- 最小化镜像大小
+- 环境变量配置
+- 健康检查配置
+
+## 开发环境
+- docker-compose.dev.yml开发配置
+- 本地数据库和缓存服务
+- 热重载开发支持
+- 端口映射和网络配置
+
+## 生产环境
+- docker-compose.yml生产配置
+- 服务编排和负载均衡
+- 日志收集和监控
+- 自动扩缩容策略
+
+## 基础设施
+- PostgreSQL数据库配置
+- Redis缓存服务
+- Kong API网关
+- 服务发现机制
+
+## 部署策略
+- 蓝绿部署
+- 滚动更新
+- 回滚机制
+- 零停机部署

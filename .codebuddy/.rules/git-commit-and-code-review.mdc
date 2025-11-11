@@ -1,0 +1,42 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-11-11T12:46:19.029Z
+provider: 
+---
+
+# Git提交和代码审查规范
+
+## 提交信息规范
+- 使用Conventional Commits格式
+- 配置commitlint进行验证
+- 提交信息包含类型、范围和描述
+- 示例：feat(auth): 添加用户注册功能
+
+## 提交类型
+- feat: 新功能
+- fix: 修复bug
+- docs: 文档更新
+- style: 代码格式调整
+- refactor: 代码重构
+- test: 测试相关
+- chore: 构建过程或辅助工具变动
+
+## 分支管理
+- 主分支保护策略
+- 功能分支开发模式
+- 代码审查流程
+- 合并请求规范
+
+## 代码审查要点
+- 代码风格一致性
+- 功能实现正确性
+- 测试覆盖完整性
+- 性能和安全考虑
+
+## 预提交钩子
+- 配置husky预提交钩子
+- 自动运行lint-staged
+- 代码格式检查
+- 测试用例验证

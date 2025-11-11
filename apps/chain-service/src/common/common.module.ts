@@ -1,24 +1,24 @@
-import { existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { existsSync, mkdirSync } from 'fs';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import { join } from 'path';
 
+import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
+import { createKeyv, Keyv } from '@keyv/redis';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheableMemory } from 'cacheable';
+import Joi from 'joi';
 import configs from './config';
+import { ResponseExceptionFilter } from './filters/exception.filter';
 import { AuthJwtAccessGuard } from './guards/jwt.access.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
-import { HashService } from './services/hash.service';
-import { DatabaseService } from './services/database.service';
-import { ResponseExceptionFilter } from './filters/exception.filter';
 import { RequestMiddleware } from './middlewares/request.middleware';
+import { DatabaseService } from './services/database.service';
+import { HashService } from './services/hash.service';
 import { QueryBuilderService } from './services/query-builder.service';
-import Joi from 'joi';
-import { CacheModule } from '@nestjs/cache-manager';
-import { createKeyv, Keyv } from '@keyv/redis';
-import { CacheableMemory } from 'cacheable';
-import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
 
 const resolveLanguagesPath = (): string => {
     const candidates = [
@@ -88,7 +88,7 @@ const resolveLanguagesPath = (): string => {
         }),
         CacheModule.registerAsync({
             inject: [ConfigService],
-            useFactory: async (configService: ConfigService) => {
+            useFactory: (configService: ConfigService) => {
                 const ttl = configService.get<number>('redis.ttl') * 1000;
                 const redisUrl = configService.get<string>('redis.url');
                 return {

@@ -1,0 +1,45 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-11-11T12:46:11.263Z
+provider: 
+---
+
+# API设计和文档规范
+
+## API设计原则
+- RESTful API设计风格
+- 使用NestJS Swagger自动生成文档
+- 统一的错误处理机制
+- 版本控制策略
+
+## 数据验证
+- 使用class-validator进行输入验证
+- 实现DTO（Data Transfer Object）模式
+- 自定义验证装饰器
+- 全局异常过滤器
+
+## 文档标准
+- 使用OpenAPI规范
+- 自动生成API文档
+- 包含请求/响应示例
+- 描述API用途和参数
+
+## 微服务通信
+- gRPC协议定义使用.proto文件
+- 自动生成TypeScript类型定义
+- 实现服务发现和负载均衡
+- 配置超时和重试机制
+
+## 缓存策略
+- Redis缓存配置
+- 缓存失效策略
+- 分布式缓存同步
+- 性能监控和优化
+
+## 安全规范
+- JWT令牌管理
+- 权限控制中间件
+- 请求频率限制
+- 敏感数据加密

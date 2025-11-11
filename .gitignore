@@ -87,4 +87,4 @@ pnpm-store.tar.gz1
 offline-*
 backup/
 .turbo/
-
+.turbo/daemon/

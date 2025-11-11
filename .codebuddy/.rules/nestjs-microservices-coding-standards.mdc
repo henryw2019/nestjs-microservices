@@ -1,0 +1,49 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2025-11-11T12:45:53.645Z
+provider: 
+---
+
+# NestJS微服务项目编码标准和最佳实践
+
+## 项目结构
+- 使用monorepo结构，apps目录包含各个微服务
+- packages目录包含共享配置和工具
+- 使用pnpm作为包管理器，turbo作为构建工具
+
+## 技术栈要求
+- Node.js >= 18.0.0
+- NestJS 11.x
+- TypeScript 5.x
+- Prisma ORM
+- gRPC用于微服务间通信
+- Redis用于缓存
+- PostgreSQL数据库
+
+## 代码规范
+- 使用ESLint和Prettier进行代码格式化
+- 遵循NestJS模块化架构模式
+- 使用class-validator进行DTO验证
+- 使用class-transformer进行数据转换
+- 实现依赖注入和面向接口编程
+
+## 微服务开发
+- 每个微服务独立部署和扩展
+- 使用gRPC进行服务间通信
+- 实现健康检查端点
+- 使用Sentry进行错误监控
+- 配置环境变量管理
+
+## 数据库操作
+- 使用Prisma进行数据库操作
+- 实现数据库迁移脚本
+- 配置连接池和连接管理
+- 使用事务处理复杂操作
+
+## 安全要求
+- 使用JWT进行身份验证
+- 实现密码加密（bcryptjs）
+- 配置Helmet安全中间件
+- 输入验证和XSS防护

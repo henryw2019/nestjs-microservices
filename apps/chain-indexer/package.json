@@ -18,14 +18,8 @@
     "prisma:studio": "dotenv -e .env.docker -- prisma studio"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.8",
-    "@nestjs/core": "^11.1.8",
-    "@nestjs/platform-express": "^11.1.8",
-    "@prisma/client": "^5.21.1",
-    "ethers": "^6.9.0",
-    "dotenv": "^16.4.5",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "@repo/base-deps": "workspace:*",
+    "ethers": "^6.9.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",
