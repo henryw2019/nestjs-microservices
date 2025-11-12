@@ -9,7 +9,22 @@
         "dist/**"
       ]
     },
+    "build:swc": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
     "dev": {
+      "cache": false,
+      "env": [
+        "*"
+      ],
+      "persistent": true
+    },
+    "dev:swc": {
       "cache": false,
       "env": [
         "*"

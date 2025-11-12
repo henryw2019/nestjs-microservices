@@ -10,10 +10,13 @@
     "scripts": {
         "prebuild": "rimraf dist",
         "build": "nest build",
+        "build:swc": "nest build --webpackPath webpack.config.js",
         "build:prod": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "node dist/main",
+        "start:swc": "node -r @swc-node/register src/main.ts",
         "dev": "npm run proto:generate && nest start --watch",
+        "dev:swc": "npm run proto:generate && nest start --watch --webpackPath webpack.config.js",
         "lint": "eslint \"{src,test}/**/*.ts\" --fix",
         "test": "jest --config test/jest.json --runInBand",
         "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",

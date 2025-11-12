@@ -9,10 +9,13 @@
     "scripts": {
         "prebuild": "rimraf dist",
         "build": "nest build",
+        "build:swc": "nest build --webpackPath webpack.config.js",
         "build:prod": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "node dist/main",
+        "start:swc": "node -r @swc-node/register src/main.ts",
         "dev": "npm run proto:generate && nest start --watch",
+        "dev:swc": "npm run proto:generate && nest start --watch --webpackPath webpack.config.js",
         "lint": "eslint \"{src,test}/**/*.ts\" --fix",
         "test": "jest --config test/jest.json --runInBand",
         "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",
@@ -22,18 +25,20 @@
         "prisma:studio": "dotenv -e .env.docker -- prisma studio"
     },
     "dependencies": {
-        "@repo/base-deps": "workspace:*",
-        "@keyv/redis": "^4.4.0"
+        "@keyv/redis": "^4.4.0",
+        "@repo/base-deps": "workspace:*"
     },
     "devDependencies": {
         "@nestjs/cli": "^11.0.10",
         "@nestjs/schematics": "^11.0.9",
         "@nestjs/testing": "^11.1.8",
+        "@swc/jest": "0.2.39",
         "@types/express": "^5.0.0",
         "@types/supertest": "^6.0.2",
         "dotenv-cli": "^8.0.0",
         "prisma": "^5.21.1",
-        "supertest": "^7.0.0"
+        "supertest": "^7.0.0",
+        "swc-loader": "0.2.6"
     },
     "lint-staged": {
         "*.ts": [
