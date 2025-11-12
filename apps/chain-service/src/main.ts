@@ -64,7 +64,7 @@ async function bootstrap() {
 
     // Swagger for development
     if (env !== 'production') {
-        setupSwagger(app);
+        void setupSwagger(app);
     }
 
     // Graceful shutdown
@@ -72,12 +72,12 @@ async function bootstrap() {
 
     process.on('SIGTERM', () => {
         logger.log('Received SIGTERM, shutting down gracefully');
-        app.close();
+        void app.close();
     });
 
     process.on('SIGINT', () => {
         logger.log('Received SIGINT, shutting down gracefully');
-        app.close();
+        void app.close();
     });
 
     // Start server

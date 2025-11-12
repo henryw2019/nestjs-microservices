@@ -27,7 +27,7 @@ export class UserListDto extends ApiBaseQueryDto {
         }
         if (value === 1 || value === '1') return true;
         if (value === 0 || value === '0') return false;
-        return value;
+        return undefined;
     })
     @IsBoolean()
     isVerified?: boolean;

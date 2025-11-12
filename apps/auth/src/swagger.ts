@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import type { SwaggerCustomOptions } from '@nestjs/swagger';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-export const setupSwagger = async (app: INestApplication) => {
+export const setupSwagger =  (app: INestApplication) => {
     const configService = app.get(ConfigService);
     const logger = new Logger();
 

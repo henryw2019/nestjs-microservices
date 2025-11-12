@@ -23,7 +23,7 @@ export class ResponseInterceptor implements NestInterceptor {
         );
 
         const response = context.switchToHttp().getResponse();
-        const statusCode = response.statusCode;
+        const statusCode = response.statusCode as number;
 
         return next.handle().pipe(
             switchMap(data =>
