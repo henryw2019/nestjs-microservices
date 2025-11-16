@@ -44,6 +44,34 @@
       "outputs": [
         "coverage/**"
       ]
+    },
+    "proto:generate": {
+      "cache": false,
+      "outputs": [
+        "src/generated/**"
+      ]
+    },
+    "prisma:generate": {
+      "cache": false,
+      "outputs": [
+        "node_modules/.prisma/client/**"
+      ]
+    },
+    "prisma:migrate": {
+      "cache": false,
+      "outputs": [
+        "prisma/migrations/**"
+      ]
+    },
+    "prisma:migrate:prod": {
+      "cache": false,
+      "outputs": [
+        "prisma/migrations/**"
+      ]
+    },
+    "prisma:studio": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

@@ -50,7 +50,12 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint --concurrency=1",
     "prepare": "husky install",
-    "test": "turbo run test --concurrency=1"
+    "test": "turbo run test --concurrency=1",
+    "proto:generate": "turbo run proto:generate",
+    "prisma:generate": "turbo run prisma:generate",
+    "prisma:migrate": "turbo run prisma:migrate",
+    "prisma:migrate:prod": "turbo run prisma:migrate:prod",
+    "prisma:studio": "turbo run prisma:studio"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
