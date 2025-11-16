@@ -72,7 +72,6 @@ async function bootstrap() {
 
     // Start server
     await app.listen(port, host);
-    console.log(`listen 阶段 ${Date.now() - t0} ms`);
     logger.log(`🚀 ${appName} started at http://${host}:${port}`);
     logger.log(`🔌 gRPC server started at ${configService.get<string>('grpc.url')}`);
 
