@@ -10,6 +10,7 @@ module.exports = (options, webpack) => {
     'nestjs-grpc',
     '@grpc/grpc-js',
     '@grpc/proto-loader',
+    '@prisma/client',
   ];
 
   return {
@@ -28,7 +29,7 @@ module.exports = (options, webpack) => {
       rules: [
         {
           test: /\.tsx?$/,
-          exclude: /node_modules/,
+          exclude: [/node_modules/, /prisma-client/],
           use: {
             loader: 'swc-loader',
             options: {

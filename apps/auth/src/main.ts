@@ -1,4 +1,3 @@
-const t0 = Date.now();
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -8,12 +7,10 @@ import helmet from 'helmet';
 
 import { AppModule } from './app/app.module';
 import { setupSwagger } from './swagger';
-console.log(`import 阶段 ${Date.now() - t0} ms`);
 
 async function bootstrap() {
     const expressInstance = express();
     const app = await NestFactory.create(AppModule, new ExpressAdapter(expressInstance));
-    console.log(`create 阶段 ${Date.now() - t0} ms`);
     const configService = app.get(ConfigService);
     const logger = app.get(Logger);
     const expressApp = app.getHttpAdapter().getInstance();
