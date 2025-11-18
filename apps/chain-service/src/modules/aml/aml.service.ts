@@ -2,21 +2,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../common/services/database.service';
 import { AmlSoapClient } from './aml.soap.client';
+import { AmlCloudAgentClient } from './aml.cloud-agent.client';
 import { AmlDecision, AmlPartyInfo, AmlScanRequestPayload, AmlScanResponsePayload } from './aml.types';
-import AmlConfig, { AmlEnforcementMode } from '../../common/config/aml.config';
+import AmlConfig, { AmlEnforcementMode, AmlDelegationType } from '../../common/config/aml.config';
 import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class AmlService {
   private readonly logger = new Logger(AmlService.name);
   private readonly enforcement: AmlEnforcementMode;
+  private readonly delegationType: AmlDelegationType;
 
   constructor(
     private readonly db: DatabaseService,
     private readonly soap: AmlSoapClient,
+    private readonly cloudAgent: AmlCloudAgentClient,
     amlCfg: ConfigType<typeof AmlConfig>
   ) {
     this.enforcement = amlCfg.enforcement;
+    this.delegationType = amlCfg.delegationType;
+    this.logger.log(`AML Service initialized with delegation type: ${this.delegationType}`);
   }
 
   async scanTransfer(input: {
@@ -48,11 +53,25 @@ export class AmlService {
 
     await (this.db as any).amlScanEvent.create({ data: { amlScanId: scan.id, type: 'REQUEST', payload: requestPayload as any } });
 
-    const response = await this.soap.realtimeScan(requestPayload);
+    // Delegate to the configured service (SOAP or Cloud Agent)
+    const response = await this.delegateScan(requestPayload);
 
     await this.persistResponse(scan.id, response);
 
     return { decision: response.decision, scanId: scan.id, correlationId: response.correlationId };
+  }
+
+  /**
+   * Delegate scan to the configured service (SOAP or Cloud Agent)
+   */
+  private async delegateScan(payload: AmlScanRequestPayload): Promise<AmlScanResponsePayload> {
+    if (this.delegationType === 'cloud_agent') {
+      this.logger.debug('Delegating scan to Cloud Intelligence Agent');
+      return this.cloudAgent.realtimeScan(payload);
+    } else {
+      this.logger.debug('Delegating scan to SOAP service');
+      return this.soap.realtimeScan(payload);
+    }
   }
 
   async persistResponse(scanId: string, response: AmlScanResponsePayload) {
@@ -94,11 +113,25 @@ export class AmlService {
     const pending = await (this.db as any).amlScan.findMany({ where: { status: { in: ['PENDING', 'REVIEW'] }, correlationId: { not: null } }, take: limit, orderBy: { createdAt: 'asc' } });
     for (const s of pending) {
       try {
-        const resp = await this.soap.queryResult(s.correlationId!);
+        // Use the configured delegation type for polling as well
+        const resp = await this.delegateQuery(s.correlationId!);
         await this.persistResponse(s.id, resp);
       } catch (err) {
         this.logger.warn(`Polling failed for scan ${s.id}: ${ (err as any)?.message || err }`);
       }
+    }
+  }
+
+  /**
+   * Delegate query to the configured service (SOAP or Cloud Agent)
+   */
+  private async delegateQuery(correlationId: string): Promise<AmlScanResponsePayload> {
+    if (this.delegationType === 'cloud_agent') {
+      this.logger.debug('Delegating query to Cloud Intelligence Agent');
+      return this.cloudAgent.queryResult(correlationId);
+    } else {
+      this.logger.debug('Delegating query to SOAP service');
+      return this.soap.queryResult(correlationId);
     }
   }
 }
