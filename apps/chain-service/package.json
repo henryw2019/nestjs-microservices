@@ -27,7 +27,6 @@
     },
     "dependencies": {
         "@repo/base-deps": "workspace:*",
-
         "@grpc/grpc-js": "^1.13.4",
         "@grpc/proto-loader": "^0.7.15",
         "@keyv/redis": "^4.4.0",
