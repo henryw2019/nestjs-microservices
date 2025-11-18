@@ -26,18 +26,18 @@
     },
     "dependencies": {
         "@repo/base-deps": "workspace:*",
-        "@keyv/redis": "^4.4.0"        
+        "@keyv/redis": "5.1.4"        
     },
     "devDependencies": {
-        "@nestjs/cli": "^11.0.10",
-        "@nestjs/schematics": "^11.0.9",
-        "@nestjs/testing": "^11.1.8",
+        "@nestjs/cli": "11.0.10",
+        "@nestjs/schematics": "11.0.9",
+        "@nestjs/testing": "11.1.9",
         "@swc/jest": "0.2.39",
-        "@types/express": "^5.0.0",
-        "@types/supertest": "^6.0.2",
-        "dotenv-cli": "^8.0.0",
-        "prisma": "5.22.0",
-        "supertest": "^7.0.0",
+        "@types/express": "5.0.5",
+        "@types/supertest": "6.0.3",
+        "dotenv-cli": "11.0.0",
+        "prisma": "6.19.0",
+        "supertest": "7.1.4",
         "swc-loader": "0.2.6"
     },
     "lint-staged": {

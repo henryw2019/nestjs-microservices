@@ -6,6 +6,7 @@ import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { join } from 'path';
 
 import { GrpcAuthModule } from '@/services/auth/grpc.auth.module';
+import { GrpcUserModule } from '@/services/user/grpc.user.module';
 import { createKeyv, Keyv } from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheableMemory } from 'cacheable';
@@ -126,6 +127,7 @@ const resolveLanguagesPath = (): string => {
             resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver],
         }),
         GrpcAuthModule,
+        GrpcUserModule,
     ],
     providers: [
         // Core Services

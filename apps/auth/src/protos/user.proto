@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+  rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse);
+}
+
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+message GetUserByIdResponse {
+  bool success = 1;
+  User user = 2;
+}
+
+message GetUserByEmailRequest {
+  string email = 1;
+}
+
+message GetUserByEmailResponse {
+  bool success = 1;
+  User user = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string phoneNumber = 5;
+  string avatar = 6;
+  bool isVerified = 7;
+  string role = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}

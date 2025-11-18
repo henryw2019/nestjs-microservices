@@ -14,8 +14,8 @@ import { UserAuthService } from 'src/modules/user/services/user.auth.service';
 export class AuthService {
     private readonly accessTokenSecret: string;
     private readonly refreshTokenSecret: string;
-    private readonly accessTokenExp: string;
-    private readonly refreshTokenExp: string;
+    private readonly accessTokenExp: number;
+    private readonly refreshTokenExp: number;
 
     constructor(
         private readonly configService: ConfigService,
@@ -25,10 +25,8 @@ export class AuthService {
     ) {
         this.accessTokenSecret = this.configService.get<string>('auth.accessToken.secret') ?? '';
         this.refreshTokenSecret = this.configService.get<string>('auth.refreshToken.secret') ?? '';
-        this.accessTokenExp =
-            this.configService.get<string>('auth.accessToken.expirationTime') ?? '';
-        this.refreshTokenExp =
-            this.configService.get<string>('auth.refreshToken.expirationTime') ?? '';
+        this.accessTokenExp = this.configService.get<number>('auth.accessToken.expirationTime') ?? 900; // 15m fallback
+        this.refreshTokenExp = this.configService.get<number>('auth.refreshToken.expirationTime') ?? 604800; // 7d fallback
     }
 
     async verifyToken(accessToken: string): Promise<IAuthPayload> {
