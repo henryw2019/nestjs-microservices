@@ -14,6 +14,7 @@ COPY . /usr/src/app
 WORKDIR /usr/src/app
 COPY pnpm-store.tar.gz /tmp/
 ENV CI=true
+ENV HUSKY=0
 RUN mkdir -p /pnpm && tar -C /pnpm -xzf /tmp/pnpm-store.tar.gz && rm /tmp/pnpm-store.tar.gz
 RUN --mount=type=cache,id=pnpm,target=${STORE_PATH} \
     pnpm config set store-dir /pnpm/pnpm-store && \

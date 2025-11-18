@@ -19,24 +19,7 @@ services:
           - PUT
           - PATCH
           - DELETE
-
-  - name: post-service
-    url: http://post-service:9002
-    routes:
-      - name: post-routes
-        paths:
-          - /post
-        strip_path: true
-        preserve_host: false
-        protocols:
-          - http
-          - https
-        methods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
+          - OPTIONS
 
   - name: chain-service
     url: http://chain-service:9003
@@ -55,6 +38,7 @@ services:
           - PUT
           - PATCH
           - DELETE
+          - OPTIONS
 
   - name: chain-reader-service
     url: http://chain-reader:9004
@@ -73,6 +57,7 @@ services:
           - PUT
           - PATCH
           - DELETE
+          - OPTIONS
 
 plugins:
   - name: rate-limiting

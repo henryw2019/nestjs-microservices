@@ -4,9 +4,9 @@
   "private": true,
   "description": "Base dependencies for NestJS microservices",
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
+        "node": ">=22.0.0",
+        "pnpm": ">=10.20.0"
+    },
   "dependencies": {
     "@nestjs/common": "^11.1.8",
     "@nestjs/core": "^11.1.8",
@@ -16,7 +16,7 @@
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/microservices": "^11.1.8",
-    "@prisma/client": "^5.21.1",
+    "@prisma/client": "5.22.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.5",
