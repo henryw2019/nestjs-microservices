@@ -19,8 +19,8 @@ docker run -d --name dev --network mynetwork --network-alias auth-service --netw
 docker run -d --name dev --network mynetwork --network-alias auth-service --network-alias chain-service --network-alias chain-reader --network-alias chain-indexer -v $(pwd):/app -p 9001:9001 -p 9003:9003 -p 9004:9004 node:22-alpine sh -c "tail -f /dev/null"
 
 # 制作开发镜像
-docker commit dev dev:1117
-docker save dev:1117 | gzip > dev-1117.tar.gz
+docker commit dev dev:1118-v3
+docker save dev:1118-v3 | gzip > dev-1118-v3.tar.gz
 
 ## AML 反洗钱扫描（chain-service）
 

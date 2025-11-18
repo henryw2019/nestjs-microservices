@@ -2,16 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { Prisma, PrismaClient } from '../../../prisma-client';
 
-const WRITE_ACTIONS: Prisma.PrismaAction[] = [
-    'create',
-    'createMany',
-    'update',
-    'updateMany',
-    'upsert',
-    'delete',
-    'deleteMany',
-];
-
 @Injectable()
 export class DatabaseService extends PrismaClient {
     private readonly logger = new Logger(DatabaseService.name);
@@ -19,19 +9,39 @@ export class DatabaseService extends PrismaClient {
     constructor() {
         super();
 
-        this.$use(async (params, next) => {
-            if (WRITE_ACTIONS.includes(params.action)) {
-                throw new Error(
-                    `Write operation "${params.action}" is disabled in chain-reader service.`,
-                );
-            }
+        const models = [
+            'block',
+            'tx',
+            'eRC20Transfer',
+            'eventLog',
+            'addressBalance',
+            'tokenMeta',
+        ] as const;
+        const writeMethods = new Set([
+            'create',
+            'createMany',
+            'update',
+            'updateMany',
+            'upsert',
+            'delete',
+            'deleteMany',
+        ]);
 
-            if (params.action === 'executeRaw' || params.action === 'runCommandRaw') {
-                throw new Error('Raw operations are disabled in chain-reader service.');
-            }
-
-            return next(params);
-        });
+        for (const m of models) {
+            const original = (this as any)[m];
+            (this as any)[m] = new Proxy(original, {
+                get(target, prop, receiver) {
+                    if (typeof prop === 'string' && writeMethods.has(prop)) {
+                        return () => {
+                            throw new Error(
+                                `Write operation "${prop}" is disabled in chain-reader service.`,
+                            );
+                        };
+                    }
+                    return Reflect.get(target, prop, receiver);
+                },
+            });
+        }
     }
 
     override $transaction(..._args: any[]): never {
