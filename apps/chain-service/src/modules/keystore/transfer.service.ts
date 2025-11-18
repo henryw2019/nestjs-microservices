@@ -7,12 +7,17 @@ import {
 } from '@nestjs/common';
 import { JsonRpcProvider, getAddress, Wallet, Contract, TransactionResponse } from 'ethers';
 import { KeyStoreService } from './keystore.service';
+import { AmlService } from '../aml/aml.service';
+import { BadRequestException as AmlBlock } from '@nestjs/common';
 import { TransferDto } from './dtos/transfer.dto';
 import { TransferResponseDto } from './dtos/transfer.response.dto';
 
 @Injectable()
 export class TransferService {
-    constructor(private readonly keyStoreService: KeyStoreService) {}
+    constructor(
+        private readonly keyStoreService: KeyStoreService,
+        private readonly amlService: AmlService,
+    ) {}
 
     private getProvider() {
         const url = process.env.ETH_RPC_URL || 'http://127.0.0.1:8545';
@@ -27,6 +32,23 @@ export class TransferService {
                 userId,
                 fromAddress,
             );
+            // AML realtime scan before submitting tx
+            const toAddress = getAddress(dto.to);
+            let toUserId = 'external';
+            try {
+                const toRec = await this.keyStoreService.getByAddress(toAddress);
+                toUserId = toRec.userId;
+            } catch (_) {
+                // keep default 'external'
+            }
+            const scan = await this.amlService.scanTransfer({
+                from: { userId, address: fromAddress },
+                to: { userId: toUserId, address: toAddress },
+                amount: dto.amount,
+            });
+            if (this.amlService.shouldBlock(scan.decision)) {
+                throw new AmlBlock(`AML blocked transfer: ${scan.decision}`);
+            }
             const provider = this.getProvider();
             const wallet = new Wallet(fromRec.privateKey, provider);
             const tx = {
@@ -36,6 +58,8 @@ export class TransferService {
             } as any;
 
             const resp = await wallet.sendTransaction(tx);
+            // link AML record to tx
+            try { await this.amlService.linkTx(scan.scanId, resp.hash); } catch {}
             return this.buildTransferResponse(resp, {
                 from: fromAddress,
                 to: dto.to,
@@ -56,11 +80,28 @@ export class TransferService {
                 userId,
                 fromAddress,
             );
+            // AML realtime scan before submitting tx
+            const toAddress = getAddress(dto.to);
+            let toUserId = 'external';
+            try {
+                const toRec = await this.keyStoreService.getByAddress(toAddress);
+                toUserId = toRec.userId;
+            } catch (_) {}
+            const scan = await this.amlService.scanTransfer({
+                from: { userId, address: fromAddress },
+                to: { userId: toUserId, address: toAddress },
+                amount: dto.amount,
+                tokenAddress: dto.token,
+            });
+            if (this.amlService.shouldBlock(scan.decision)) {
+                throw new AmlBlock(`AML blocked transfer: ${scan.decision}`);
+            }
             const provider = this.getProvider();
             const wallet = new Wallet(fromRec.privateKey, provider);
             const abi = ['function transfer(address to, uint256 amount) public returns (bool)'];
             const contract = new Contract(dto.token, abi, wallet);
             const tx = await contract.transfer(dto.to, dto.amount);
+            try { await this.amlService.linkTx(scan.scanId, tx.hash); } catch {}
             return this.buildTransferResponse(tx, {
                 from: fromAddress,
                 to: dto.to,

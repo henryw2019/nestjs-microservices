@@ -29,3 +29,53 @@ model Contract {
 
   @@map("contracts")
 }
+
+// Anti-Money-Laundering (AML) scan records for audit & enforcement
+enum AmlScanStatus {
+  PENDING
+  PASSED
+  REVIEW
+  FAILED
+  ERROR
+}
+
+model AmlScan {
+  id                   String        @id @default(uuid())
+  // business linkage (optional): tx hash once available
+  txHash               String?       @map("tx_hash")
+  // who/what we scanned
+  fromUserId           String        @map("from_user_id")
+  toUserId             String        @map("to_user_id")
+  fromAddress          String        @map("from_address")
+  toAddress            String        @map("to_address")
+  // external system references
+  requestRef           String?       @map("request_ref")
+  correlationId        String?       @unique @map("correlation_id")
+  // serialized snapshots
+  requestPayload       Json          @map("request_payload")
+  lastResponse         Json?         @map("last_response")
+  resultCode           String?       @map("result_code")
+  status               AmlScanStatus
+  errorMessage         String?       @map("error_message")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  events               AmlScanEvent[]
+
+  @@index([createdAt])
+  @@index([txHash])
+  @@map("aml_scans")
+}
+
+model AmlScanEvent {
+  id          String   @id @default(uuid())
+  amlScanId   String   @map("aml_scan_id")
+  type        String   // REQUEST | RESPONSE | ERROR
+  payload     Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  scan        AmlScan  @relation(fields: [amlScanId], references: [id], onDelete: Cascade)
+
+  @@index([amlScanId, createdAt])
+  @@map("aml_scan_events")
+}

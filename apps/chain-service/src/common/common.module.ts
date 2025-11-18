@@ -84,6 +84,18 @@ const resolveLanguagesPath = (): string => {
                 // Auth Service GRPC Configuration
                 GRPC_AUTH_URL: Joi.string().required(),
                 GRPC_AUTH_PACKAGE: Joi.string().default('auth'),
+
+                // AML SOAP Configuration
+                AML_WSDL_URL: Joi.string().allow('').default(''),
+                AML_ENDPOINT: Joi.string().allow('').default(''),
+                AML_USERNAME: Joi.string().allow('').default(''),
+                AML_PASSWORD: Joi.string().allow('').default(''),
+                AML_TIMEOUT_MS: Joi.number().default(15000),
+                AML_RETRY_ATTEMPTS: Joi.number().default(2),
+                AML_RETRY_DELAY_MS: Joi.number().default(500),
+                AML_ENFORCEMENT_MODE: Joi.string()
+                    .valid('block_on_fail', 'block_on_review', 'log_only')
+                    .default('block_on_fail'),
             }),
         }),
         CacheModule.registerAsync({
