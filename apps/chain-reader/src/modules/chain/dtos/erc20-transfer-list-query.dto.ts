@@ -13,34 +13,9 @@ export class Erc20TransferListQueryDto extends ApiBaseQueryDto {
     @IsString()
     token?: string;
 
-    @ApiPropertyOptional({ description: 'Sender address', example: '0x1234...' })
+    @ApiPropertyOptional({ description: 'From or To address', example: '0x1234...' })
     @IsOptional()
     @IsString()
-    from?: string;
+    refAddress?: string;
 
-    @ApiPropertyOptional({ description: 'Recipient address', example: '0x5678...' })
-    @IsOptional()
-    @IsString()
-    to?: string;
-
-    @ApiPropertyOptional({ description: 'Block number', example: '1000000' })
-    @IsOptional()
-    @IsString()
-    blockNumber?: string;
-
-    @ApiPropertyOptional({
-        description: 'Minimum transferred amount',
-        example: '1000000000000000000',
-    })
-    @IsOptional()
-    @IsString()
-    minValue?: string;
-
-    @ApiPropertyOptional({
-        description: 'Maximum transferred amount',
-        example: '5000000000000000000',
-    })
-    @IsOptional()
-    @IsString()
-    maxValue?: string;
 }

@@ -12,19 +12,15 @@ export class UserUpdateDto {
     email?: string;
 
     @ApiProperty({
-        description: 'User phone number (international format)',
+        description: 'User Identification number',
         required: false,
-        pattern: '^\\+?[1-9]\\d{1,14}$',
     })
     @IsOptional()
     @IsString()
-    @Matches(/^\+?[1-9]\d{1,14}$/, {
-        message: 'Phone number must be in valid international format',
-    })
     phoneNumber?: string;
 
     @ApiProperty({
-        description: 'User first name',
+        description: 'User name',
         required: false,
     })
     @IsOptional()

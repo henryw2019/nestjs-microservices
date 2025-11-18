@@ -120,19 +120,15 @@ export class ChainQueryService {
             where.blockNumber = BigInt(query.blockNumber);
         }
 
-        if (query.from) {
-            where.from = query.from;
-        }
-
-        if (query.to) {
-            where.to = query.to;
-        }
-
-        if (query.minValue || query.maxValue) {
-            where.value = {
-                ...(query.minValue ? { gte: new Prisma.Decimal(query.minValue) } : {}),
-                ...(query.maxValue ? { lte: new Prisma.Decimal(query.maxValue) } : {}),
-            };
+        if (query.refAddress) {
+            where.AND = [
+                {
+                    OR: [
+                        { from: query.refAddress }, 
+                        { to: query.refAddress }
+                    ],
+                },
+            ];
         }
 
         const paginationDto = this.pickPagination(query);
@@ -169,23 +165,15 @@ export class ChainQueryService {
             where.token = query.token;
         }
 
-        if (query.from) {
-            where.from = query.from;
-        }
-
-        if (query.to) {
-            where.to = query.to;
-        }
-
-        if (query.blockNumber) {
-            where.blockNumber = BigInt(query.blockNumber);
-        }
-
-        if (query.minValue || query.maxValue) {
-            where.value = {
-                ...(query.minValue ? { gte: new Prisma.Decimal(query.minValue) } : {}),
-                ...(query.maxValue ? { lte: new Prisma.Decimal(query.maxValue) } : {}),
-            };
+        if (query.refAddress) {
+            where.AND = [
+                {
+                    OR: [
+                        { from: query.refAddress }, 
+                        { to: query.refAddress }
+                    ],
+                },
+            ];
         }
 
         const paginationDto = this.pickPagination(query);

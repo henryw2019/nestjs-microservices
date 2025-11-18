@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { AdminOnly } from '@/common/decorators/auth-roles.decorator';
+// import { AdminOnly } from '@/common/decorators/auth-roles.decorator';
 import { ContractResponseDto } from './dtos/contract-response.dto';
 import { CreateContractDto } from './dtos/create-contract.dto';
 import { UpdateContractDto } from './dtos/update-contract.dto';
@@ -20,7 +20,7 @@ import { ExecuteContractFunctionDto } from './dtos/execute-contract-function.dto
 import { ContractExecutionResult, ContractService } from './contract.service';
 
 @ApiTags('contracts')
-@AdminOnly()
+// @AdminOnly()
 @Controller({ path: 'contracts', version: '1' })
 export class ContractController {
     constructor(private readonly contractService: ContractService) {}

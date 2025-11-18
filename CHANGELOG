@@ -1,0 +1,9 @@
+2025-11-18 改动
+1、auth服务中user表的firstname用来保存客户名称、Phonenumber用来保存证件号码
+2、chain-indexer的hex区块号规范化、tx失败也要刷新from账户余额
+3、chain-reader的.env.docker缓存时间改为3秒、缓存代码修改
+4、chain-reader的erc20-transfer、transaction 改from、to为refAddress查询
+5、chain-service的.env.docker 的chainid改为23333
+6、chain-service的contract服务取消仅管理员允许调用
+7、chain-service的keystore创建取消 userid输入
+8、kong配置增大rate-limiting

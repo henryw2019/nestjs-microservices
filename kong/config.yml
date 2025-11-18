@@ -96,16 +96,6 @@ plugins:
       max_age: 3600
 
   - name: rate-limiting
-    route: post-routes
-    config:
-      minute: 200
-      hour: 2000
-      day: 20000
-      policy: local
-      hide_client_headers: false
-      fault_tolerant: true
-
-  - name: rate-limiting
     route: chain-service-routes
     config:
       minute: 200
@@ -118,18 +108,18 @@ plugins:
   - name: rate-limiting
     route: chain-reader-routes
     config:
-      minute: 300
-      hour: 3000
-      day: 30000
+      minute: 30000
+      hour: 300000
+      day: 3000000
       policy: local
       hide_client_headers: false
       fault_tolerant: true
 
   - name: rate-limiting
     config:
-      minute: 300
-      hour: 3000
-      day: 30000
+      minute: 30000
+      hour: 300000
+      day: 3000000
       policy: local
       hide_client_headers: false
       fault_tolerant: true

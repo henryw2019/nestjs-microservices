@@ -2,11 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateKeyStoreDto {
-    @ApiProperty({ description: 'User id to bind', example: 'user-uuid' })
-    @IsString()
-    @IsNotEmpty()
-    userId!: string;
-
     @ApiPropertyOptional({
         description: 'Account name for user to identify address',
         example: 'My Main Wallet',
