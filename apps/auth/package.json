@@ -46,7 +46,6 @@
         "@types/cache-manager-ioredis": "2.0.8",
         "@types/config": "3.3.5",
         "@types/express": "5.0.5",
-        "@types/ms": "2.1.0",
         "@types/passport-jwt": "4.0.1",
         "@types/pg": "8.15.6",
         "@types/supertest": "6.0.3",
