@@ -47,7 +47,7 @@
         "@types/config": "^3.3.5",
 
         "@types/ms": "^0.7.34",
-        "@types/soap": "^0.42.7",
+        "@types/soap": "^0.21.0",
         "@types/passport-jwt": "^4.0.1",
         "@types/pg": "^8.11.10"
     },
