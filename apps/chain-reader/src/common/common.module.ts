@@ -8,6 +8,7 @@ import Keyv from 'keyv';
 import KeyvRedis from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
 import Joi from 'joi';
+import { existsSync } from 'fs';
 
 import configs from './config';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
@@ -91,7 +92,11 @@ import { HttpCacheInterceptor } from './interceptors/cache.interceptor';
         I18nModule.forRoot({
             fallbackLanguage: 'en',
             loaderOptions: {
-                path: join(__dirname, '../languages/'),
+                path: (() => {
+                    const devPath = join(__dirname, '../languages');      // src 或 dist/src
+                    const prodPath = join(__dirname, '../../languages');  // dist
+                    return existsSync(devPath) ? devPath : prodPath;
+                })(),
                 watch: process.env.NODE_ENV === 'development',
             },
             resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver],

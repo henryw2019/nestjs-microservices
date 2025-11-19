@@ -1,12 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { GrpcClientService } from 'nestjs-grpc';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { ValidateTokenRequest, ValidateTokenResponse } from '../../generated/auth';
 
-@Injectable()
-export class GrpcAuthService {
-    private readonly logger = new Logger(GrpcAuthService.name);
+interface AuthServiceClient {
+    ValidateToken(data: ValidateTokenRequest): any;
+}
 
-    constructor(private readonly grpcClientService: GrpcClientService) {}
+@Injectable()
+export class GrpcAuthService implements OnModuleInit {
+    private readonly logger = new Logger(GrpcAuthService.name);
+    private svc!: AuthServiceClient;
+
+    constructor(@Inject('AUTH_GRPC') private readonly client: ClientGrpc) {}
+
+    onModuleInit() {
+        this.svc = this.client.getService<AuthServiceClient>('AuthService');
+    }
 
     async validateToken(token: string): Promise<ValidateTokenResponse> {
         try {
@@ -14,10 +24,9 @@ export class GrpcAuthService {
 
             const request: ValidateTokenRequest = { token };
 
-            const response = await this.grpcClientService.call<
-                ValidateTokenRequest,
-                ValidateTokenResponse
-            >('AuthService', 'ValidateToken', request);
+            const response = await firstValueFrom<ValidateTokenResponse>(
+                this.svc.ValidateToken(request),
+            );
 
             this.logger.debug(`Token validation response: ${JSON.stringify(response)}`);
             return response;

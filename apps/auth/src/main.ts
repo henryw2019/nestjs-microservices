@@ -6,6 +6,9 @@ import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 
 import { AppModule } from './app/app.module';
+import { Transport } from '@nestjs/microservices';
+import { join } from 'path';
+import { existsSync } from 'fs';
 import { setupSwagger } from './swagger';
 
 async function bootstrap() {
@@ -14,6 +17,16 @@ async function bootstrap() {
     const configService = app.get(ConfigService);
     const logger = app.get(Logger);
     const expressApp = app.getHttpAdapter().getInstance();
+
+    const resolveProtoPath = (file: string) => {
+        const candidates = [
+            join(__dirname, 'protos', file),
+            join(__dirname, '..', 'protos', file),
+            join(process.cwd(), 'apps/auth/src/protos', file),
+        ];
+        for (const p of candidates) if (existsSync(p)) return p;
+        return candidates[0];
+    };
 
     // Basic configuration
     const appName = configService.getOrThrow<string>('app.name');
@@ -69,6 +82,21 @@ async function bootstrap() {
 
     // Graceful shutdown
     app.enableShutdownHooks();
+
+    // gRPC microservice
+    app.connectMicroservice({
+        transport: Transport.GRPC,
+        options: {
+            url: configService.get<string>('grpc.url', '0.0.0.0:50051'),
+            package: ['auth', 'user'],
+            protoPath: [resolveProtoPath('auth.proto'), resolveProtoPath('user.proto')],
+            loader: { keepCase: true, longs: String, enums: String, defaults: true, oneofs: true },
+            maxSendMessageLength: 10 * 1024 * 1024,
+            maxReceiveMessageLength: 10 * 1024 * 1024,
+        },
+    });
+
+    await app.startAllMicroservices();
 
     // Start server
     await app.listen(port, host);

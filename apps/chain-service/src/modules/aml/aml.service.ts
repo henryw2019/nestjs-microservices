@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { DatabaseService } from '../../common/services/database.service';
 import { AmlSoapClient } from './aml.soap.client';
@@ -14,7 +14,7 @@ export class AmlService {
   constructor(
     private readonly db: DatabaseService,
     private readonly soap: AmlSoapClient,
-    amlCfg: ConfigType<typeof AmlConfig>
+    @Inject(AmlConfig.KEY) amlCfg: ConfigType<typeof AmlConfig>
   ) {
     this.enforcement = amlCfg.enforcement;
   }

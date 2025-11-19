@@ -5,7 +5,6 @@ export default (options, webpack) => {
     'cache-manager',
     'class-validator',
     'class-transformer',
-    'nestjs-grpc',
     '@grpc/grpc-js',
     '@grpc/proto-loader',
     '@prisma/client',

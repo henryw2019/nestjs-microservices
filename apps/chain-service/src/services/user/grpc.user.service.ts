@@ -1,22 +1,32 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { GrpcClientService } from 'nestjs-grpc';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { GetUserByIdRequest, GetUserByIdResponse, GetUserByEmailRequest, GetUserByEmailResponse } from '../../generated/user';
 
-@Injectable()
-export class GrpcUserService {
-    private readonly logger = new Logger(GrpcUserService.name);
+interface UserServiceClient {
+    GetUserById(data: GetUserByIdRequest): any;
+    GetUserByEmail(data: GetUserByEmailRequest): any;
+}
 
-    constructor(private readonly grpcClientService: GrpcClientService) {}
+@Injectable()
+export class GrpcUserService implements OnModuleInit {
+    private readonly logger = new Logger(GrpcUserService.name);
+    private svc!: UserServiceClient;
+
+    constructor(@Inject('USER_GRPC') private readonly client: ClientGrpc) {}
+
+    onModuleInit() {
+        this.svc = this.client.getService<UserServiceClient>('UserService');
+    }
 
     async getUserById(userId: string): Promise<GetUserByIdResponse> {
         try {
             this.logger.debug(`Getting user by ID via gRPC: ${userId}`);
 
             const request: GetUserByIdRequest = { id: userId };
-            const response = await this.grpcClientService.call<
-                GetUserByIdRequest,
-                GetUserByIdResponse
-            >('UserService', 'GetUserById', request);
+            const response = await firstValueFrom<GetUserByIdResponse>(
+                this.svc.GetUserById(request),
+            );
 
             this.logger.debug(`Get user response: ${JSON.stringify(response)}`);
             return response;
@@ -31,10 +41,9 @@ export class GrpcUserService {
             this.logger.debug(`Getting user by email via gRPC: ${email}`);
 
             const request: GetUserByEmailRequest = { email };
-            const response = await this.grpcClientService.call<
-                GetUserByEmailRequest,
-                GetUserByEmailResponse
-            >('UserService', 'GetUserByEmail', request);
+            const response = await firstValueFrom<GetUserByEmailResponse>(
+                this.svc.GetUserByEmail(request),
+            );
 
             this.logger.debug(`Get user by email response: ${JSON.stringify(response)}`);
             return response;

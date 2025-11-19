@@ -15,11 +15,11 @@
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "node dist/main",
         "start:swc": "node -r @swc-node/register src/main.ts",
-        "dev": "pnpm run proto:generate && nest start --watch",
-        "dev:swc": "pnpm run proto:generate && nest start --watch --webpackPath webpack.config.js",
+        "dev": "nest start --watch",
+        "dev:swc": "nest start --watch --webpackPath webpack.config.js",
         "lint": "eslint \"{src,test}/**/*.ts\" --fix",
         "test": "jest --config test/jest.json --runInBand",
-        "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",
+        "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
         "prisma:generate": "dotenv -e .env.docker -- prisma generate",
         "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev",
         "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy",
@@ -37,7 +37,6 @@
         "bcryptjs": "3.0.3",
         "ethers": "6.15.0",
         "ioredis": "5.8.2",
-        "nestjs-grpc": "1.4.2",
         "soap": "1.6.0",
         "passport": "0.7.0",
         "passport-jwt": "4.0.1"
@@ -47,7 +46,8 @@
         "@types/config": "3.3.5",
         "@types/ms": "2.1.0",
         "@types/passport-jwt": "4.0.1",
-        "@types/pg": "8.15.6"
+        "@types/pg": "8.15.6",
+        "nestjs-grpc":"1.4.2"
     },
     "lint-staged": {
         "*.ts": [

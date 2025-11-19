@@ -18,7 +18,7 @@
         "dev:swc": "dotenv -e .env.docker nest start --watch --webpackPath webpack.config.js",
         "lint": "eslint \"{src,test}/**/*.ts\" --fix",
         "test": "jest --config test/jest.json --runInBand",
-        "proto:generate": "npx nestjs-grpc generate --proto ./src/protos --output ./src/generated",
+        "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
         "prisma:generate": "dotenv -e .env.docker -- prisma generate",
         "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev",
         "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy",
@@ -38,7 +38,8 @@
         "dotenv-cli": "11.0.0",
         "prisma": "6.19.0",
         "supertest": "7.1.4",
-        "swc-loader": "0.2.6"
+        "swc-loader": "0.2.6",
+        "nestjs-grpc":"1.4.2"
     },
     "lint-staged": {
         "*.ts": [

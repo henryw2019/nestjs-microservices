@@ -7,7 +7,7 @@ import {
     EventLog,
     AddressBalance,
     TokenMeta,
-} from '../../../../prisma-client';
+} from '../../../../prisma-client/client';
 import { DatabaseService } from '../../../common/services/database.service';
 import { QueryBuilderService } from '../../../common/services/query-builder.service';
 import { PaginatedResult } from '../../../common/interfaces/query-builder.interface';

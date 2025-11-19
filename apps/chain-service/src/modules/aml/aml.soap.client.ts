@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import AmlConfig from '../../common/config/aml.config';
 import { AmlDecision, AmlScanRequestPayload, AmlScanResponsePayload } from './aml.types';
@@ -9,7 +9,7 @@ export class AmlSoapClient {
   private readonly logger = new Logger(AmlSoapClient.name);
   private client?: Client;
 
-  constructor(private readonly amlCfg: ConfigType<typeof AmlConfig>) {}
+  constructor(@Inject(AmlConfig.KEY) private readonly amlCfg: ConfigType<typeof AmlConfig>) {}
 
   private async getClient(): Promise<Client> {
     if (this.client) return this.client;

@@ -19,7 +19,7 @@ import {
 } from 'ethers';
 import { promises as fs } from 'fs';
 import { isAbsolute, join, resolve } from 'path';
-import { Contract as ContractModel } from '../../../prisma-client';
+import { Contract as ContractModel } from '../../../prisma-client/client';
 
 import { DatabaseService } from '@/common/services/database.service';
 import { KeyStoreService } from '@/modules/keystore/keystore.service';
