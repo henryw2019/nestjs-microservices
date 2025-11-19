@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { $Enums, User } from '../../../../prisma-client';
+import { $Enums, User } from '../../../../prisma-client/client';
 import { Exclude } from 'class-transformer';
 
 export class UserResponseDto implements User {

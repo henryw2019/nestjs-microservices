@@ -1,4 +1,4 @@
-import { Role } from '../../../prisma-client';
+import { Role } from '../../../prisma-client/client';
 
 export interface IAuthUserPayload {
     id: string;

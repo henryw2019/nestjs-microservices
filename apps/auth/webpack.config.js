@@ -1,6 +1,4 @@
-const path = require('path');
-
-module.exports = (options, webpack) => {
+export default (options, webpack) => {
   const lazyImports = [
     '@nestjs/microservices',
     '@nestjs/websockets',

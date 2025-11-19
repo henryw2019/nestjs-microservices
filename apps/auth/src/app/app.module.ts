@@ -11,6 +11,20 @@ import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { AuthGrpcController } from './auth.grpc.controller';
 import { UserGrpcController } from './user.grpc.controller';
+import {existsSync} from "fs";
+
+function resolveProtoPath(file: string) {
+  const candidates = [
+    join(__dirname, '../protos', file),      // dist/src/protos
+    join(__dirname, '../../protos', file),   // dist/protos
+    join(process.cwd(), 'apps/auth/src/protos', file), // dev 源码
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) return p;
+  }
+  return candidates[0];
+}
+
 
 @Module({
     imports: [
@@ -21,29 +35,13 @@ import { UserGrpcController } from './user.grpc.controller';
         GrpcModule.forProviderAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => ({
-                protoPath: join(__dirname, '../protos/auth.proto'),
-                package: 'auth',
+                protoPaths : [resolveProtoPath('auth.proto'), resolveProtoPath('user.proto')],
+                package: ['auth', 'user'],
                 url: configService.get<string>('grpc.url', '0.0.0.0:50051'),
                 logging: {
                     enabled: true,
                     level: configService.get<string>('app.env') === 'development' ? 'debug' : 'log',
                     context: 'AuthService',
-                    logErrors: true,
-                    logPerformance: configService.get<string>('app.env') === 'development',
-                    logDetails: configService.get<string>('app.env') === 'development',
-                },
-            }),
-        }),
-        GrpcModule.forProviderAsync({
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                protoPath: join(__dirname, '../protos/user.proto'),
-                package: 'user',
-                url: configService.get<string>('grpc.url', '0.0.0.0:50051'),
-                logging: {
-                    enabled: true,
-                    level: configService.get<string>('app.env') === 'development' ? 'debug' : 'log',
-                    context: 'UserService',
                     logErrors: true,
                     logPerformance: configService.get<string>('app.env') === 'development',
                     logDetails: configService.get<string>('app.env') === 'development',

@@ -22,6 +22,7 @@ import Joi from 'joi';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
 import { CacheableMemory } from 'cacheable';
+import { existsSync } from 'fs';
 
 @Module({
     imports: [
@@ -97,7 +98,12 @@ import { CacheableMemory } from 'cacheable';
         I18nModule.forRoot({
             fallbackLanguage: 'en',
             loaderOptions: {
-                path: join(__dirname, '../languages/'),
+                // 兼容 dev(ts-node): src/languages 和 prod(build): dist/languages
+                path: (() => {
+                    const devPath = join(__dirname, '../languages');      // src 或 dist/src
+                    const prodPath = join(__dirname, '../../languages');  // dist
+                    return existsSync(devPath) ? devPath : prodPath;
+                })(),
                 watch: process.env.NODE_ENV === 'development',
             },
             resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver],
