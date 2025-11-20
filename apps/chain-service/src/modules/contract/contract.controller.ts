@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-// import { AdminOnly } from '@/common/decorators/auth-roles.decorator';
+import { AdminOnly, UserAndAdmin } from '@/common/decorators/auth-roles.decorator';
 import { ContractResponseDto } from './dtos/contract-response.dto';
 import { CreateContractDto } from './dtos/create-contract.dto';
 import { UpdateContractDto } from './dtos/update-contract.dto';
@@ -28,6 +28,7 @@ export class ContractController {
     @Post()
     @ApiOperation({ summary: 'Register a new contract with dynamic ABI support' })
     @ApiResponse({ status: HttpStatus.CREATED, type: ContractResponseDto })
+    @AdminOnly()
     create(@Body() dto: CreateContractDto): Promise<ContractResponseDto> {
         return this.contractService.create(dto);
     }
@@ -35,6 +36,7 @@ export class ContractController {
     @Get()
     @ApiOperation({ summary: 'List all registered contracts' })
     @ApiOkResponse({ type: [ContractResponseDto] })
+    @AdminOnly()
     findAll(): Promise<ContractResponseDto[]> {
         return this.contractService.findAll();
     }
@@ -42,6 +44,7 @@ export class ContractController {
     @Get(':id')
     @ApiOperation({ summary: 'Fetch contract metadata, optionally returning the ABI definition' })
     @ApiOkResponse({ type: ContractResponseDto })
+    @AdminOnly()
     findOne(
         @Param('id') id: string,
         @Query('withAbi') withAbi?: string,
@@ -56,6 +59,7 @@ export class ContractController {
     @Put(':id')
     @ApiOperation({ summary: 'Update contract metadata and optionally replace the ABI definition' })
     @ApiOkResponse({ type: ContractResponseDto })
+    @AdminOnly()
     update(@Param('id') id: string, @Body() dto: UpdateContractDto): Promise<ContractResponseDto> {
         return this.contractService.update(id, dto);
     }
@@ -63,6 +67,7 @@ export class ContractController {
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({ summary: 'Remove a contract and its associated ABI definition' })
+    @AdminOnly()
     async remove(@Param('id') id: string): Promise<void> {
         await this.contractService.remove(id);
     }
@@ -70,6 +75,7 @@ export class ContractController {
     @Post(':id/execute')
     @ApiOperation({ summary: 'Execute a contract function dynamically using the stored ABI' })
     @ApiOkResponse({ description: 'Result of the contract function execution' })
+    @UserAndAdmin()
     execute(
         @Param('id') id: string,
         @Body() dto: ExecuteContractFunctionDto,
