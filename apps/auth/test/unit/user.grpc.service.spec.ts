@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGrpcService } from 'src/modules/user/services/user.grpc.service';
 import { UserAuthService } from 'src/modules/user/services/user.auth.service';
-import { Role } from '@prisma/client';
+import { Role } from '../../prisma-client/client';
 
 describe('UserGrpcService', () => {
     let service: UserGrpcService;

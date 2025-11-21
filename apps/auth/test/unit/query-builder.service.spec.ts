@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Role } from '@prisma/client';
+import { Role } from '../../prisma-client/client';
 
 import { DatabaseService } from 'src/common/services/database.service';
 import { QueryBuilderService } from 'src/common/services/query-builder.service';
