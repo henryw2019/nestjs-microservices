@@ -1,4 +1,4 @@
-export default (options, webpack) => {
+module.exports = (options, webpack) => {
   const lazyImports = [
     '@nestjs/microservices',
     '@nestjs/websockets',
@@ -9,7 +9,7 @@ export default (options, webpack) => {
     '@grpc/proto-loader',
     '@prisma/client',
   ];
-  
+
   return {
     ...options,
     target: 'node',
