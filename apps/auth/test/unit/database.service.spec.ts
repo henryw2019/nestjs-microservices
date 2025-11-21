@@ -20,16 +20,17 @@ describe('DatabaseService', () => {
             const logSpy = jest.spyOn(databaseService['logger'], 'log').mockImplementation();
             await databaseService.onModuleInit();
             expect((databaseService as any).$connect).toHaveBeenCalled();
-            expect(logSpy).toHaveBeenCalledWith('✅ Database connection established');
+            expect(logSpy).toHaveBeenCalledWith('Database connection established');
         });
 
         it('should throw error when database connection fails', async () => {
             const mockError = new Error('Connection failed');
             const errorSpy = jest.spyOn(databaseService['logger'], 'error').mockImplementation();
             (databaseService as any).$connect = jest.fn().mockRejectedValue(mockError);
+
             await expect(databaseService.onModuleInit()).rejects.toThrow('Connection failed');
             expect((databaseService as any).$connect).toHaveBeenCalled();
-            expect(errorSpy).toHaveBeenCalledWith('❌ Failed to connect to database', mockError);
+            expect(errorSpy).toHaveBeenCalledWith('Failed to connect to database', mockError);
         });
     });
 
@@ -38,17 +39,18 @@ describe('DatabaseService', () => {
             const logSpy = jest.spyOn(databaseService['logger'], 'log').mockImplementation();
             await databaseService.onModuleDestroy();
             expect((databaseService as any).$disconnect).toHaveBeenCalled();
-            expect(logSpy).toHaveBeenCalledWith('🔌 Database connection closed');
+            expect(logSpy).toHaveBeenCalledWith('Database connection closed');
         });
 
         it('should log error when database disconnection fails', async () => {
             const mockError = new Error('Disconnection failed');
             const errorSpy = jest.spyOn(databaseService['logger'], 'error').mockImplementation();
             (databaseService as any).$disconnect = jest.fn().mockRejectedValue(mockError);
+
             await databaseService.onModuleDestroy();
             expect((databaseService as any).$disconnect).toHaveBeenCalled();
             expect(errorSpy).toHaveBeenCalledWith(
-                '❌ Error closing database connection',
+                'Error closing database connection',
                 mockError,
             );
         });
@@ -63,6 +65,7 @@ describe('DatabaseService', () => {
                 database: {
                     status: 'up',
                     connection: 'active',
+                    responseTime: 'normal',
                 },
             });
             expect((databaseService as any).$queryRaw).toHaveBeenCalledWith(
@@ -81,6 +84,7 @@ describe('DatabaseService', () => {
                     status: 'down',
                     connection: 'failed',
                     error: mockError.message,
+                    responseTime: 'timeout',
                 },
             });
             expect((databaseService as any).$queryRaw).toHaveBeenCalledWith(
@@ -99,6 +103,7 @@ describe('DatabaseService', () => {
                     status: 'down',
                     connection: 'failed',
                     error: mockError.message,
+                    responseTime: 'timeout',
                 },
             });
             expect(errorSpy).toHaveBeenCalledWith('Database health check failed', mockError);
@@ -114,6 +119,7 @@ describe('DatabaseService', () => {
                     status: 'down',
                     connection: 'failed',
                     error: mockError.message,
+                    responseTime: 'timeout',
                 },
             });
             expect(errorSpy).toHaveBeenCalledWith('Database health check failed', mockError);
@@ -160,6 +166,7 @@ describe('DatabaseService', () => {
                 database: {
                     status: 'up',
                     connection: 'active',
+                    responseTime: 'normal',
                 },
             });
         });
@@ -171,6 +178,7 @@ describe('DatabaseService', () => {
                 database: {
                     status: 'up',
                     connection: 'active',
+                    responseTime: 'normal',
                 },
             });
         });

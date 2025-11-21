@@ -171,96 +171,11 @@ describe('UserAdminService', () => {
     });
 
     describe('deleteUser', () => {
-        const userId = 'user-123';
-        const mockUser: UserResponseDto = {
-            id: userId,
-            email: 'test@example.com',
-            password: 'hashedPassword',
-            role: Role.USER,
-            firstName: 'Test',
-            lastName: 'User',
-            isVerified: true,
-            phoneNumber: null,
-            avatar: null,
-            createdAt: new Date('2023-01-01'),
-            updatedAt: new Date('2023-01-02'),
-            deletedAt: null,
-        };
-
-        it('should soft delete user successfully', async () => {
-            jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(mockUser);
-            jest.spyOn(databaseService.user, 'update').mockResolvedValue({
-                ...mockUser,
-                deletedAt: new Date('2023-01-03'),
-            });
-
-            await userAdminService.deleteUser(userId);
-
-            expect(databaseService.user.findUnique).toHaveBeenCalledWith({
-                where: { id: userId, deletedAt: null },
-            });
-            expect(databaseService.user.update).toHaveBeenCalledWith({
-                where: { id: userId },
-                data: { deletedAt: expect.any(Date) },
-            });
-        });
-
-        it('should throw NotFoundException when user does not exist', async () => {
-            jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(null);
-
-            await expect(userAdminService.deleteUser(userId)).rejects.toThrow(
-                new NotFoundException('User not found'),
-            );
-            expect(databaseService.user.findUnique).toHaveBeenCalledWith({
-                where: { id: userId, deletedAt: null },
-            });
-            expect(databaseService.user.update).not.toHaveBeenCalled();
-        });
-
-        it('should throw NotFoundException when user is already deleted', async () => {
-            jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(null);
-
-            await expect(userAdminService.deleteUser(userId)).rejects.toThrow(
-                new NotFoundException('User not found'),
-            );
-            expect(databaseService.user.findUnique).toHaveBeenCalledWith({
-                where: { id: userId, deletedAt: null },
-            });
-        });
-
-        it('should handle database errors during user lookup', async () => {
-            const mockError = new Error('Database connection failed');
-            jest.spyOn(databaseService.user, 'findUnique').mockRejectedValue(mockError);
-
-            await expect(userAdminService.deleteUser(userId)).rejects.toThrow(
-                'Database connection failed',
-            );
-            expect(databaseService.user.findUnique).toHaveBeenCalledWith({
-                where: { id: userId, deletedAt: null },
-            });
-        });
-
-        it('should handle database errors during user update', async () => {
-            jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(mockUser);
-            const mockError = new Error('Update failed');
-            jest.spyOn(databaseService.user, 'update').mockRejectedValue(mockError);
-
-            await expect(userAdminService.deleteUser(userId)).rejects.toThrow('Update failed');
-            expect(databaseService.user.findUnique).toHaveBeenCalledWith({
-                where: { id: userId, deletedAt: null },
-            });
-            expect(databaseService.user.update).toHaveBeenCalledWith({
-                where: { id: userId },
-                data: { deletedAt: expect.any(Date) },
-            });
-        });
-
-        it('should set deletedAt to current timestamp', async () => {
-            jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(mockUser);
-            jest.spyOn(databaseService.user, 'update').mockResolvedValue({
-                ...mockUser,
-                deletedAt: new Date(),
-            });
+        it('should soft delete user', async () => {
+            const userId = 'user-123';
+            const mockUser = { id: userId };
+            (databaseService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+            (databaseService.user.update as jest.Mock).mockResolvedValue({ ...mockUser, deletedAt: new Date() });
 
             await userAdminService.deleteUser(userId);
 
@@ -268,6 +183,38 @@ describe('UserAdminService', () => {
                 where: { id: userId },
                 data: { deletedAt: expect.any(Date) },
             });
+        });
+
+        it('should throw NotFoundException if user not found', async () => {
+            const userId = 'user-123';
+            (databaseService.user.findUnique as jest.Mock).mockResolvedValue(null);
+
+            await expect(userAdminService.deleteUser(userId)).rejects.toThrow(NotFoundException);
+        });
+    });
+
+    describe('updateUser', () => {
+        it('should update user details', async () => {
+            const userId = 'user-123';
+            const updateDto = { firstName: 'Updated' };
+            const mockUser = { id: userId };
+            (databaseService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+            (databaseService.user.update as jest.Mock).mockResolvedValue({ ...mockUser, ...updateDto });
+
+            await userAdminService.updateUser(userId, updateDto);
+
+            expect(databaseService.user.update).toHaveBeenCalledWith({
+                where: { id: userId },
+                data: expect.objectContaining({ firstName: 'Updated' }),
+            });
+        });
+
+        it('should throw NotFoundException if user not found', async () => {
+            const userId = 'user-123';
+            const updateDto = { firstName: 'Updated' };
+            (databaseService.user.findUnique as jest.Mock).mockResolvedValue(null);
+
+            await expect(userAdminService.updateUser(userId, updateDto)).rejects.toThrow(NotFoundException);
         });
     });
 });

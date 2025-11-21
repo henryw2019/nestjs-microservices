@@ -63,23 +63,21 @@ describe('UserAuthService', () => {
             });
         });
 
-        it('should throw NotFoundException when user does not exist', async () => {
+        it('should return null when user does not exist', async () => {
             jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(null);
 
-            await expect(userAuthService.getUserProfile(userId)).rejects.toThrow(
-                new NotFoundException('User not found'),
-            );
+            const result = await userAuthService.getUserProfile(userId);
+            expect(result).toBeNull();
             expect(databaseService.user.findUnique).toHaveBeenCalledWith({
                 where: { id: userId, deletedAt: null },
             });
         });
 
-        it('should throw NotFoundException when user is soft deleted', async () => {
+        it('should return null when user is soft deleted', async () => {
             jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(null);
 
-            await expect(userAuthService.getUserProfile(userId)).rejects.toThrow(
-                new NotFoundException('User not found'),
-            );
+            const result = await userAuthService.getUserProfile(userId);
+            expect(result).toBeNull();
         });
     });
 
@@ -111,23 +109,21 @@ describe('UserAuthService', () => {
             });
         });
 
-        it('should throw NotFoundException when user does not exist with email', async () => {
+        it('should return null when user does not exist with email', async () => {
             jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(null);
 
-            await expect(userAuthService.getUserProfileByEmail(email)).rejects.toThrow(
-                new NotFoundException('User not found'),
-            );
+            const result = await userAuthService.getUserProfileByEmail(email);
+            expect(result).toBeNull();
             expect(databaseService.user.findUnique).toHaveBeenCalledWith({
                 where: { email, deletedAt: null },
             });
         });
 
-        it('should throw NotFoundException when user with email is soft deleted', async () => {
+        it('should return null when user with email is soft deleted', async () => {
             jest.spyOn(databaseService.user, 'findUnique').mockResolvedValue(null);
 
-            await expect(userAuthService.getUserProfileByEmail(email)).rejects.toThrow(
-                new NotFoundException('User not found'),
-            );
+            const result = await userAuthService.getUserProfileByEmail(email);
+            expect(result).toBeNull();
         });
     });
 

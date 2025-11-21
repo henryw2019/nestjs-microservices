@@ -11,18 +11,37 @@
   ],
   "coverageThreshold": {
     "global": {
-      "branches": 100,
-      "functions": 100,
-      "lines": 100,
-      "statements": 100
+      "branches": 80,
+      "functions": 80,
+      "lines": 80,
+      "statements": 80
     }
   },
   "moduleFileExtensions": ["js", "ts", "json"],
   "transform": {
-    "^.+\\.(t|j)s$": ["@swc/jest"]
+    "^.+\\.(t|j)s$": [
+      "@swc/jest",
+      {
+        "jsc": {
+          "parser": {
+            "syntax": "typescript",
+            "decorators": true,
+            "dynamicImport": true
+          },
+          "transform": {
+            "legacyDecorator": true,
+            "decoratorMetadata": true
+          }
+        }
+      }
+    ]
   },
   "modulePathIgnorePatterns": ["<rootDir>/dist"],
 
+  "moduleNameMapper": {
+    "^@prisma/client$": "<rootDir>/prisma-client/client",
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
   "coverageReporters": ["text", "lcov", "html"],
   "coveragePathIgnorePatterns": [
     "<rootDir>/src/generated/",

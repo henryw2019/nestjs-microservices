@@ -4,7 +4,7 @@ import { Logger } from '@nestjs/common';
 import { HashService } from 'src/common/services/hash.service';
 
 // Mock bcrypt
-jest.mock('bcrypt');
+jest.mock('bcryptjs');
 
 describe('HashService', () => {
     let hashService: HashService;
