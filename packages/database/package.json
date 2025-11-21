@@ -24,7 +24,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "generate": "pnpm run generate:indexer && pnpm run generate:auth && pnpm run generate:chain-service && node scripts/fix-imports.js",
+    "prisma:generate": "pnpm run generate",
+    "generate": "pnpm run generate:indexer && pnpm run generate:auth && pnpm run generate:chain-service",
     "generate:indexer": "prisma generate --schema=./prisma/indexer/schema.prisma",
     "generate:auth": "prisma generate --schema=./prisma/auth/schema.prisma",
     "generate:chain-service": "prisma generate --schema=./prisma/chain-service/schema.prisma"

@@ -20,7 +20,6 @@
         "lint": "eslint \"{src,test}/**/*.ts\" --fix",
         "test": "jest --config test/jest.json --runInBand",
         "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
-        "prisma:generate": "pnpm --filter @repo/database run generate:chain-service",
         "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev --schema ../../packages/database/prisma/chain-service/schema.prisma",
         "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy --schema ../../packages/database/prisma/chain-service/schema.prisma",
         "prisma:studio": "dotenv -e .env.docker -- prisma studio --schema ../../packages/database/prisma/chain-service/schema.prisma"
