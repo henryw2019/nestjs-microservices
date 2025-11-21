@@ -19,23 +19,25 @@
         "test": "NODE_ENV=local jest --config test/jest.json --runInBand",
         "test:e2e": "NODE_ENV=local jest --config test/jest-e2e.json --runInBand",
         "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
-        "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev --schema ../../packages/database/prisma/auth/schema.prisma",
-        "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy --schema ../../packages/database/prisma/auth/schema.prisma",
-        "prisma:studio": "dotenv -e .env.docker -- prisma studio --schema ../../packages/database/prisma/auth/schema.prisma"
+        "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev --config ../../packages/database/prisma/auth/prisma.config.ts",
+        "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy --config ../../packages/database/prisma/auth/prisma.config.ts",
+        "prisma:studio": "dotenv -e .env.docker -- prisma studio --config ../../packages/database/prisma/auth/prisma.config.ts"
     },
     "dependencies": {
-        "@repo/base-deps": "workspace:*",
-        "@repo/database": "workspace:*",
         "@grpc/grpc-js": "1.14.1",
         "@grpc/proto-loader": "0.8.0",
         "@keyv/redis": "5.1.4",
         "@nestjs/jwt": "11.0.1",
         "@nestjs/passport": "11.0.5",
+        "@prisma/adapter-pg": "^7.0.0",
+        "@repo/base-deps": "workspace:*",
+        "@repo/database": "workspace:*",
         "@sentry/node": "10.25.0",
         "bcryptjs": "3.0.3",
         "ioredis": "5.8.2",
         "passport": "0.7.0",
-        "passport-jwt": "4.0.1"
+        "passport-jwt": "4.0.1",
+        "pg": "^8.16.3"
     },
     "devDependencies": {
         "@faker-js/faker": "10.1.0",
@@ -50,12 +52,12 @@
         "@types/pg": "8.15.6",
         "@types/supertest": "6.0.3",
         "dotenv-cli": "11.0.0",
-        "prisma": "6.19.0",
+        "nestjs-grpc": "1.4.2",
+        "prisma": "7.0.0",
         "source-map-support": "0.5.21",
         "supertest": "7.1.4",
         "swc-loader": "0.2.6",
-        "ts-loader": "9.5.4",
-        "nestjs-grpc":"1.4.2"
+        "ts-loader": "9.5.4"
     },
     "lint-staged": {
         "*.ts": [

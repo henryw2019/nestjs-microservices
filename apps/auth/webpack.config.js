@@ -9,7 +9,7 @@ export default (options, webpack) => {
     '@grpc/proto-loader',
     '@prisma/client',
   ];
-
+  
   return {
     ...options,
     target: 'node',

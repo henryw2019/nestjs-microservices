@@ -37,8 +37,8 @@
     "typescript": "5.9.3"
   },
   "overrides": {
-    "prisma": "6.19.0",
-    "@prisma/client": "6.19.0"
+    "prisma": "7.0.0",
+    "@prisma/client": "7.0.0"
   },
   "name": "nestjs-microservices-monorepo",
   "packageManager": "pnpm@10.20.0",

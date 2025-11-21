@@ -1,13 +1,17 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { PrismaClient } from '@repo/database/chain-service';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
 export class DatabaseService extends PrismaClient {
     protected logger: Logger;
 
     constructor() {
-        super();
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        const adapter = new PrismaPg(pool);
+        super({ adapter });
         this.logger = new Logger(DatabaseService.name);
     }
 

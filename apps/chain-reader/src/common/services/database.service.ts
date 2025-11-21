@@ -1,13 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { Prisma, PrismaClient } from '@repo/database/indexer';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
 export class DatabaseService extends PrismaClient {
     private readonly logger = new Logger(DatabaseService.name);
 
     constructor() {
-        super();
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        const adapter = new PrismaPg(pool);
+        super({ adapter });
 
         const models = [
             'block',

@@ -26,16 +26,17 @@
     "build": "tsc",
     "prisma:generate": "pnpm run generate",
     "generate": "pnpm run generate:indexer && pnpm run generate:auth && pnpm run generate:chain-service",
-    "generate:indexer": "prisma generate --schema=./prisma/indexer/schema.prisma",
-    "generate:auth": "prisma generate --schema=./prisma/auth/schema.prisma",
-    "generate:chain-service": "prisma generate --schema=./prisma/chain-service/schema.prisma"
+    "generate:indexer": "prisma generate --config=./prisma/indexer/prisma.config.ts",
+    "generate:auth": "prisma generate --config=./prisma/auth/prisma.config.ts",
+    "generate:chain-service": "prisma generate --config=./prisma/chain-service/prisma.config.ts"
   },
   "dependencies": {
-    "@prisma/client": "6.19.0"
+    "@prisma/client": "7.0.0",
+    "@prisma/client-runtime-utils": "7.0.0"
   },
   "devDependencies": {
-    "prisma": "6.19.0",
-    "typescript": "^5.7.3",
-    "@types/node": "^22.10.7"
+    "@types/node": "^22.10.7",
+    "prisma": "7.0.0",
+    "typescript": "^5.7.3"
   }
 }
