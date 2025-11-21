@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
+import { Body, Controller, Get, Put, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 
 import { UserAuthService } from '../services/user.auth.service';
@@ -27,7 +27,9 @@ export class UserAuthController {
         type: SwaggerResponse(UserResponseDto),
     })
     async getUserProfile(@AuthUser('id') userId: string): Promise<UserResponseDto> {
-        return this.userAuthService.getUserProfile(userId);
+        const user = await this.userAuthService.getUserProfile(userId);
+        if (!user) throw new NotFoundException('User not found');
+        return user;
     }
 
     @UserAndAdmin()

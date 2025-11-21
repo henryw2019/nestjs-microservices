@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../prisma-client"
+  output   = "../../src/generated/chain-service-client"
   binaryTargets = ["native"]
 }
 
@@ -49,34 +49,14 @@ model AmlScan {
   toUserId             String        @map("to_user_id")
   fromAddress          String        @map("from_address")
   toAddress            String        @map("to_address")
-  // external system references
-  requestRef           String?       @map("request_ref")
-  correlationId        String?       @unique @map("correlation_id")
-  // serialized snapshots
-  requestPayload       Json          @map("request_payload")
-  lastResponse         Json?         @map("last_response")
-  resultCode           String?       @map("result_code")
+  
+  // result
   status               AmlScanStatus
-  errorMessage         String?       @map("error_message")
+  riskScore            Float?        @map("risk_score")
+  details              Json?         // full JSON response from AML provider
+  
   createdAt            DateTime      @default(now()) @map("created_at")
   updatedAt            DateTime      @updatedAt @map("updated_at")
 
-  events               AmlScanEvent[]
-
-  @@index([createdAt])
-  @@index([txHash])
   @@map("aml_scans")
-}
-
-model AmlScanEvent {
-  id          String   @id @default(uuid())
-  amlScanId   String   @map("aml_scan_id")
-  type        String   // REQUEST | RESPONSE | ERROR
-  payload     Json
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  scan        AmlScan  @relation(fields: [amlScanId], references: [id], onDelete: Cascade)
-
-  @@index([amlScanId, createdAt])
-  @@map("aml_scan_events")
 }

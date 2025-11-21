@@ -79,7 +79,7 @@ async function bootstrap() {
         void gracefulShutdown('SIGINT');
     });
 
-    await app.listen(port, host);
+    await app.listen(port || 3000, host || '0.0.0.0');
 
     logger.log(`🚀 ${appName} started at http://${host}:${port}`);
     if (env !== 'production') {

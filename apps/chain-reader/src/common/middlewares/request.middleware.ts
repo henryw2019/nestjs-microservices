@@ -11,7 +11,7 @@ export class RequestMiddleware implements NestMiddleware {
         const startTime = Date.now();
         const requestId = this.generateRequestId();
 
-        request['requestId'] = requestId;
+        (request as any)['requestId'] = requestId;
         response.setHeader('X-Request-ID', requestId);
 
         this.logger.log(`→ ${method} ${originalUrl} - ${ip} ${userAgent} [${requestId}]`);

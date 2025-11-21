@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HashService } from '../../src/common/services/hash.service';
 import * as bcrypt from 'bcryptjs';
 
-jest.mock('bcrypt');
+jest.mock('bcryptjs');
 const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
 
 describe('HashService', () => {

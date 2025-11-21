@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
-import { Prisma, PrismaClient } from '../../../prisma-client/client';
+import { Prisma, PrismaClient } from '@repo/database/indexer';
 
 @Injectable()
 export class DatabaseService extends PrismaClient {

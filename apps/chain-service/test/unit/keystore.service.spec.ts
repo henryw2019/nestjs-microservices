@@ -55,14 +55,15 @@ describe('KeyStoreService', () => {
         expect(databaseMock.keyStore.create).toHaveBeenCalledWith({
             data: {
                 userId: 'user_1',
-                address: ethers.utils.getAddress(fixedWallet.address),
+                address: ethers.getAddress(fixedWallet.address),
                 privateKey: fixedWallet.privateKey,
+                accountName: null,
             },
         });
         expect(result).toEqual({
             id: 'ks_1',
             userId: 'user_1',
-            address: ethers.utils.getAddress(fixedWallet.address),
+            address: ethers.getAddress(fixedWallet.address),
             createdAt: createdRecord.createdAt,
         });
     });
@@ -115,7 +116,7 @@ describe('KeyStoreService', () => {
         expect(databaseMock.keyStore.findFirst).toHaveBeenCalledWith({
             where: {
                 userId: 'user_1',
-                address: ethers.utils.getAddress('0x3333333333333333333333333333333333333333'),
+                address: ethers.getAddress('0x3333333333333333333333333333333333333333'),
             },
         });
         expect(result).toBe(record);

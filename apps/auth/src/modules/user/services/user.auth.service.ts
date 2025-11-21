@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/common/services/database.service';
-import { Role } from '../../../../prisma-client/client';
+import { Role } from '@repo/database/auth';
 import { UserResponseDto } from '../dtos/user.response.dto';
 import { UserUpdateDto } from '../dtos/user.update.dto';
 
@@ -24,6 +24,7 @@ export class UserAuthService {
 
     async updateUserProfile(userId: string, updateDto: UserUpdateDto): Promise<UserResponseDto> {
         const user = await this.getUserProfile(userId);
+        if (!user) throw new NotFoundException('User not found');
 
         const updatedUser = await this.databaseService.user.update({
             where: { id: user.id },
@@ -42,7 +43,7 @@ export class UserAuthService {
     async createUser(data: Partial<UserResponseDto>): Promise<UserResponseDto> {
         const user = await this.databaseService.user.create({
             data: {
-                email: data.email,
+                email: data.email!,
                 firstName: data.firstName?.trim() || '',
                 lastName: data.lastName?.trim() || '',
                 phoneNumber: data.phoneNumber,

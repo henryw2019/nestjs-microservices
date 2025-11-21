@@ -4,16 +4,16 @@ import { Type } from 'class-transformer';
 // Base API Response DTO
 export abstract class ApiBaseResponseDto {
     @ApiProperty({ description: 'HTTP Status code', example: 200 })
-    statusCode: number;
+    statusCode!: number;
 
     @ApiProperty({
         description: 'Timestamp of the response',
         example: new Date().toISOString(),
     })
-    timestamp: string;
+    timestamp!: string;
 
     @ApiProperty({ description: 'Response message', example: 'Success' })
-    message: string;
+    message!: string;
 }
 
 // Generic response DTO with data
@@ -31,7 +31,7 @@ export function SwaggerResponse<TModel>(model: new () => TModel) {
             description: 'Response data',
         })
         @Type(() => model)
-        data: TModel;
+        data!: TModel;
     }
 
     Object.defineProperty(SwaggerResponseType, 'name', {
@@ -46,7 +46,7 @@ export function SwaggerArrayResponse<TModel>(model: new () => TModel) {
     class SwaggerResponseType extends ApiResponseDto<TModel[]> {
         @ApiProperty({ type: () => model, isArray: true })
         @Type(() => model)
-        data: TModel[];
+        data!: TModel[];
     }
 
     Object.defineProperty(SwaggerResponseType, 'name', {
@@ -59,22 +59,22 @@ export function SwaggerArrayResponse<TModel>(model: new () => TModel) {
 // Metadata DTO
 export class PaginationMetaDto {
     @ApiProperty({ example: 1 })
-    page: number;
+    page!: number;
 
     @ApiProperty({ example: 10 })
-    limit: number;
+    limit!: number;
 
     @ApiProperty({ example: 100 })
-    total: number;
+    total!: number;
 
     @ApiProperty({ example: 10 })
-    totalPages: number;
+    totalPages!: number;
 
     @ApiProperty({ example: true })
-    hasNextPage: boolean;
+    hasNextPage!: boolean;
 
     @ApiProperty({ example: false })
-    hasPreviousPage: boolean;
+    hasPreviousPage!: boolean;
 }
 
 // SwaggerPaginatedResponse generator
@@ -82,11 +82,11 @@ export function SwaggerPaginatedResponse<TModel>(model: new () => TModel) {
     class PaginatedResultDto {
         @ApiProperty({ isArray: true, type: () => model })
         @Type(() => model)
-        items: TModel[];
+        items!: TModel[];
 
         @ApiProperty({ type: () => PaginationMetaDto })
         @Type(() => PaginationMetaDto)
-        meta: PaginationMetaDto;
+        meta!: PaginationMetaDto;
     }
 
     class SwaggerResponseType extends ApiResponseDto<PaginatedResultDto> {
@@ -95,7 +95,7 @@ export function SwaggerPaginatedResponse<TModel>(model: new () => TModel) {
             description: 'Paginated response data',
         })
         @Type(() => PaginatedResultDto)
-        data: PaginatedResultDto;
+        data!: PaginatedResultDto;
     }
 
     Object.defineProperty(PaginatedResultDto, 'name', {

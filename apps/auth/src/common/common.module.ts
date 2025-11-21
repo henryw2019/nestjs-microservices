@@ -75,7 +75,7 @@ import { existsSync } from 'fs';
         CacheModule.registerAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
-                const ttl = configService.get<number>('redis.ttl') * 1000;
+                const ttl = (configService.get<number>('redis.ttl') || 3600) * 1000;
                 const redisUrl = configService.get<string>('redis.url');
                 return {
                     stores: [

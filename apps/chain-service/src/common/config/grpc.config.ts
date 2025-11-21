@@ -9,8 +9,8 @@ export default registerAs('grpc', (): IGrpcConfig => {
     const authGrpcPackage = process.env.GRPC_AUTH_PACKAGE;
 
     return {
-        url: grpcUrl,
-        package: grpcPackage,
+        url: grpcUrl || '',
+        package: grpcPackage || '',
         authUrl: authGrpcUrl,
         authPackage: authGrpcPackage,
     };

@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Role } from '../../prisma-client/client';
+import { Role } from '@repo/database/auth';
 
 import { DatabaseService } from 'src/common/services/database.service';
 import { UserResponseDto } from 'src/modules/user/dtos/user.response.dto';

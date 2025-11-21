@@ -19,13 +19,14 @@
         "test": "NODE_ENV=local jest --config test/jest.json --runInBand",
         "test:e2e": "NODE_ENV=local jest --config test/jest-e2e.json --runInBand",
         "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
-        "prisma:generate": "dotenv -e .env.docker -- prisma generate",
-        "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev",
-        "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy",
-        "prisma:studio": "dotenv -e .env.docker -- prisma studio"
+        "prisma:generate": "pnpm --filter @repo/database run generate:auth",
+        "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev --schema ../../packages/database/prisma/auth/schema.prisma",
+        "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy --schema ../../packages/database/prisma/auth/schema.prisma",
+        "prisma:studio": "dotenv -e .env.docker -- prisma studio --schema ../../packages/database/prisma/auth/schema.prisma"
     },
     "dependencies": {
         "@repo/base-deps": "workspace:*",
+        "@repo/database": "workspace:*",
         "@grpc/grpc-js": "1.14.1",
         "@grpc/proto-loader": "0.8.0",
         "@keyv/redis": "5.1.4",

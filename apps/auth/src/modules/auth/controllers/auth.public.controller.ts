@@ -10,7 +10,7 @@ import { SwaggerResponse } from 'src/common/dtos/api-response.dto';
 import { AuthLoginDto } from '../dtos/auth.login.dto';
 import { AuthRefreshResponseDto, AuthResponseDto } from '../dtos/auth.response.dto';
 import { AuthSignupDto } from '../dtos/auth.signup.dto';
-import { IAuthPayload } from '../interfaces/auth.interface';
+import type { IAuthPayload } from '../interfaces/auth.interface';
 import { AuthService } from '../services/auth.service';
 
 @ApiTags('auth.public')

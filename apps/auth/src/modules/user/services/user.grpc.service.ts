@@ -11,8 +11,8 @@ export class UserGrpcService {
         return {
             id: user.id,
             email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            firstName: user.firstName ?? undefined,
+            lastName: user.lastName ?? undefined,
             phoneNumber: user.phoneNumber || '',
             avatar: user.avatar || '',
             isVerified: user.isVerified,
@@ -26,7 +26,7 @@ export class UserGrpcService {
         if (!request.id) {
             return {
                 success: false,
-                user: null,
+                user: undefined,
             };
         }
 
@@ -35,7 +35,7 @@ export class UserGrpcService {
             if (!user) {
                 return {
                     success: false,
-                    user: null,
+                    user: undefined,
                 };
             }
 
@@ -46,7 +46,7 @@ export class UserGrpcService {
         } catch (error) {
             return {
                 success: false,
-                user: null,
+                user: undefined,
             };
         }
     }
@@ -55,7 +55,7 @@ export class UserGrpcService {
         if (!request.email) {
             return {
                 success: false,
-                user: null,
+                user: undefined,
             };
         }
 
@@ -64,7 +64,7 @@ export class UserGrpcService {
             if (!user) {
                 return {
                     success: false,
-                    user: null,
+                    user: undefined,
                 };
             }
 
@@ -75,7 +75,7 @@ export class UserGrpcService {
         } catch (error) {
             return {
                 success: false,
-                user: null,
+                user: undefined,
             };
         }
     }

@@ -2,19 +2,19 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class TransactionResponseDto {
     @ApiProperty({ description: 'Transaction hash', example: '0xabc123...' })
-    hash: string;
+    hash!: string;
 
     @ApiProperty({ description: 'Block number containing the transaction', example: '1000000' })
-    blockNumber: string;
+    blockNumber!: string;
 
     @ApiProperty({ description: 'Sender address', example: '0x1234...' })
-    from: string;
+    from!: string;
 
     @ApiProperty({ description: 'Recipient address', example: '0x5678...' })
     to?: string | null;
 
     @ApiProperty({ description: 'Transaction value in wei', example: '1000000000000000000' })
-    value: string;
+    value!: string;
 
     @ApiProperty({
         description: 'Gas used (wei) as BigInt string',

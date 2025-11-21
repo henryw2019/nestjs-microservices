@@ -1,0 +1,40 @@
+{
+  "name": "@repo/database",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./indexer": {
+      "types": "./dist/indexer.d.ts",
+      "default": "./dist/indexer.js"
+    },
+    "./auth": {
+      "types": "./dist/auth.d.ts",
+      "default": "./dist/auth.js"
+    },
+    "./chain-service": {
+      "types": "./dist/chain-service.d.ts",
+      "default": "./dist/chain-service.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "generate": "pnpm run generate:indexer && pnpm run generate:auth && pnpm run generate:chain-service && node scripts/fix-imports.js",
+    "generate:indexer": "prisma generate --schema=./prisma/indexer/schema.prisma",
+    "generate:auth": "prisma generate --schema=./prisma/auth/schema.prisma",
+    "generate:chain-service": "prisma generate --schema=./prisma/chain-service/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.0"
+  },
+  "devDependencies": {
+    "prisma": "6.19.0",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.7"
+  }
+}

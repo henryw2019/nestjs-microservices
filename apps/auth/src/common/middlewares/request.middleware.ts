@@ -12,7 +12,7 @@ export class RequestMiddleware implements NestMiddleware {
         const requestId = this.generateRequestId();
 
         // Add request ID to request object for tracing
-        request['requestId'] = requestId;
+        (request as any)['requestId'] = requestId;
 
         // Set request ID header
         response.setHeader('X-Request-ID', requestId);

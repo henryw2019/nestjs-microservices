@@ -19,7 +19,7 @@ import {
 } from 'ethers';
 import { promises as fs } from 'fs';
 import { isAbsolute, join, resolve } from 'path';
-import { Contract as ContractModel } from '../../../prisma-client/client';
+import { Contract as ContractModel } from '@repo/database/chain-service';
 
 import { DatabaseService } from '@/common/services/database.service';
 import { KeyStoreService } from '@/modules/keystore/keystore.service';
@@ -147,7 +147,9 @@ export class ContractService {
         const iface = new Interface(abi as any);
         let fragment: FunctionFragment;
         try {
-            fragment = iface.getFunction(dto.functionName);
+            const func = iface.getFunction(dto.functionName);
+            if (!func) throw new Error();
+            fragment = func;
         } catch (error) {
             throw new NotFoundException(`Function ${dto.functionName} not found in contract ABI`);
         }
@@ -409,7 +411,7 @@ export class ContractService {
             type: 'write',
             functionName: dto.functionName,
             transaction,
-            receipt: this.normalizeReceipt(receipt),
+            receipt: receipt ? this.normalizeReceipt(receipt) : undefined,
         };
     }
 

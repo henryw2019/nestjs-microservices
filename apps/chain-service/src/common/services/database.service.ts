@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
-import { PrismaClient } from '../../../prisma-client/client';
+import { PrismaClient } from '@repo/database/chain-service';
 
 @Injectable()
 export class DatabaseService extends PrismaClient {
@@ -45,7 +45,7 @@ export class DatabaseService extends PrismaClient {
                 database: {
                     status: 'down',
                     connection: 'failed',
-                    error: error.message,
+                    error: (error as Error).message,
                 },
             };
         }

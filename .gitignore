@@ -88,3 +88,5 @@ offline-*
 backup/
 .turbo/
 .turbo/daemon/
+**/src/generated/**
+**/migrations/**

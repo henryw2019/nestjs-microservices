@@ -8,10 +8,10 @@ export const setupSwagger = async (app: INestApplication) => {
     const configService = app.get(ConfigService);
     const logger = new Logger();
 
-    const docName: string = configService.get<string>('doc.name');
-    const docDesc: string = configService.get<string>('doc.description');
-    const docVersion: string = configService.get<string>('doc.version');
-    const docPrefix: string = configService.get<string>('doc.prefix');
+    const docName: string = configService.get<string>('doc.name') || 'API Docs';
+    const docDesc: string = configService.get<string>('doc.description') || 'API Description';
+    const docVersion: string = configService.get<string>('doc.version') || '1.0.0';
+    const docPrefix: string = configService.get<string>('doc.prefix') || 'docs';
 
     const documentBuild = new DocumentBuilder()
         .setTitle(docName)

@@ -212,9 +212,9 @@ export class IndexerService implements OnModuleInit {
                         lastUpdatedAt: new Date(),
                     },
                 })
-                .catch(e => console.error('Prisma tokenMeta upsert error', e));
+                .catch((e: any) => console.error('Prisma tokenMeta upsert error', e));
         } catch (e) {
-            console.error('ensureTokenMeta general error', e?.message || e);
+            console.error('ensureTokenMeta general error', (e as any)?.message || e);
         }
     }
 
@@ -223,7 +223,7 @@ export class IndexerService implements OnModuleInit {
         try {
             await this.preloadAbis();
         } catch (e) {
-            console.error('preloadAbis error', e?.message || e);
+            console.error('preloadAbis error', (e as any)?.message || e);
         }
 
         // 1. 导入genesis分配，写入0区块Tx
@@ -328,7 +328,7 @@ export class IndexerService implements OnModuleInit {
         try {
             this.dumpIndexedEvents();
         } catch (e) {
-            console.error('dumpIndexedEvents error', e?.message || e);
+            console.error('dumpIndexedEvents error', (e as any)?.message || e);
         }
     }
 
@@ -448,7 +448,7 @@ export class IndexerService implements OnModuleInit {
                         gasFee = null;
                     if (receipt) {
                         let _gasUsed: any = receipt.gasUsed;
-                        let _gasPrice: any = receipt.effectiveGasPrice ?? receipt.gasPrice;
+                        let _gasPrice: any = (receipt as any).effectiveGasPrice ?? receipt.gasPrice;
                         if (_gasUsed !== undefined && _gasUsed !== null) {
                             if (typeof _gasUsed === 'string') _gasUsed = BigInt(_gasUsed);
                             if (typeof _gasUsed === 'number') _gasUsed = BigInt(_gasUsed);
@@ -475,7 +475,7 @@ export class IndexerService implements OnModuleInit {
                             const bal = await this.provider.getBalance(tx.from, block.number);
                             balanceAfter = bal ? bal.toString() : null;
                         } catch (e) {
-                            console.error('getBalance error', e?.message || e);
+                            console.error('getBalance error', (e as any)?.message || e);
                         }
                     }
 
@@ -565,7 +565,7 @@ export class IndexerService implements OnModuleInit {
                         } catch (e) {
                             console.error(
                                 `[block ${blockNumber}] ensureTokenMeta contract creation error`,
-                                e?.message || e,
+                                (e as any)?.message || e,
                             );
                         }
                     }
@@ -584,7 +584,7 @@ export class IndexerService implements OnModuleInit {
                             `[block ${blockNumber}] tx ${tx.hash} log ${logIdx + 1}/${logs.length} addr=${log.address}`,
                         );
 
-                        const rawLogIndex = log.logIndex ?? log.index;
+                        const rawLogIndex = (log as any).logIndex ?? log.index;
                         let logIndexNum =
                             typeof rawLogIndex !== 'undefined' ? Number(rawLogIndex) : NaN;
                         if (Number.isNaN(logIndexNum)) logIndexNum = 0;
@@ -618,7 +618,7 @@ export class IndexerService implements OnModuleInit {
                             }
                         } catch (e) {
                             console.log(
-                                `      proxy upgrade parse error for tx=${tx.hash}: ${e?.message || e}`,
+                                `      proxy upgrade parse error for tx=${tx.hash}: ${(e as any)?.message || e}`,
                             );
                         }
 
@@ -663,11 +663,7 @@ export class IndexerService implements OnModuleInit {
                                         const balRes = await this.provider
                                             .getBalance(addr)
                                             .catch(() => null);
-                                        const balStr = balRes
-                                            ? typeof balRes === 'bigint'
-                                                ? balRes.toString()
-                                                : BigInt(balRes.toString()).toString()
-                                            : '0';
+                                        const balStr = balRes ? balRes.toString() : '0';
                                         await trx.addressBalance.create({
                                             data: {
                                                 address: addr,
@@ -689,7 +685,7 @@ export class IndexerService implements OnModuleInit {
                                             console.error(
                                                 'failed to create fallback AddressBalance',
                                                 addr,
-                                                err?.message || err,
+                                                (err as any)?.message || err,
                                             );
                                         }
                                     }
@@ -701,7 +697,7 @@ export class IndexerService implements OnModuleInit {
                             try {
                                 await this.ensureTokenMeta(log.address, trx);
                             } catch (e) {
-                                console.error('ensureTokenMeta error', e?.message || e);
+                                console.error('ensureTokenMeta error', (e as any)?.message || e);
                             }
                         };
 
@@ -711,7 +707,7 @@ export class IndexerService implements OnModuleInit {
                                 parsedFromAbi = ifaceFromAbi.parseLog(log);
                             } catch (e) {
                                 console.log(
-                                    `      parse error via ABI for log index=${logIndexNum} tx=${tx.hash}: ${e?.message || e}`,
+                                    `      parse error via ABI for log index=${logIndexNum} tx=${tx.hash}: ${(e as any)?.message || e}`,
                                 );
                             }
                         }
@@ -804,7 +800,7 @@ export class IndexerService implements OnModuleInit {
                                 parsedTransfer = TRANSFER_EVENT_IFACE.parseLog(log);
                             } catch (e) {
                                 console.log(
-                                    `      fallback transfer parse error for tx=${tx.hash}: ${e?.message || e}`,
+                                    `      fallback transfer parse error for tx=${tx.hash}: ${(e as any)?.message || e}`,
                                 );
                             }
 
@@ -939,7 +935,7 @@ export class IndexerService implements OnModuleInit {
                 } else {
                     // ETH balance
                     const res = await this.provider.getBalance(address).catch(() => null);
-                    const bal = res ? (typeof res === 'bigint' ? res : BigInt(res.toString())) : 0n;
+                    const bal = res ? res : 0n;
                     const balStr = bal.toString();
                     const existing = await client.addressBalance.findFirst({
                         where: { address: address, tokenAddress: null },
@@ -966,7 +962,7 @@ export class IndexerService implements OnModuleInit {
                     }
                 }
             } catch (e) {
-                console.error('refreshBalances item error', address, token, e?.message || e);
+                console.error('refreshBalances item error', address, token, (e as any)?.message || e);
             }
         }
     }
@@ -1036,7 +1032,7 @@ export class IndexerService implements OnModuleInit {
             this.registerInterfaceEvents(iface);
             return iface;
         } catch (e) {
-            console.error('loadInterfaceForAddress error', e?.message || e);
+            console.error('loadInterfaceForAddress error', (e as any)?.message || e);
             return null;
         }
     }

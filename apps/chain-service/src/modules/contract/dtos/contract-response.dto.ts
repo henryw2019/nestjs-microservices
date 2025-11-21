@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AbiInput } from './create-contract.dto';
+import type { AbiInput } from './create-contract.dto';
 
 export class ContractResponseDto {
     @ApiProperty({ description: 'Unique identifier of the contract' })

@@ -1,6 +1,6 @@
 import { GrpcMethod } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
-import { ValidateTokenRequest, ValidateTokenResponse } from 'src/generated/auth';
+import type { ValidateTokenRequest, ValidateTokenResponse } from 'src/generated/auth';
 import { AuthService } from 'src/modules/auth/services/auth.service';
 
 @Controller()
@@ -12,7 +12,7 @@ export class AuthGrpcController {
         if (!data.token) {
             return {
                 success: false,
-                payload: null,
+                payload: undefined,
             };
         }
 
@@ -28,7 +28,7 @@ export class AuthGrpcController {
         } catch {
             return {
                 success: false,
-                payload: null,
+                payload: undefined,
             };
         }
     }

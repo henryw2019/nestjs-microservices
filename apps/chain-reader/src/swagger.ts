@@ -12,16 +12,16 @@ export const setupSwagger = async (app: INestApplication) => {
     const docPrefix = configService.get<string>('doc.prefix');
 
     const documentBuild = new DocumentBuilder()
-        .setTitle(docName)
-        .setDescription(docDesc)
-        .setVersion(docVersion)
+        .setTitle(docName || 'API Docs')
+        .setDescription(docDesc || 'API Description')
+        .setVersion(docVersion || '1.0.0')
         .build();
 
     const document = SwaggerModule.createDocument(app, documentBuild, {
         deepScanRoutes: true,
     });
 
-    SwaggerModule.setup(docPrefix, app, document, {
+    SwaggerModule.setup(docPrefix || 'docs', app, document, {
         explorer: true,
         customSiteTitle: docName,
         swaggerOptions: {

@@ -10,7 +10,8 @@ import {
     MaxLength,
 } from 'class-validator';
 
-import { AbiInput, parseAbi } from './create-contract.dto';
+import type { AbiInput } from './create-contract.dto';
+import { parseAbi } from './create-contract.dto';
 
 const optionalAbi = (value: unknown): AbiInput | undefined => {
     if (value === undefined || value === null || value === '') {

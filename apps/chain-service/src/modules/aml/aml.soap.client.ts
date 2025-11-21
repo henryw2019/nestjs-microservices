@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import AmlConfig from '../../common/config/aml.config';
 import { AmlDecision, AmlScanRequestPayload, AmlScanResponsePayload } from './aml.types';
 import { Client, createClientAsync, ISoapMethod } from 'soap';

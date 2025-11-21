@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { ValidateTokenRequest, ValidateTokenResponse } from '../../generated/auth';
 
@@ -31,7 +31,7 @@ export class GrpcAuthService implements OnModuleInit {
             this.logger.debug(`Token validation response: ${JSON.stringify(response)}`);
             return response;
         } catch (error) {
-            this.logger.error(`Token validation failed: ${error.message}`, error.stack);
+            this.logger.error(`Token validation failed: ${(error as Error).message}`, (error as Error).stack);
             throw error;
         }
     }

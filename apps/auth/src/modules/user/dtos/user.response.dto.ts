@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { $Enums, User } from '../../../../prisma-client/client';
+import { $Enums, User } from '@repo/database/auth';
 import { Exclude } from 'class-transformer';
 
 export class UserResponseDto implements User {
@@ -7,67 +7,69 @@ export class UserResponseDto implements User {
         description: 'Unique user identifier',
         format: 'uuid',
     })
-    id: string;
+    id!: string;
 
     @ApiProperty({
         description: 'User email address',
         format: 'email',
     })
-    email: string;
+    email!: string;
 
     @ApiProperty({
         description: 'User first name',
+        nullable: true,
     })
-    firstName: string;
+    firstName!: string | null;
 
     @ApiProperty({
         description: 'User last name',
+        nullable: true,
     })
-    lastName: string;
+    lastName!: string | null;
 
     @ApiProperty({
         description: 'User phone number',
         nullable: true,
     })
-    phoneNumber: string | null;
+    phoneNumber!: string | null;
 
     @ApiProperty({
         description: 'User profile picture URL',
         nullable: true,
     })
-    avatar: string | null;
+    avatar!: string | null;
 
     @ApiProperty({
         description: 'Email verification status',
     })
-    isVerified: boolean;
+    isVerified!: boolean;
 
     @ApiProperty({
         description: 'User role in the system',
         enum: $Enums.Role,
     })
-    role: $Enums.Role;
+    role!: $Enums.Role;
 
     @ApiProperty({
         description: 'Account creation timestamp',
         format: 'date-time',
     })
-    createdAt: Date;
+    createdAt!: Date;
 
     @ApiProperty({
         description: 'Last profile update timestamp',
         format: 'date-time',
     })
-    updatedAt: Date;
+    updatedAt!: Date;
 
     @ApiProperty({
         description: 'Account deletion timestamp',
         nullable: true,
         format: 'date-time',
     })
-    deletedAt: Date | null;
+    deletedAt!: Date | null;
 
     @Exclude()
     @ApiHideProperty()
-    password: string;
+    password!: string | null;
 }

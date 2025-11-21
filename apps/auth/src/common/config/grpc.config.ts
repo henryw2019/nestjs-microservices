@@ -6,7 +6,7 @@ export default registerAs('grpc', (): IGrpcConfig => {
     const grpcPackage = process.env.GRPC_PACKAGE;
 
     return {
-        url: grpcUrl,
-        package: grpcPackage,
+        url: grpcUrl || '',
+        package: grpcPackage || '',
     };
 });

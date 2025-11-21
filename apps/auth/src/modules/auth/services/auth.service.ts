@@ -58,6 +58,10 @@ export class AuthService {
             throw new NotFoundException('User not found');
         }
 
+        if (!user.password) {
+            throw new NotFoundException('Invalid password');
+        }
+
         const isPasswordValid = this.hashService.match(user.password, password);
         if (!isPasswordValid) {
             throw new NotFoundException('Invalid password');

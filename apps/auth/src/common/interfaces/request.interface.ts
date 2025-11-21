@@ -1,4 +1,4 @@
-import { Role } from '../../../prisma-client/client';
+import { Role } from '@repo/database/auth';
 
 export interface IAuthUserPayload {
     id: string;

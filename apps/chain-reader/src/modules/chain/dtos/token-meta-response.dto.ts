@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class TokenMetaResponseDto {
     @ApiProperty({ description: 'Token contract address', example: '0xToken...' })
-    tokenAddress: string;
+    tokenAddress!: string;
 
     @ApiProperty({ description: 'Token name', example: 'USD Coin', nullable: true })
     name?: string | null;
@@ -21,5 +21,5 @@ export class TokenMetaResponseDto {
     totalSupply?: string | null;
 
     @ApiProperty({ description: 'Last update timestamp', example: '2024-01-01T00:00:00.000Z' })
-    lastUpdatedAt: string;
+    lastUpdatedAt!: string;
 }

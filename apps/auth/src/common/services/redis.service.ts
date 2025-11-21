@@ -8,7 +8,7 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
     private readonly logger = new Logger(RedisService.name);
 
     constructor(private readonly configService: ConfigService) {
-        super(configService.get<string>('redis.url'));
+        super(configService.get<string>('redis.url') || '');
     }
 
     async onModuleInit(): Promise<void> {
@@ -63,7 +63,7 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
                 redis: {
                     status: 'down',
                     connection: 'failed',
-                    error: error.message,
+                    error: (error as Error).message,
                     responseTime: 'timeout',
                 },
             };

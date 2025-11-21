@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserGrpcService } from 'src/modules/user/services/user.grpc.service';
 import { UserAuthService } from 'src/modules/user/services/user.auth.service';
-import { Role } from '../../prisma-client/client';
+import { Role } from '@repo/database/auth';
 
 describe('UserGrpcService', () => {
     let service: UserGrpcService;
@@ -62,21 +62,21 @@ describe('UserGrpcService', () => {
         it('should return failure when id is missing', async () => {
             const result = await service.getUserById({ id: '' });
             expect(result.success).toBe(false);
-            expect(result.user).toBeNull();
+            expect(result.user).toBeUndefined();
         });
 
         it('should return failure when user not found', async () => {
             mockUserAuthService.getUserProfile.mockResolvedValue(null);
             const result = await service.getUserById({ id: 'user-123' });
             expect(result.success).toBe(false);
-            expect(result.user).toBeNull();
+            expect(result.user).toBeUndefined();
         });
 
         it('should return failure when error occurs', async () => {
             mockUserAuthService.getUserProfile.mockRejectedValue(new Error('Error'));
             const result = await service.getUserById({ id: 'user-123' });
             expect(result.success).toBe(false);
-            expect(result.user).toBeNull();
+            expect(result.user).toBeUndefined();
         });
     });
 
@@ -94,21 +94,21 @@ describe('UserGrpcService', () => {
         it('should return failure when email is missing', async () => {
             const result = await service.getUserByEmail({ email: '' });
             expect(result.success).toBe(false);
-            expect(result.user).toBeNull();
+            expect(result.user).toBeUndefined();
         });
 
         it('should return failure when user not found', async () => {
             mockUserAuthService.getUserProfileByEmail.mockResolvedValue(null);
             const result = await service.getUserByEmail({ email: 'test@example.com' });
             expect(result.success).toBe(false);
-            expect(result.user).toBeNull();
+            expect(result.user).toBeUndefined();
         });
 
         it('should return failure when error occurs', async () => {
             mockUserAuthService.getUserProfileByEmail.mockRejectedValue(new Error('Error'));
             const result = await service.getUserByEmail({ email: 'test@example.com' });
             expect(result.success).toBe(false);
-            expect(result.user).toBeNull();
+            expect(result.user).toBeUndefined();
         });
     });
 });

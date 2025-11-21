@@ -134,6 +134,9 @@ importers:
       '@repo/base-deps':
         specifier: workspace:*
         version: link:../../packages/base-deps
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@sentry/node':
         specifier: 10.25.0
         version: 10.25.0
@@ -210,6 +213,9 @@ importers:
       '@repo/base-deps':
         specifier: workspace:*
         version: link:../../packages/base-deps
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       ethers:
         specifier: 6.15.0
         version: 6.15.0
@@ -262,6 +268,9 @@ importers:
       '@repo/base-deps':
         specifier: workspace:*
         version: link:../../packages/base-deps
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
     devDependencies:
       '@nestjs/cli':
         specifier: 11.0.10
@@ -320,6 +329,9 @@ importers:
       '@repo/base-deps':
         specifier: workspace:*
         version: link:../../packages/base-deps
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@sentry/node':
         specifier: 10.25.0
         version: 10.25.0
@@ -423,6 +435,22 @@ importers:
       rxjs:
         specifier: 7.8.2
         version: 7.8.2
+
+  packages/database:
+    dependencies:
+      '@prisma/client':
+        specifier: 6.19.0
+        version: 6.19.0(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.19.0
+      prisma:
+        specifier: 6.19.0
+        version: 6.19.0(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
 
   packages/prettier-config: {}
 

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { ApiBaseQueryDto } from 'src/common/dtos/api-query.dto';
-import { Role } from '../../../../prisma-client/client';
+import { Role } from '@repo/database/auth';
 
 export class UserListDto extends ApiBaseQueryDto {
     @ApiProperty({

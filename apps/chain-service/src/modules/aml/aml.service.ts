@@ -4,7 +4,7 @@ import { DatabaseService } from '../../common/services/database.service';
 import { AmlSoapClient } from './aml.soap.client';
 import { AmlDecision, AmlPartyInfo, AmlScanRequestPayload, AmlScanResponsePayload } from './aml.types';
 import AmlConfig, { AmlEnforcementMode } from '../../common/config/aml.config';
-import { ConfigType } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class AmlService {
