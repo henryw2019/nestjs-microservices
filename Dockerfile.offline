@@ -1,0 +1,84 @@
+# Dockerfile.offline
+# 使用离线缓存进行构建的 Dockerfile
+# ⚠️ 使用预构建的本地镜像 my-offline-base:latest
+FROM my-offline-base:latest AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV STORE_PATH="/pnpm/pnpm-store"
+
+# (基础依赖已在 my-offline-base 中安装，此处无需联网操作)
+
+FROM base AS build
+WORKDIR /usr/src/app
+ENV CI=true
+ENV HUSKY=0
+# 强制指定 store 目录，覆盖 .npmrc 中的设置
+ENV NPM_CONFIG_STORE_DIR="/pnpm/pnpm-store"
+
+# 1. 复制离线依赖包 (必须存在于构建上下文中)
+COPY pnpm-store.tar.gz /tmp/
+
+# 2. 解压依赖包 (无需再 config set store-dir)
+RUN mkdir -p /pnpm && \
+    tar -C /pnpm -xzf /tmp/pnpm-store.tar.gz && \
+    rm /tmp/pnpm-store.tar.gz
+
+# 3. 复制 Lockfile 和 .npmrc
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+
+# 4. 安装依赖 (强制使用离线模式)
+# --offline: 禁止连接网络，仅使用 store 中的包
+# --frozen-lockfile: 确保不修改 lockfile
+# --prod=false: 确保安装 devDependencies (如 turbo, typescript)，否则构建会失败
+# --ignore-scripts: 避免在 install 阶段运行 postinstall (因为可能需要网络或二进制不兼容)，我们稍后手动处理
+RUN pnpm install --frozen-lockfile --offline --prod=false
+
+
+# 5. 复制源码并构建
+COPY . .
+
+# 重新生成 Prisma Client (因为 install --offline 可能跳过了 postinstall 脚本)
+# 使用 pnpm filter 直接调用 database 包的脚本，不依赖 turbo
+# 显式使用 pnpm exec prisma，确保找到二进制文件
+RUN pnpm prisma:generate
+
+# 构建项目 (同样绕过 turbo，直接用 pnpm 递归构建)
+# 注意：如果 package.json 中的 build 脚本是 "turbo run build"，那么 pnpm run -r build 也会调用 turbo
+# 所以我们需要直接调用 tsc 或者 nest build，或者接受没有 turbo 的事实
+# 这里假设 pnpm run -r build 会递归调用每个包的 build 脚本
+RUN pnpm build
+
+# 6. 部署生产产物
+RUN pnpm deploy --filter=auth         --prod --legacy /prod/auth && \
+    pnpm deploy --filter=chain-reader --prod --legacy /prod/chain-reader && \
+    pnpm deploy --filter=chain-service --prod --legacy /prod/chain-service && \
+    pnpm deploy --filter=chain-indexer --prod --legacy /prod/chain-indexer
+
+# --- 运行时阶段 (与标准 Dockerfile 相同) ---
+
+FROM base AS auth
+COPY --from=build --chown=nestjs:nestjs /prod/auth /prod/auth
+USER nestjs
+WORKDIR /prod/auth
+EXPOSE 9001 50051
+CMD ["node", "dist/main"]
+
+FROM base AS chain-reader
+COPY --from=build --chown=nestjs:nestjs /prod/chain-reader /prod/chain-reader
+USER nestjs
+WORKDIR /prod/chain-reader
+EXPOSE 9004
+CMD ["node", "dist/main"]
+
+FROM base AS chain-service
+COPY --from=build --chown=nestjs:nestjs /prod/chain-service /prod/chain-service
+USER nestjs
+WORKDIR /prod/chain-service
+EXPOSE 9003
+CMD ["node", "dist/main"]
+
+FROM base AS chain-indexer
+COPY --from=build --chown=nestjs:nestjs /prod/chain-indexer /prod/chain-indexer
+USER nestjs
+WORKDIR /prod/chain-indexer
+CMD ["node", "dist/main"]

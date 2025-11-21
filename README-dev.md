@@ -22,6 +22,35 @@ docker run -d --name dev --network mynetwork --network-alias auth-service --netw
 docker commit dev dev:1119
 docker save dev:1119-v1 | gzip > dev-1119-v1.tar.gz
 
+
+# 离线构建方法
+## 导出构建镜像
+docker build -f Dockerfile.deps -t pnpm-deps-exporter .
+## 创建一个临时容器（不需要运行）
+docker create --name temp-exporter pnpm-deps-exporter
+## 从容器中复制 tar.gz 到当前目录
+docker cp temp-exporter:/pnpm-store.tar.gz ./pnpm-store.tar.gz
+## 清理
+docker rm temp-exporter
+
+
+# 0 创建一个builder镜像
+docker build -f Dockerfile.builder -t my-builder:latest .
+
+# 1. 构建 Auth 服务
+docker build -f Dockerfile.app --target auth -t my-auth-service:offline .
+
+# 2. 构建 Chain Reader 服务
+docker build -f Dockerfile.app --target chain-reader -t my-chain-reader:offline .
+
+# 3. 构建 Chain Service 服务
+docker build -f Dockerfile.app --target chain-service -t my-chain-service:offline .
+
+# 4. 构建 Chain Indexer 服务
+docker build -f Dockerfile.app --target chain-indexer -t my-chain-indexer:offline .
+
+
+
 ## AML 反洗钱扫描（chain-service）
 
 chain-service 在发起转账前调用外部 SOAP 反洗钱系统进行实时扫描，并将请求/响应落库用于审计；扫描未终态时由定时任务轮询查询。

@@ -1,0 +1,14 @@
+# Dockerfile.base
+# 预构建的基础镜像，包含 pnpm 和系统依赖，用于离线构建
+FROM node:22-alpine
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+# 安装 pnpm 和必要依赖
+RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories && \
+    apk add --no-cache libc6-compat openssl ca-certificates python3 git && \
+    npm config set registry https://mirrors.cloud.tencent.com/npm/ && \
+    npm install -g pnpm@latest-10 && \
+    addgroup --system --gid 1001 nestjs && \
+    adduser --system --uid 1001 nestjs

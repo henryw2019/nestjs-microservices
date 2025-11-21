@@ -44,7 +44,7 @@ services:
       - "9001:9001"    # HTTP API
       - "50051:50051"  # gRPC
     env_file:
-      - ./auth/.env.docker
+      - ./apps/auth/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -72,7 +72,7 @@ services:
     ports:
       - "9004:9004"
     env_file:
-      - ./chain-reader/.env.docker
+      - ./apps/chain-reader/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -100,7 +100,7 @@ services:
     ports:
       - "9003:9003"
     env_file:
-      - ./chain-service/.env.docker
+      - ./apps/chain-service/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -128,7 +128,7 @@ services:
     container_name: bw-chain-indexer
     restart: unless-stopped
     env_file:
-      - ./chain-indexer/.env.docker
+      - ./apps/chain-indexer/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

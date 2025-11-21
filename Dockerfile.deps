@@ -1,29 +1,48 @@
 # Build dependencies cache image for offline use
 # Usage: docker build -f Dockerfile.deps -t myapp-deps-cache:latest .
-FROM node:22-slim AS deps-cache
+# NOTE: Must use the same base OS (Alpine) as the runtime image to ensure binary compatibility (e.g. Prisma engines)
+FROM node:22-alpine AS deps-cache
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm config set registry https://mirrors.cloud.tencent.com/npm/  && npm install -g pnpm@latest-10
+
+# Install pnpm and system deps needed for some native builds
+RUN sed -i 's|https://dl-cdn.alpinelinux.org|https://mirrors.aliyun.com|g' /etc/apk/repositories && \
+    apk add --no-cache libc6-compat openssl ca-certificates python3 git && \
+    npm config set registry https://mirrors.cloud.tencent.com/npm/ && \
+    npm install -g pnpm@latest-10
 
 WORKDIR /app
 
-# Copy workspace configuration
-COPY pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY auth/package.json ./auth/
-COPY chain-reader/package.json ./chain-reader/
-COPY chain-service/package.json ./chain-service/
-COPY chain-indexer/package.json ./chain-indexer/
-COPY package.json ./
+# 强制指定 store 目录，覆盖 .npmrc 中的设置
+ENV NPM_CONFIG_STORE_DIR="/pnpm/pnpm-store"
+
+# Copy workspace configuration and .npmrc
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY apps/auth/package.json ./apps/auth/
+COPY apps/chain-reader/package.json ./apps/chain-reader/
+COPY apps/chain-service/package.json ./apps/chain-service/
+COPY apps/chain-indexer/package.json ./apps/chain-indexer/
+COPY packages/base-deps/package.json ./packages/base-deps/
+COPY packages/database/package.json ./packages/database/
+COPY packages/prettier-config/package.json ./packages/prettier-config/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+COPY packages/database/prisma ./packages/database/prisma/
+COPY package.json turbo.json ./
 
 # Download all dependencies and cache them
-RUN pnpm config set store-dir /pnpm/pnpm-store && \
-    pnpm install --lockfile-only && \
-    pnpm fetch
+# 注意：这里不需要再手动 config set store-dir，因为环境变量 NPM_CONFIG_STORE_DIR 已经生效
+# --prod=false: 确保下载所有依赖（包括 devDependencies）
+# 执行一次完整的 install，确保所有 postinstall 脚本（如 Prisma 引擎下载）都执行过
+# 虽然 postinstall 下载的文件不一定进 store，但 @prisma/engines 包本身会进 store
+RUN pnpm install --prod=false && \
+    pnpm prisma:generate
 
-# Create a minimal image with the pnpm store that can be used for copying
+# Package the store
+RUN tar -czf /pnpm-store.tar.gz -C /pnpm pnpm-store
+
+# Create a minimal image with the tarball
 FROM alpine:latest
-COPY --from=deps-cache /pnpm/pnpm-store /pnpm/pnpm-store
+COPY --from=deps-cache /pnpm-store.tar.gz /pnpm-store.tar.gz
 
-# Default command to copy cache if no command is specified
-CMD ["sh", "-c", "cp -r /pnpm/pnpm-store /cache"]
-COPY --from=deps-cache /pnpm/pnpm-store /pnpm/pnpm-store
+# Default command to hint usage
+CMD ["echo", "Container created. Use 'docker cp <container_id>:/pnpm-store.tar.gz .' to extract."]

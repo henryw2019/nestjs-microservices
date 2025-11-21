@@ -1,18 +1,56 @@
-# Common excludes to keep build context small
-**/node_modules
-**/.turbo
-**/.git
+# Version Control
 .git
 .gitignore
-.vscode
-.env
-.env.*
+**/.git
+**/.gitignore
+
+# Dependencies
+**/node_modules
+pnpm-store
+!pnpm-store.tar.gz
+
+# Build Outputs
 **/dist
 **/coverage
-**/tmp
+**/.turbo
 **/.cache
-**/*.log
+**/tmp
+
+# Environment Variables (Keep .env.docker if needed for build, otherwise exclude all)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+# !.env.docker # Uncomment if you need to copy this specific file
+
+# IDE & System
+.vscode
+.idea
 **/.DS_Store
-pnpm-store
-.turbo
+Thumbs.db
+
+# Logs
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Documentation & Configs not needed in prod
+*.md
+!README.md
+docs/
+scripts/
+docker-compose*.yml
+Dockerfile*
+LICENSE
+CHANGELOG
+cspell.json
+.eslintrc*
+.prettierrc*
+
+
+# Misc
 backup
+
