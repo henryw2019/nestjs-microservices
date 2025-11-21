@@ -5,7 +5,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 
-import { AppModule } from './app/app.module';
+import { AppModule } from './app/app.module.js';
 import { setupSwagger } from './swagger';
 
 async function bootstrap() {

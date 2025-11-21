@@ -12,6 +12,7 @@ export default (options, webpack) => {
 
   return {
     ...options,
+    target: 'node',
     externals: [],
     plugins: [
       ...options.plugins,

@@ -3,9 +3,9 @@
   "display": "Node Library",
   "extends": "./base.json",
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "NodeNext",
-    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2019",
     "declaration": true,
     "declarationMap": true,
     "noEmit": false,
