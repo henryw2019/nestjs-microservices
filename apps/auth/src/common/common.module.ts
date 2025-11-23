@@ -30,7 +30,7 @@ import { existsSync } from 'fs';
             load: configs,
             isGlobal: true,
             cache: true,
-            envFilePath: ['.env.docker', '.env'],
+            envFilePath: ['../../.env.docker','.env.docker', '.env'],
             expandVariables: true,
             validationSchema: Joi.object({
                 // App Configuration
