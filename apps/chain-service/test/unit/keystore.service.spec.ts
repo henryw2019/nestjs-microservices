@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { KeyStoreService } from '../../src/modules/keystore/keystore.service';
 import { DatabaseService } from '../../src/common/services/database.service';
 import { ethers } from 'ethers';
+import { NotFoundException } from '@nestjs/common';
 
 describe('KeyStoreService', () => {
     let service: KeyStoreService;
@@ -16,7 +17,7 @@ describe('KeyStoreService', () => {
     const fixedWallet = {
         address: '0x1111111111111111111111111111111111111111',
         privateKey: '0xabcdef',
-    } as ethers.Wallet;
+    } as any;
 
     beforeEach(async () => {
         jest.spyOn(ethers.Wallet, 'createRandom').mockReturnValue(fixedWallet);
@@ -97,6 +98,11 @@ describe('KeyStoreService', () => {
         ]);
     });
 
+    it('throws NotFoundException if no public keys found for user', async () => {
+        (databaseMock.keyStore.findMany as jest.Mock).mockResolvedValue([]);
+        await expect(service.getPublicByUserId('user_1')).rejects.toThrow(NotFoundException);
+    });
+
     it('normalizes address before fetching secrets', async () => {
         const record = {
             id: 'ks_1',
@@ -120,5 +126,37 @@ describe('KeyStoreService', () => {
             },
         });
         expect(result).toBe(record);
+    });
+
+    it('throws NotFoundException if keystore not found by address', async () => {
+        (databaseMock.keyStore.findFirst as jest.Mock).mockResolvedValue(null);
+        await expect(service.getByAddress(fixedWallet.address)).rejects.toThrow(NotFoundException);
+    });
+
+    it('returns secret by user id', async () => {
+        const record = { id: 'ks_1', privateKey: '0xpriv' };
+        (databaseMock.keyStore.findFirst as jest.Mock).mockResolvedValue(record);
+        const result = await service.getSecretByUserId('user_1');
+        expect(result).toEqual(record);
+    });
+
+    it('throws NotFoundException if secret not found by user id', async () => {
+        (databaseMock.keyStore.findFirst as jest.Mock).mockResolvedValue(null);
+        await expect(service.getSecretByUserId('user_1')).rejects.toThrow(NotFoundException);
+    });
+
+    it('returns secret by user id and address', async () => {
+        const record = { id: 'ks_1', privateKey: '0xpriv' };
+        (databaseMock.keyStore.findFirst as jest.Mock).mockResolvedValue(record);
+        const result = await service.getSecretByUserIdAndAddress('user_1', fixedWallet.address);
+        expect(result).toEqual(record);
+        expect(databaseMock.keyStore.findFirst).toHaveBeenCalledWith({
+            where: { userId: 'user_1', address: ethers.getAddress(fixedWallet.address) },
+        });
+    });
+
+    it('throws NotFoundException if secret not found by user id and address', async () => {
+        (databaseMock.keyStore.findFirst as jest.Mock).mockResolvedValue(null);
+        await expect(service.getSecretByUserIdAndAddress('user_1', fixedWallet.address)).rejects.toThrow(NotFoundException);
     });
 });
