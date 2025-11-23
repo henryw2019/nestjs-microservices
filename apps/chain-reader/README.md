@@ -28,7 +28,7 @@ npm run build        # Compile TypeScript
 npm run start        # Start compiled app
 npm run lint         # ESLint with auto-fix
 npm test             # Run unit tests
-npm run prisma:generate   # Generate Prisma client
+pnpm prisma:generate   # Generate Prisma client
 ```
 
 ## 🧪 Testing

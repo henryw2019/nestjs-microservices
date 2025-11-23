@@ -10,7 +10,7 @@ Quick start (local):
 ```bash
 cd chain-indexer
 npm ci
-npm run prisma:generate
+pnpm prisma:generate
 npm run prisma:migrate
 npm run dev
 ```

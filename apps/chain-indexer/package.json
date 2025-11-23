@@ -14,14 +14,14 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "node dist/main",
     "start:swc": "node -r @swc-node/register src/main.ts",
-    "dev": "dotenv -e .env.docker nest start --watch",
-    "dev:swc": "dotenv -e .env.docker nest start --watch --webpackPath webpack.config.js",
+    "dev": "dotenv -e ../../.env.docker nest start --watch",
+    "dev:swc": "dotenv -e ../../.env.docker nest start --watch --webpackPath webpack.config.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest --config test/jest.json --runInBand",
     "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
-    "prisma:migrate": "dotenv -e .env.docker -- prisma migrate dev --schema ../../packages/database/prisma/indexer/schema.prisma",
-    "prisma:migrate:prod": "dotenv -e .env.docker -- prisma migrate deploy --schema ../../packages/database/prisma/indexer/schema.prisma",
-    "prisma:studio": "dotenv -e .env.docker -- prisma studio --schema ../../packages/database/prisma/indexer/schema.prisma"
+    "prisma:migrate": "dotenv -e ../../.env.docker -- prisma migrate dev --schema ../../packages/database/prisma/indexer/schema.prisma",
+    "prisma:migrate:prod": "dotenv -e ../../.env.docker -- prisma migrate deploy --schema ../../packages/database/prisma/indexer/schema.prisma",
+    "prisma:studio": "dotenv -e ../../.env.docker -- prisma studio --schema ../../packages/database/prisma/indexer/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",

@@ -8,10 +8,15 @@ export default registerAs('grpc', (): IGrpcConfig => {
     const authGrpcUrl = process.env.GRPC_AUTH_URL;
     const authGrpcPackage = process.env.GRPC_AUTH_PACKAGE;
 
+    const userGrpcUrl = process.env.GRPC_USER_URL;
+    const userGrpcPackage = process.env.GRPC_USER_PACKAGE;
+
     return {
         url: grpcUrl || '',
         package: grpcPackage || '',
         authUrl: authGrpcUrl,
         authPackage: authGrpcPackage,
+        userUrl: userGrpcUrl,
+        userPackage: userGrpcPackage,
     };
 });

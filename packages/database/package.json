@@ -26,9 +26,9 @@
     "build": "tsc",
     "prisma:generate": "pnpm run generate",
     "generate": "pnpm run generate:indexer && pnpm run generate:auth && pnpm run generate:chain-service",
-    "generate:indexer": "prisma generate --config=./prisma/indexer/prisma.config.ts",
-    "generate:auth": "prisma generate --config=./prisma/auth/prisma.config.ts",
-    "generate:chain-service": "prisma generate --config=./prisma/chain-service/prisma.config.ts"
+    "generate:indexer": "dotenv -e ../../.env.docker -- prisma generate --config=./prisma/indexer/prisma.config.ts",
+    "generate:auth": "dotenv -e ../../.env.docker -- prisma generate --config=./prisma/auth/prisma.config.ts",
+    "generate:chain-service": "dotenv -e ../../.env.docker -- prisma generate --config=./prisma/chain-service/prisma.config.ts"
   },
   "dependencies": {
     "@prisma/client": "7.0.0",
@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "dotenv-cli": "11.0.0",
     "prisma": "7.0.0",
     "typescript": "^5.7.3"
   }

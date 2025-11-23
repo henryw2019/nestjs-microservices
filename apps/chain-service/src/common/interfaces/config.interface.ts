@@ -52,6 +52,8 @@ export interface IGrpcConfig {
     package: string;
     authUrl?: string;
     authPackage?: string;
+    userUrl?: string;
+    userPackage?: string;
 }
 
 export interface IRedisConfig {

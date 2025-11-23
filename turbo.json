@@ -32,10 +32,12 @@
       "persistent": true
     },
     "format": {
-      "cache": false
+      "outputs": []
     },
     "lint": {
-      "cache": false
+      "outputs": [
+        ".eslintcache"
+      ]
     },
     "test": {
       "dependsOn": [
@@ -54,7 +56,7 @@
     "prisma:generate": {
       "cache": false,
       "outputs": [
-        "node_modules/.prisma/client/**"
+        "packages/database/src/generated/**"
       ]
     },
     "prisma:migrate": {

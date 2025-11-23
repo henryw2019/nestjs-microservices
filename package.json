@@ -46,6 +46,8 @@
   "scripts": {
     "build": "turbo run build ",
     "build:swc": "turbo run build:swc",
+    "clean": "turbo run clean && rm -rf node_modules/.cache",
+    "typecheck": "turbo run typecheck",
     "ci": "turbo run lint test build --concurrency=1",
     "ci:swc": "turbo run lint test build:swc --concurrency=1",
     "dev": "turbo run dev",

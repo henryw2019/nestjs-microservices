@@ -44,6 +44,7 @@ services:
       - "9001:9001"    # HTTP API
       - "50051:50051"  # gRPC
     env_file:
+      - ./.env.docker
       - ./apps/auth/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -128,6 +129,7 @@ services:
     container_name: bw-chain-indexer
     restart: unless-stopped
     env_file:
+      - ./.env.docker
       - ./apps/chain-indexer/.env.docker
     extra_hosts:
       - "host.docker.internal:host-gateway"

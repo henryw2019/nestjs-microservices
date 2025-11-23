@@ -54,7 +54,8 @@ import { existsSync } from 'fs';
                 SENTRY_DSN: Joi.string().allow('').optional(),
 
                 // Database Configuration
-                DATABASE_URL: Joi.string().uri().required(),
+                DATABASE_URL: Joi.string().uri().optional(),
+                AUTH_DATABASE_URL: Joi.string().uri().required(),
 
                 // JWT Configuration
                 ACCESS_TOKEN_SECRET_KEY: Joi.string().min(32).required(),

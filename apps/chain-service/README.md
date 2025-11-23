@@ -74,7 +74,7 @@ CHAIN_ID=31337
 npm install
 
 # 生成 Prisma Client / 执行迁移
-npm run prisma:generate
+pnpm prisma:generate
 npm run prisma:migrate
 
 # 生成 gRPC 客户端

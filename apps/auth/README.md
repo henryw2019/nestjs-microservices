@@ -116,11 +116,11 @@ src/
 4. **Database Setup**
 
     ```bash
-    # Generate Prisma client
-    npm run prisma:generate
+    # Generate Prisma client (run from root directory)
+    pnpm prisma:generate
 
     # Run migrations
-    npm run prisma:migrate
+    pnpm prisma:migrate
 
     # (Optional) Open Prisma Studio
     npm run prisma:studio
