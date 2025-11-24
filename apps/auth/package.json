@@ -16,6 +16,8 @@
         "start:swc": "node -r @swc-node/register src/main.ts",
         "dev": "nest start --watch",
         "dev:swc": "nest start --watch --webpackPath webpack.config.js",
+        "debug": "nest start --debug --watch",
+        "debug:swc": "nest start --debug --watch --webpackPath webpack.config.js",
         "test": "NODE_ENV=local jest --config test/jest.json --runInBand",
         "test:e2e": "NODE_ENV=local jest --config test/jest-e2e.json --runInBand",
         "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",

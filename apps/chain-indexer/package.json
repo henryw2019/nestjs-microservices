@@ -16,6 +16,8 @@
     "start:swc": "node -r @swc-node/register src/main.ts",
     "dev": "dotenv -e ../../.env.docker nest start --watch",
     "dev:swc": "dotenv -e ../../.env.docker nest start --watch --webpackPath webpack.config.js",
+    "debug": "dotenv -e ../../.env.docker nest start --debug --watch",
+    "debug:swc": "dotenv -e ../../.env.docker nest start --debug --watch --webpackPath webpack.config.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest --config test/jest.json --runInBand",
     "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",

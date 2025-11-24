@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "firsttris.vscode-jest-runner",
+    "rvest.vs-code-prettier-eslint",
+    "ms-azuretools.vscode-docker",
+    "mikestead.dotenv",
+    "prisma.prisma",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+    "yoavbls.pretty-ts-errors",
+    "usernamehw.errorlens",
+    "humao.rest-client"
+  ]
+}

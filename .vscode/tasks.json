@@ -1,0 +1,112 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Install Dependencies",
+      "type": "shell",
+      "command": "pnpm install",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build All",
+      "type": "shell",
+      "command": "turbo run build",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: Auth",
+      "type": "shell",
+      "command": "pnpm --filter auth dev",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting Nest application...",
+          "endsPattern": "Nest application successfully started"
+        }
+      }
+    },
+    {
+      "label": "Dev: Chain Indexer",
+      "type": "shell",
+      "command": "pnpm --filter chain-indexer dev",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting Nest application...",
+          "endsPattern": "Nest application successfully started"
+        }
+      }
+    },
+    {
+      "label": "Dev: Chain Reader",
+      "type": "shell",
+      "command": "pnpm --filter chain-reader dev",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting Nest application...",
+          "endsPattern": "Nest application successfully started"
+        }
+      }
+    },
+    {
+      "label": "Dev: Chain Service",
+      "type": "shell",
+      "command": "pnpm --filter chain-service dev",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": {
+          "regexp": "^.*$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Starting Nest application...",
+          "endsPattern": "Nest application successfully started"
+        }
+      }
+    },
+    {
+      "label": "Docker: Up",
+      "type": "shell",
+      "command": "docker-compose up -d",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: Down",
+      "type": "shell",
+      "command": "docker-compose down",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Prisma: Generate",
+      "type": "shell",
+      "command": "pnpm --filter database prisma:generate",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
