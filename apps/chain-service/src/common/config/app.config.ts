@@ -25,7 +25,7 @@ export default registerAs('app', (): IAppConfig => {
 
         http: {
             host: process.env.HTTP_HOST || '0.0.0.0',
-            port: parseInt(process.env.HTTP_PORT || '9003', 10),
+            port: parseInt(process.env.HTTP_PORT_CHAIN_SERVICE || '9003', 10),
         },
 
         cors: {

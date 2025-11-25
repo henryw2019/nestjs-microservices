@@ -9,7 +9,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [ConfigModule.forFeature(AmlConfig), ScheduleModule.forRoot()],
-  providers: [DatabaseService, AmlSoapClient, AmlService, AmlResultPollingService],
+  providers: [AmlSoapClient, AmlService, AmlResultPollingService],
   exports: [AmlService],
 })
 export class AmlModule {}

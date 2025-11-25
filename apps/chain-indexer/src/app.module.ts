@@ -9,17 +9,16 @@ import Joi from 'joi';
         ConfigModule.forRoot({
             isGlobal: true,
             cache: true,
-            envFilePath: ['../../.env.docker', '.env.docker', '.env'],
+            envFilePath: ['../../.env.docker', '.env'],
             expandVariables: true,
             validationSchema: Joi.object({
                 NODE_ENV: Joi.string()
                     .valid('development', 'staging', 'production', 'local')
                     .default('development'),
-                
+
                 // Database Configuration
-                DATABASE_URL: Joi.string().uri().optional(),
                 INDEXER_DATABASE_URL: Joi.string().uri().required(),
-                
+
                 // Blockchain Configuration
                 ETH_RPC_URL: Joi.string().uri().required(),
                 CHAIN_ID: Joi.number().required(),

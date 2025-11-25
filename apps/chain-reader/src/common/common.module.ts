@@ -43,7 +43,7 @@ import { HttpCacheInterceptor } from './interceptors/cache.interceptor';
                 DOC_PREFIX: Joi.string().default('/docs'),
                 API_VERSION: Joi.string().default('1.0.0'),
 
-                DATABASE_URL: Joi.string().uri().required(),
+                CHAIN_READER_DATABASE_URL: Joi.string().uri().required(),
 
                 CACHE_TTL_SECONDS: Joi.number().min(1).default(300),
                 CACHE_MAX_ITEMS: Joi.number().min(100).default(5000),
@@ -93,8 +93,8 @@ import { HttpCacheInterceptor } from './interceptors/cache.interceptor';
             fallbackLanguage: 'en',
             loaderOptions: {
                 path: (() => {
-                    const devPath = join(__dirname, '../languages');      // src 或 dist/src
-                    const prodPath = join(__dirname, '../../languages');  // dist
+                    const devPath = join(__dirname, '../languages'); // src 或 dist/src
+                    const prodPath = join(__dirname, '../../languages'); // dist
                     return existsSync(devPath) ? devPath : prodPath;
                 })(),
                 watch: process.env.NODE_ENV === 'development',

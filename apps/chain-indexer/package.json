@@ -21,9 +21,9 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest --config test/jest.json --runInBand",
     "proto:generate": "pnpm exec nestjs-grpc generate --proto ./src/protos --output ./src/generated",
-    "prisma:migrate": "dotenv -e ../../.env.docker -- prisma migrate dev --schema ../../packages/database/prisma/indexer/schema.prisma",
-    "prisma:migrate:prod": "dotenv -e ../../.env.docker -- prisma migrate deploy --schema ../../packages/database/prisma/indexer/schema.prisma",
-    "prisma:studio": "dotenv -e ../../.env.docker -- prisma studio --schema ../../packages/database/prisma/indexer/schema.prisma"
+    "prisma:migrate": "dotenv -e ../../.env.docker -- prisma migrate dev --config ../../packages/database/prisma/indexer/prisma.config.ts",
+    "prisma:migrate:prod": "dotenv -e ../../.env.docker -- prisma migrate deploy --config ../../packages/database/prisma/indexer/prisma.config.ts",
+    "prisma:studio": "dotenv -e ../../.env.docker -- prisma studio --config ../../packages/database/prisma/indexer/prisma.config.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",

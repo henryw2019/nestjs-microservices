@@ -10,7 +10,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
 
     constructor() {
         const pool = new Pool({ 
-            connectionString: process.env.AUTH_DATABASE_URL || process.env.DATABASE_URL 
+            connectionString: process.env.AUTH_DATABASE_URL
         });
         const adapter = new PrismaPg(pool);
         super({ adapter });
@@ -19,7 +19,9 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
     async onModuleInit(): Promise<void> {
         try {
             await this.$connect();
-            this.logger.log('Database connection established');
+            const dbUrl = process.env.AUTH_DATABASE_URL || '';
+            const maskedUrl = dbUrl.replace(/:([^:@]+)@/, ':****@');
+            this.logger.log(`Database connection established to ${maskedUrl}`);
         } catch (error) {
             this.logger.error('Failed to connect to database', error);
             throw error;

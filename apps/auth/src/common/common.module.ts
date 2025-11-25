@@ -30,7 +30,7 @@ import { existsSync } from 'fs';
             load: configs,
             isGlobal: true,
             cache: true,
-            envFilePath: ['../../.env.docker','.env.docker', '.env'],
+            envFilePath: ['../../.env.docker', '.env'],
             expandVariables: true,
             validationSchema: Joi.object({
                 // App Configuration
@@ -54,7 +54,6 @@ import { existsSync } from 'fs';
                 SENTRY_DSN: Joi.string().allow('').optional(),
 
                 // Database Configuration
-                DATABASE_URL: Joi.string().uri().optional(),
                 AUTH_DATABASE_URL: Joi.string().uri().required(),
 
                 // JWT Configuration
@@ -101,8 +100,8 @@ import { existsSync } from 'fs';
             loaderOptions: {
                 // 兼容 dev(ts-node): src/languages 和 prod(build): dist/languages
                 path: (() => {
-                    const devPath = join(__dirname, '../languages');      // src 或 dist/src
-                    const prodPath = join(__dirname, '../../languages');  // dist
+                    const devPath = join(__dirname, '../languages'); // src 或 dist/src
+                    const prodPath = join(__dirname, '../../languages'); // dist
                     return existsSync(devPath) ? devPath : prodPath;
                 })(),
                 watch: process.env.NODE_ENV === 'development',

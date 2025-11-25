@@ -5,11 +5,13 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
-export class DatabaseService extends PrismaClient {
+export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
     protected logger: Logger;
 
     constructor() {
-        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        const pool = new Pool({
+            connectionString: process.env.CHAIN_SERVICE_DATABASE_URL,
+        });
         const adapter = new PrismaPg(pool);
         super({ adapter });
         this.logger = new Logger(DatabaseService.name);
@@ -18,7 +20,9 @@ export class DatabaseService extends PrismaClient {
     async onModuleInit(): Promise<void> {
         try {
             await this.$connect();
-            this.logger.log('Database connection established');
+            const dbUrl = process.env.CHAIN_SERVICE_DATABASE_URL || '';
+            const maskedUrl = dbUrl.replace(/:([^:@]+)@/, ':****@');
+            this.logger.log(`Database connection established to ${maskedUrl}`);
         } catch (error) {
             this.logger.error('Failed to connect to database', error);
             throw error;

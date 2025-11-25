@@ -1,15 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger ,OnModuleDestroy,OnModuleInit} from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { Prisma, PrismaClient } from '@repo/database/indexer';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
-export class DatabaseService extends PrismaClient {
+export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(DatabaseService.name);
 
     constructor() {
-        const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+        const pool = new Pool({ connectionString: process.env.CHAIN_READER_DATABASE_URL });
         const adapter = new PrismaPg(pool);
         super({ adapter });
 
@@ -67,7 +67,9 @@ export class DatabaseService extends PrismaClient {
     async onModuleInit(): Promise<void> {
         try {
             await this.$connect();
-            this.logger.log('Database connection established');
+            const dbUrl = process.env.CHAIN_READER_DATABASE_URL || '';
+            const maskedUrl = dbUrl.replace(/:([^:@]+)@/, ':****@');
+            this.logger.log(`Database connection established to ${maskedUrl}`);
         } catch (error) {
             this.logger.error('Failed to connect to database', error as Error);
             throw error;

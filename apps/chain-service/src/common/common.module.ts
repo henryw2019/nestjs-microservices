@@ -47,7 +47,7 @@ const resolveLanguagesPath = (): string => {
             load: configs,
             isGlobal: true,
             cache: true,
-            envFilePath: ['../../.env.docker','.env.docker', '.env'],
+            envFilePath: ['../../.env.docker', '.env'],
             expandVariables: true,
             validationSchema: Joi.object({
                 // App Configuration
@@ -71,7 +71,7 @@ const resolveLanguagesPath = (): string => {
                 SENTRY_DSN: Joi.string().allow('').optional(),
 
                 // Database Configuration
-                DATABASE_URL: Joi.string().uri().required(),
+                CHAIN_SERVICE_DATABASE_URL: Joi.string().uri().required(),
 
                 // Redis Configuration
                 REDIS_URL: Joi.string().uri().default('redis://localhost:6379'),
