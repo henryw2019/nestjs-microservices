@@ -32,16 +32,16 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
 
     async isHealthy(): Promise<HealthIndicatorResult> {
         const timeout = 5000; // 5秒超时
-        
+
         try {
             const timeoutId = setTimeout(() => {
                 throw new Error('Redis health check timeout');
             }, timeout);
-            
+
             try {
                 const result = await this.ping();
                 clearTimeout(timeoutId);
-                
+
                 if (result === 'PONG') {
                     return {
                         redis: {
@@ -51,7 +51,7 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
                         },
                     };
                 }
-                
+
                 throw new Error('Unexpected Redis response');
             } catch (pingError) {
                 clearTimeout(timeoutId);

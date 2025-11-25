@@ -4,7 +4,7 @@ import { of, throwError } from 'rxjs';
 
 describe('GrpcAuthService', () => {
     let service: GrpcAuthService;
-    let authServiceClient: { 
+    let authServiceClient: {
         ValidateToken: jest.Mock;
         GetUserById: jest.Mock;
         GetUserByEmail: jest.Mock;

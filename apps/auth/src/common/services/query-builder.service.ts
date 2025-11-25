@@ -19,13 +19,14 @@ type ModelAccessor<T> = {
 };
 
 // 辅助函数，用于安全地获取模型访问器
-function getModelAccessor<T>(
-    databaseService: DatabaseService, 
-    model: string
-): ModelAccessor<T> {
+function getModelAccessor<T>(databaseService: DatabaseService, model: string): ModelAccessor<T> {
     // 使用类型断言，但限制在最小范围内
     const modelAccessor = (databaseService as any)[model];
-    if (!modelAccessor || typeof modelAccessor.findMany !== 'function' || typeof modelAccessor.count !== 'function') {
+    if (
+        !modelAccessor ||
+        typeof modelAccessor.findMany !== 'function' ||
+        typeof modelAccessor.count !== 'function'
+    ) {
         throw new Error(`Model ${model} not found or does not have required methods`);
     }
     return modelAccessor as ModelAccessor<T>;
@@ -51,7 +52,11 @@ export class QueryBuilderService {
         const sortBy = dto.sortBy || defaultSort.field;
         const sortOrder = dto.sortOrder || defaultSort.order;
 
-        const where = this.buildWhereClause(dto as Record<string, unknown>, searchFields, customFilters);
+        const where = this.buildWhereClause(
+            dto as Record<string, unknown>,
+            searchFields,
+            customFilters,
+        );
         const include = this.buildIncludeClause(relations);
         const modelAccessor = getModelAccessor<T>(this.databaseService, model);
 

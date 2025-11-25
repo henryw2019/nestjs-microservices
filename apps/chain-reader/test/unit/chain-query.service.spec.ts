@@ -171,7 +171,14 @@ describe('ChainQueryService', () => {
         it('should filter by hash', async () => {
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: [],
-                meta: { page: 1, limit: 25, total: 0, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 0,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             await service.getBlocks({ hash: '0x123' });
@@ -179,7 +186,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { hash: '0x123' },
-                })
+                }),
             );
         });
 
@@ -189,7 +196,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { number: BigInt(123) },
-                })
+                }),
             );
         });
 
@@ -204,7 +211,7 @@ describe('ChainQueryService', () => {
                             lte: BigInt(200),
                         },
                     },
-                })
+                }),
             );
         });
 
@@ -222,7 +229,7 @@ describe('ChainQueryService', () => {
                             lte: new Date('2024-01-02T00:00:00Z'),
                         },
                     },
-                })
+                }),
             );
         });
 
@@ -244,7 +251,7 @@ describe('ChainQueryService', () => {
                         sortOrder: 'asc',
                         search: 'test',
                     },
-                })
+                }),
             );
         });
     });
@@ -270,7 +277,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: mockTxs,
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getTransactions({});
@@ -305,7 +319,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { hash: '0xtx123' },
-                })
+                }),
             );
         });
 
@@ -315,7 +329,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { blockNumber: BigInt(12345) },
-                })
+                }),
             );
         });
 
@@ -327,14 +341,11 @@ describe('ChainQueryService', () => {
                     customFilters: {
                         AND: [
                             {
-                                OR: [
-                                    { from: '0xaddress' },
-                                    { to: '0xaddress' },
-                                ],
+                                OR: [{ from: '0xaddress' }, { to: '0xaddress' }],
                             },
                         ],
                     },
-                })
+                }),
             );
         });
 
@@ -356,7 +367,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: [mockTx],
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getTransactions({});
@@ -435,7 +453,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: mockTransfers,
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getErc20Transfers({});
@@ -467,7 +492,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { txHash: '0xtx123' },
-                })
+                }),
             );
         });
 
@@ -477,7 +502,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { token: '0xtoken123' },
-                })
+                }),
             );
         });
 
@@ -489,14 +514,11 @@ describe('ChainQueryService', () => {
                     customFilters: {
                         AND: [
                             {
-                                OR: [
-                                    { from: '0xaddress123' },
-                                    { to: '0xaddress123' },
-                                ],
+                                OR: [{ from: '0xaddress123' }, { to: '0xaddress123' }],
                             },
                         ],
                     },
-                })
+                }),
             );
         });
     });
@@ -524,7 +546,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: mockEventLogs,
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getEventLogs({});
@@ -561,7 +590,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { chainId: 1 },
-                })
+                }),
             );
         });
 
@@ -573,7 +602,7 @@ describe('ChainQueryService', () => {
                     customFilters: {
                         eventName: { equals: 'transfer', mode: 'insensitive' },
                     },
-                })
+                }),
             );
         });
 
@@ -583,7 +612,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { processed: true },
-                })
+                }),
             );
 
             await service.getEventLogs({ processed: 'false' });
@@ -591,7 +620,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { processed: false },
-                })
+                }),
             );
         });
 
@@ -615,7 +644,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: [mockEventLog],
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getEventLogs({});
@@ -653,7 +689,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: mockBalances,
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getAddressBalances({});
@@ -682,7 +725,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { address: '0xaddress123' },
-                })
+                }),
             );
         });
 
@@ -692,7 +735,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { tokenAddress: '0xtoken123' },
-                })
+                }),
             );
         });
     });
@@ -712,7 +755,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: mockTokenMeta,
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getTokenMeta({});
@@ -749,7 +799,14 @@ describe('ChainQueryService', () => {
 
             queryBuilder.findManyWithPagination.mockResolvedValue({
                 items: mockTokenMeta,
-                meta: { page: 1, limit: 25, total: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+                meta: {
+                    page: 1,
+                    limit: 25,
+                    total: 1,
+                    totalPages: 1,
+                    hasNextPage: false,
+                    hasPreviousPage: false,
+                },
             });
 
             const result = await service.getTokenMeta({});
@@ -770,7 +827,7 @@ describe('ChainQueryService', () => {
             expect(queryBuilder.findManyWithPagination).toHaveBeenCalledWith(
                 expect.objectContaining({
                     customFilters: { tokenAddress: '0xtoken123' },
-                })
+                }),
             );
         });
 
@@ -782,7 +839,7 @@ describe('ChainQueryService', () => {
                     customFilters: {
                         symbol: { contains: 'test', mode: 'insensitive' },
                     },
-                })
+                }),
             );
         });
 
@@ -794,7 +851,7 @@ describe('ChainQueryService', () => {
                     customFilters: {
                         name: { contains: 'test token', mode: 'insensitive' },
                     },
-                })
+                }),
             );
         });
     });

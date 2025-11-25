@@ -394,7 +394,7 @@ export class IndexerService implements OnModuleInit {
         console.log(`[block ${blockNumber}] start processing`);
 
         let hex = ethers.toBeHex(block.number);
-        hex = '0x' + ((hex.startsWith('0x') ? hex.slice(2) : hex).replace(/^0+/, ''));
+        hex = '0x' + (hex.startsWith('0x') ? hex.slice(2) : hex).replace(/^0+/, '');
         const blockWithTxs = await this.provider
             .send('eth_getBlockByNumber', [hex, true])
             .catch(() => null);
@@ -859,11 +859,11 @@ export class IndexerService implements OnModuleInit {
                             `      log ${logIdx + 1}/${logs.length} queued ${addressesToRefresh.length - addressesBefore} balance refresh entries`,
                         );
                     }
-                    
+
                     // tx failed but still refresh from balances
                     if (tx.from) addressesToRefresh.push({ address: tx.from, token: null });
                     //if (tx.to) addressesToRefresh.push({ address: tx.to, token: null });
-                    
+
                     if (addressesToRefresh.length > 0) {
                         console.log(
                             `[block ${blockNumber}] refreshing ${addressesToRefresh.length} balance targets for tx ${tx.hash}`,
@@ -962,7 +962,12 @@ export class IndexerService implements OnModuleInit {
                     }
                 }
             } catch (e) {
-                console.error('refreshBalances item error', address, token, (e as any)?.message || e);
+                console.error(
+                    'refreshBalances item error',
+                    address,
+                    token,
+                    (e as any)?.message || e,
+                );
             }
         }
     }

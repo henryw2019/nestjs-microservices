@@ -30,7 +30,13 @@ import { existsSync } from 'fs';
                             package: configService.get<string>('grpc.authPackage', 'auth'),
                             protoPath: resolveProtoPath('auth.proto'),
                             url: configService.get<string>('grpc.authUrl', 'auth-service:50051'),
-                            loader: { keepCase: true, longs: String, enums: String, defaults: true, oneofs: true },
+                            loader: {
+                                keepCase: true,
+                                longs: String,
+                                enums: String,
+                                defaults: true,
+                                oneofs: true,
+                            },
                         },
                     };
                 },

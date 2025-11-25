@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserAuthService } from 'src/modules/user/services/user.auth.service';
-import { GetUserByIdRequest, GetUserByIdResponse, GetUserByEmailRequest, GetUserByEmailResponse, User } from 'src/generated/user';
+import {
+    GetUserByIdRequest,
+    GetUserByIdResponse,
+    GetUserByEmailRequest,
+    GetUserByEmailResponse,
+    User,
+} from 'src/generated/user';
 import { UserResponseDto } from 'src/modules/user/dtos/user.response.dto';
 
 @Injectable()

@@ -4,7 +4,10 @@ import { Reflector } from '@nestjs/core';
 import { I18nService } from 'nestjs-i18n';
 import { ExecutionContext, CallHandler } from '@nestjs/common';
 import { of, Observable } from 'rxjs';
-import { MESSAGE_KEY_METADATA, MESSAGE_DTO_METADATA } from '../../src/common/constants/response.constant';
+import {
+    MESSAGE_KEY_METADATA,
+    MESSAGE_DTO_METADATA,
+} from '../../src/common/constants/response.constant';
 
 describe('ResponseInterceptor', () => {
     let interceptor: ResponseInterceptor;
@@ -35,8 +38,8 @@ describe('ResponseInterceptor', () => {
         }).compile();
 
         interceptor = module.get<ResponseInterceptor>(ResponseInterceptor);
-        reflector = module.get(Reflector) as jest.Mocked<Reflector>;
-        i18nService = module.get(I18nService) as jest.Mocked<I18nService>;
+        reflector = module.get(Reflector);
+        i18nService = module.get(I18nService);
     });
 
     const createMockContext = (statusCode: number = 200): ExecutionContext => {
@@ -68,7 +71,7 @@ describe('ResponseInterceptor', () => {
         const mockNext = createMockCallHandler(mockData);
         const mockDto = class TestDto {};
 
-        reflector.get.mockImplementation((key) => {
+        reflector.get.mockImplementation(key => {
             if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
             if (key === MESSAGE_DTO_METADATA) return mockDto;
             return undefined;
@@ -83,8 +86,14 @@ describe('ResponseInterceptor', () => {
                 message: 'Success message',
                 data: expect.any(Object), // Transformed by plainToInstance
             });
-            expect(reflector.get).toHaveBeenCalledWith(MESSAGE_KEY_METADATA, mockContext.getHandler());
-            expect(reflector.get).toHaveBeenCalledWith(MESSAGE_DTO_METADATA, mockContext.getHandler());
+            expect(reflector.get).toHaveBeenCalledWith(
+                MESSAGE_KEY_METADATA,
+                mockContext.getHandler(),
+            );
+            expect(reflector.get).toHaveBeenCalledWith(
+                MESSAGE_DTO_METADATA,
+                mockContext.getHandler(),
+            );
             expect(i18nService.translate).toHaveBeenCalledWith('test.success.message', {
                 defaultValue: 'http.success.200',
             });
@@ -97,11 +106,11 @@ describe('ResponseInterceptor', () => {
         const mockContext = createMockContext(201);
         const mockNext = createMockCallHandler(mockData);
 
-        reflector.get.mockImplementation((key) => {
-    if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
-    if (key === MESSAGE_DTO_METADATA) return class TestDto {};
-    return undefined;
-});
+        reflector.get.mockImplementation(key => {
+            if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
+            if (key === MESSAGE_DTO_METADATA) return class TestDto {};
+            return undefined;
+        });
 
         i18nService.translate.mockResolvedValue('Created successfully');
 
@@ -121,11 +130,11 @@ describe('ResponseInterceptor', () => {
         const mockContext = createMockContext(200);
         const mockNext = createMockCallHandler(null);
 
-        reflector.get.mockImplementation((key) => {
-    if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
-    if (key === MESSAGE_DTO_METADATA) return class TestDto {};
-    return undefined;
-});
+        reflector.get.mockImplementation(key => {
+            if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
+            if (key === MESSAGE_DTO_METADATA) return class TestDto {};
+            return undefined;
+        });
 
         i18nService.translate.mockResolvedValue('Success');
 
@@ -163,11 +172,11 @@ describe('ResponseInterceptor', () => {
         const mockContext = createMockContext(500);
         const mockNext = createMockCallHandler(mockData);
 
-        reflector.get.mockImplementation((key) => {
-    if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
-    if (key === MESSAGE_DTO_METADATA) return class TestDto {};
-    return undefined;
-});
+        reflector.get.mockImplementation(key => {
+            if (key === MESSAGE_KEY_METADATA) return 'test.success.message';
+            if (key === MESSAGE_DTO_METADATA) return class TestDto {};
+            return undefined;
+        });
 
         i18nService.translate.mockResolvedValue('Internal server error');
 
@@ -183,7 +192,7 @@ describe('ResponseInterceptor', () => {
         const mockContext = createMockContext(200);
         const mockNext = createMockCallHandler(mockData);
 
-        reflector.get.mockImplementation((key) => {
+        reflector.get.mockImplementation(key => {
             if (key === MESSAGE_KEY_METADATA) return 'simple.message';
             if (key === MESSAGE_DTO_METADATA) return undefined;
             return undefined;

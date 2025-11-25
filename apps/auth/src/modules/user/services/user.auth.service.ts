@@ -36,7 +36,7 @@ export class UserAuthService {
                 avatar: updateDto.avatar,
             },
         });
-        
+
         return updatedUser as UserResponseDto;
     }
 
@@ -52,7 +52,7 @@ export class UserAuthService {
                 role: Role.USER, // Assuming a default role
             },
         });
-        
+
         return user as UserResponseDto;
     }
 }

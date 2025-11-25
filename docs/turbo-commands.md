@@ -59,17 +59,17 @@ pnpm prisma:studio
 这些命令在 `turbo.json` 中配置，具有以下特性：
 
 1. **缓存控制**：
-   - `proto:generate` 和 `prisma:*` 命令禁用缓存，确保每次都执行最新代码
-   - `prisma:studio` 设置为持久化任务，因为它需要保持运行状态
+    - `proto:generate` 和 `prisma:*` 命令禁用缓存，确保每次都执行最新代码
+    - `prisma:studio` 设置为持久化任务，因为它需要保持运行状态
 
 2. **输出配置**：
-   - `proto:generate` 输出到 `src/generated/**`
-   - `prisma:generate` 输出到 `node_modules/.prisma/client/**`
-   - `prisma:migrate` 和 `prisma:migrate:prod` 输出到 `prisma/migrations/**`
+    - `proto:generate` 输出到 `src/generated/**`
+    - `prisma:generate` 输出到 `node_modules/.prisma/client/**`
+    - `prisma:migrate` 和 `prisma:migrate:prod` 输出到 `prisma/migrations/**`
 
 3. **依赖关系**：
-   - 构建任务依赖于其他包的构建完成
-   - 测试任务依赖于构建完成
+    - 构建任务依赖于其他包的构建完成
+    - 测试任务依赖于构建完成
 
 ## 使用建议
 
@@ -83,17 +83,19 @@ pnpm prisma:studio
 如果遇到问题，可以尝试：
 
 1. 清理缓存：
-   ```bash
-   pnpm turbo clean
-   ```
+
+    ```bash
+    pnpm turbo clean
+    ```
 
 2. 重新安装依赖：
-   ```bash
-   rm -rf node_modules
-   pnpm install
-   ```
+
+    ```bash
+    rm -rf node_modules
+    pnpm install
+    ```
 
 3. 检查特定包的命令：
-   ```bash
-   pnpm turbo run proto:generate --filter=auth --dry-run
-   ```
+    ```bash
+    pnpm turbo run proto:generate --filter=auth --dry-run
+    ```

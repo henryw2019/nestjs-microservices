@@ -17,5 +17,4 @@ export class Erc20TransferListQueryDto extends ApiBaseQueryDto {
     @IsOptional()
     @IsString()
     refAddress?: string;
-
 }

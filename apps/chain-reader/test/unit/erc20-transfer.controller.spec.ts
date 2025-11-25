@@ -24,7 +24,7 @@ describe('Erc20TransferController', () => {
         }).compile();
 
         controller = module.get<Erc20TransferController>(Erc20TransferController);
-        chainQueryService = module.get(ChainQueryService) as jest.Mocked<ChainQueryService>;
+        chainQueryService = module.get(ChainQueryService);
     });
 
     it('should be defined', () => {

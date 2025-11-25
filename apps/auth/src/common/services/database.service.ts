@@ -9,8 +9,8 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
     private readonly logger = new Logger(DatabaseService.name);
 
     constructor() {
-        const pool = new Pool({ 
-            connectionString: process.env.AUTH_DATABASE_URL
+        const pool = new Pool({
+            connectionString: process.env.AUTH_DATABASE_URL,
         });
         const adapter = new PrismaPg(pool);
         super({ adapter });
@@ -39,17 +39,17 @@ export class DatabaseService extends PrismaClient implements OnModuleInit, OnMod
 
     async isHealthy(): Promise<HealthIndicatorResult> {
         const timeout = 5000; // 5秒超时
-        
+
         try {
             // 使用AbortController实现更安全的超时控制
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
-            
+
             try {
                 // 使用Prisma的queryRaw进行健康检查
                 await this.$queryRaw`SELECT 1`;
                 clearTimeout(timeoutId);
-                
+
                 return {
                     database: {
                         status: 'up',

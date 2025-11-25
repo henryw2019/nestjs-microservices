@@ -1,6 +1,11 @@
 import { GrpcMethod } from '@nestjs/microservices';
 import { Controller } from '@nestjs/common';
-import type { GetUserByIdRequest, GetUserByIdResponse, GetUserByEmailRequest, GetUserByEmailResponse } from 'src/generated/user';
+import type {
+    GetUserByIdRequest,
+    GetUserByIdResponse,
+    GetUserByEmailRequest,
+    GetUserByEmailResponse,
+} from 'src/generated/user';
 import { UserGrpcService } from 'src/modules/user/services/user.grpc.service';
 
 @Controller()

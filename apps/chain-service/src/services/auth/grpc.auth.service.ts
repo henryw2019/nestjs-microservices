@@ -31,7 +31,10 @@ export class GrpcAuthService implements OnModuleInit {
             this.logger.debug(`Token validation response: ${JSON.stringify(response)}`);
             return response;
         } catch (error) {
-            this.logger.error(`Token validation failed: ${(error as Error).message}`, (error as Error).stack);
+            this.logger.error(
+                `Token validation failed: ${(error as Error).message}`,
+                (error as Error).stack,
+            );
             throw error;
         }
     }

@@ -123,10 +123,7 @@ export class ChainQueryService {
         if (query.refAddress) {
             where.AND = [
                 {
-                    OR: [
-                        { from: query.refAddress }, 
-                        { to: query.refAddress }
-                    ],
+                    OR: [{ from: query.refAddress }, { to: query.refAddress }],
                 },
             ];
         }
@@ -168,10 +165,7 @@ export class ChainQueryService {
         if (query.refAddress) {
             where.AND = [
                 {
-                    OR: [
-                        { from: query.refAddress }, 
-                        { to: query.refAddress }
-                    ],
+                    OR: [{ from: query.refAddress }, { to: query.refAddress }],
                 },
             ];
         }

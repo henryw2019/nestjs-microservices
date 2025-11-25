@@ -137,7 +137,10 @@ describe('IndexerService', () => {
         it('should decode known log with topic', () => {
             const transferTopic = ethers.id('Transfer(address,address,uint256)');
             const mockLog = {
-                topics: [transferTopic, '0x000000000000000000000000sender1234567890123456789012345678901234567890'],
+                topics: [
+                    transferTopic,
+                    '0x000000000000000000000000sender1234567890123456789012345678901234567890',
+                ],
                 data: '0x0000000000000000000000000000000000000000000000000000000000000064',
             };
 
@@ -172,9 +175,11 @@ describe('IndexerService', () => {
     describe('onModuleInit', () => {
         it('should initialize the service', async () => {
             // Mock the onModuleInit method
-            const initSpy = jest.spyOn(service as any, 'onModuleInit').mockImplementation(async () => {
-                // Mock implementation
-            });
+            const initSpy = jest
+                .spyOn(service as any, 'onModuleInit')
+                .mockImplementation(async () => {
+                    // Mock implementation
+                });
 
             await service.onModuleInit();
             expect(initSpy).toHaveBeenCalled();

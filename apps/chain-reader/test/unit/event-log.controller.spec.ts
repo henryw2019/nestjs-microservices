@@ -24,7 +24,7 @@ describe('EventLogController', () => {
         }).compile();
 
         controller = module.get<EventLogController>(EventLogController);
-        chainQueryService = module.get(ChainQueryService) as jest.Mocked<ChainQueryService>;
+        chainQueryService = module.get(ChainQueryService);
     });
 
     it('should be defined', () => {

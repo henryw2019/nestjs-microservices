@@ -157,6 +157,8 @@ describe('KeyStoreService', () => {
 
     it('throws NotFoundException if secret not found by user id and address', async () => {
         (databaseMock.keyStore.findFirst as jest.Mock).mockResolvedValue(null);
-        await expect(service.getSecretByUserIdAndAddress('user_1', fixedWallet.address)).rejects.toThrow(NotFoundException);
+        await expect(
+            service.getSecretByUserIdAndAddress('user_1', fixedWallet.address),
+        ).rejects.toThrow(NotFoundException);
     });
 });

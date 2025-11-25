@@ -9,80 +9,96 @@
 ### Auth Service (服务端)
 
 #### 1. Proto 定义
+
 **文件**: `apps/auth/src/protos/user.proto`
 
 定义了 UserService 的 gRPC 接口，包括：
+
 - `GetUserById`: 根据用户 ID 获取用户信息
 - `GetUserByEmail`: 根据用户邮箱获取用户信息
 
 #### 2. 生成的 TypeScript 接口
+
 **文件**: `apps/auth/src/generated/user.ts`
 
 使用命令 `npx nestjs-grpc generate` 自动生成，包含：
+
 - `UserServiceClient`: 客户端接口
 - `UserServiceInterface`: 服务端接口
 - Request/Response 类型定义
 
 #### 3. gRPC 服务实现
+
 **文件**: `apps/auth/src/modules/user/services/user.grpc.service.ts`
 
 实现了 UserService 的业务逻辑：
+
 ```typescript
 export class UserGrpcService {
-    async getUserById(request: GetUserByIdRequest): Promise<GetUserByIdResponse>
-    async getUserByEmail(request: GetUserByEmailRequest): Promise<GetUserByEmailResponse>
+    async getUserById(request: GetUserByIdRequest): Promise<GetUserByIdResponse>;
+    async getUserByEmail(request: GetUserByEmailRequest): Promise<GetUserByEmailResponse>;
 }
 ```
 
 #### 4. gRPC 控制器
+
 **文件**: `apps/auth/src/app/user.grpc.controller.ts`
 
 暴露 gRPC 端点：
+
 ```typescript
 @GrpcController('UserService')
 export class UserGrpcController {
     @GrpcMethod('GetUserById')
     async getUserById(data: GetUserByIdRequest): Promise<GetUserByIdResponse>
-    
+
     @GrpcMethod('GetUserByEmail')
     async getUserByEmail(data: GetUserByEmailRequest): Promise<GetUserByEmailResponse>
 }
 ```
 
 #### 5. 模块注册
-**文件**: 
+
+**文件**:
+
 - `apps/auth/src/modules/user/user.module.ts` - 添加 UserGrpcService 到 providers
 - `apps/auth/src/app/app.module.ts` - 注册 UserService gRPC provider 和 UserGrpcController
 
 ### Chain Service (客户端)
 
 #### 1. Proto 文件
+
 **文件**: `apps/chain-service/src/protos/user.proto`
 
 与 auth service 相同的 proto 定义
 
 #### 2. 生成的 TypeScript 接口
+
 **文件**: `apps/chain-service/src/generated/user.ts`
 
 客户端使用的类型定义
 
 #### 3. gRPC 客户端服务
+
 **文件**: `apps/chain-service/src/services/user/grpc.user.service.ts`
 
 客户端调用实现：
+
 ```typescript
 export class GrpcUserService {
-    async getUserById(userId: string): Promise<GetUserByIdResponse>
-    async getUserByEmail(email: string): Promise<GetUserByEmailResponse>
+    async getUserById(userId: string): Promise<GetUserByIdResponse>;
+    async getUserByEmail(email: string): Promise<GetUserByEmailResponse>;
 }
 ```
 
 #### 4. gRPC 客户端模块
+
 **文件**: `apps/chain-service/src/services/user/grpc.user.module.ts`
 
 配置 UserService gRPC 客户端连接
 
 #### 5. 更新
+
 **文件**: `apps/chain-service/src/common/common.module.ts`
 
 添加 GrpcUserModule 到全局模块导入
@@ -106,23 +122,23 @@ export class ExampleService {
     async getUserInfo(userId: string) {
         // 通过 ID 获取用户
         const response = await this.grpcUserService.getUserById(userId);
-        
+
         if (response.success && response.user) {
             console.log('User:', response.user);
             return response.user;
         }
-        
+
         throw new NotFoundException('User not found');
     }
 
     async getUserByEmail(email: string) {
         // 通过邮箱获取用户
         const response = await this.grpcUserService.getUserByEmail(email);
-        
+
         if (response.success && response.user) {
             return response.user;
         }
-        
+
         throw new NotFoundException('User not found');
     }
 }
@@ -208,19 +224,19 @@ GRPC_AUTH_URL=auth:50051  # 指向 auth service 的 gRPC 端点
 
 ```json
 {
-  "success": true,
-  "user": {
-    "id": "123e4567-e89b-12d3-a456-426614174000",
-    "email": "user@example.com",
-    "firstName": "John",
-    "lastName": "Doe",
-    "phoneNumber": "+1234567890",
-    "avatar": "https://example.com/avatar.jpg",
-    "isVerified": true,
-    "role": "USER",
-    "createdAt": "2024-01-01T00:00:00.000Z",
-    "updatedAt": "2024-01-01T00:00:00.000Z"
-  }
+    "success": true,
+    "user": {
+        "id": "123e4567-e89b-12d3-a456-426614174000",
+        "email": "user@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "phoneNumber": "+1234567890",
+        "avatar": "https://example.com/avatar.jpg",
+        "isVerified": true,
+        "role": "USER",
+        "createdAt": "2024-01-01T00:00:00.000Z",
+        "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
 }
 ```
 
@@ -228,7 +244,7 @@ GRPC_AUTH_URL=auth:50051  # 指向 auth service 的 gRPC 端点
 
 ```json
 {
-  "success": false,
-  "user": null
+    "success": false,
+    "user": null
 }
 ```

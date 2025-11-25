@@ -26,7 +26,7 @@ describe('BlockController', () => {
         }).compile();
 
         controller = module.get<BlockController>(BlockController);
-        chainQueryService = module.get(ChainQueryService) as jest.Mocked<ChainQueryService>;
+        chainQueryService = module.get(ChainQueryService);
     });
 
     it('should be defined', () => {
@@ -146,7 +146,7 @@ describe('BlockController', () => {
             chainQueryService.getBlockByNumber.mockResolvedValue(null);
 
             await expect(controller.getBlock(blockNumber)).rejects.toThrow(
-                new NotFoundException(`Block ${blockNumber} not found`)
+                new NotFoundException(`Block ${blockNumber} not found`),
             );
 
             expect(chainQueryService.getBlockByNumber).toHaveBeenCalledWith(blockNumber);

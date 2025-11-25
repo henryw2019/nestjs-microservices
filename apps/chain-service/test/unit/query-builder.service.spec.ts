@@ -56,12 +56,14 @@ describe('QueryBuilderService', () => {
                     hasPreviousPage: false,
                 },
             });
-            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-                skip: 0,
-                take: 10,
-                orderBy: { createdAt: 'desc' },
-                where: { isDeleted: false },
-            }));
+            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    skip: 0,
+                    take: 10,
+                    orderBy: { createdAt: 'desc' },
+                    where: { isDeleted: false },
+                }),
+            );
         });
 
         it('should handle custom pagination and sorting', async () => {
@@ -90,11 +92,13 @@ describe('QueryBuilderService', () => {
                 hasNextPage: true,
                 hasPreviousPage: true,
             });
-            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-                skip: 5,
-                take: 5,
-                orderBy: { name: 'asc' },
-            }));
+            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    skip: 5,
+                    take: 5,
+                    orderBy: { name: 'asc' },
+                }),
+            );
         });
 
         it('should build where clause with search', async () => {
@@ -109,14 +113,16 @@ describe('QueryBuilderService', () => {
 
             await service.findManyWithPagination(options);
 
-            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-                where: expect.objectContaining({
-                    OR: [
-                        { name: { contains: 'test', mode: 'insensitive' } },
-                        { email: { contains: 'test', mode: 'insensitive' } },
-                    ],
+            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: expect.objectContaining({
+                        OR: [
+                            { name: { contains: 'test', mode: 'insensitive' } },
+                            { email: { contains: 'test', mode: 'insensitive' } },
+                        ],
+                    }),
                 }),
-            }));
+            );
         });
 
         it('should build where clause with filters', async () => {
@@ -136,15 +142,17 @@ describe('QueryBuilderService', () => {
 
             await service.findManyWithPagination(options);
 
-            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-                where: expect.objectContaining({
-                    email: { endsWith: '@example.com' },
-                    createdDate: { gte: new Date('2023-01-01') },
-                    roles: { in: ['admin', 'user'] },
-                    firstName: { contains: 'John', mode: 'insensitive' },
-                    status: 'active',
+            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: expect.objectContaining({
+                        email: { endsWith: '@example.com' },
+                        createdDate: { gte: new Date('2023-01-01') },
+                        roles: { in: ['admin', 'user'] },
+                        firstName: { contains: 'John', mode: 'insensitive' },
+                        status: 'active',
+                    }),
                 }),
-            }));
+            );
         });
 
         it('should build include clause', async () => {
@@ -159,16 +167,18 @@ describe('QueryBuilderService', () => {
 
             await service.findManyWithPagination(options);
 
-            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
-                include: {
-                    profile: true,
-                    posts: {
-                        include: {
-                            comments: true,
+            expect(mockDatabaseService.user.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    include: {
+                        profile: true,
+                        posts: {
+                            include: {
+                                comments: true,
+                            },
                         },
                     },
-                },
-            }));
+                }),
+            );
         });
     });
 });

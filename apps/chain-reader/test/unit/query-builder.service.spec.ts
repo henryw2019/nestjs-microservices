@@ -39,9 +39,12 @@ describe('QueryBuilderService', () => {
 
     describe('findManyWithPagination', () => {
         it('should return paginated results', async () => {
-            const mockItems = [{ id: 1, name: 'test1' }, { id: 2, name: 'test2' }];
+            const mockItems = [
+                { id: 1, name: 'test1' },
+                { id: 2, name: 'test2' },
+            ];
             const mockTotal = 2;
-            
+
             mockDatabaseService.block = {
                 findMany: jest.fn().mockResolvedValue(mockItems),
                 count: jest.fn().mockResolvedValue(mockTotal),
@@ -70,7 +73,7 @@ describe('QueryBuilderService', () => {
         it('should handle search functionality', async () => {
             const mockItems = [{ id: 1, name: 'search result' }];
             const mockTotal = 1;
-            
+
             mockDatabaseService.tx = {
                 findMany: jest.fn().mockResolvedValue(mockItems),
                 count: jest.fn().mockResolvedValue(mockTotal),
@@ -92,14 +95,14 @@ describe('QueryBuilderService', () => {
                             { from: { contains: 'test', mode: 'insensitive' } },
                         ],
                     }),
-                })
+                }),
             );
         });
 
         it('should handle custom filters', async () => {
             const mockItems = [{ id: 1, status: 'confirmed' }];
             const mockTotal = 1;
-            
+
             mockDatabaseService.eventLog = {
                 findMany: jest.fn().mockResolvedValue(mockItems),
                 count: jest.fn().mockResolvedValue(mockTotal),
@@ -116,14 +119,14 @@ describe('QueryBuilderService', () => {
             expect(mockDatabaseService.eventLog.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                     where: { status: 'confirmed' },
-                })
+                }),
             );
         });
 
         it('should handle field transformation', async () => {
             const mockItems = [{ id: 1, value: 100 }];
             const mockTotal = 1;
-            
+
             mockDatabaseService.addressBalance = {
                 findMany: jest.fn().mockResolvedValue(mockItems),
                 count: jest.fn().mockResolvedValue(mockTotal),
@@ -133,7 +136,7 @@ describe('QueryBuilderService', () => {
                 model: 'addressBalance',
                 dto: { page: 1, limit: 10, balance: '100' },
                 transformFields: {
-                    balance: (value) => parseInt(value, 10),
+                    balance: value => parseInt(value, 10),
                 },
             };
 
@@ -142,7 +145,7 @@ describe('QueryBuilderService', () => {
             expect(mockDatabaseService.addressBalance.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                     where: { balance: 100 },
-                })
+                }),
             );
         });
     });

@@ -22,19 +22,30 @@ export class HealthCacheService {
         return `${this.keyPrefix}${key}`;
     }
 
-    async set(key: string, result: HealthIndicatorResult, ttl: number = this.defaultTTL): Promise<void> {
+    async set(
+        key: string,
+        result: HealthIndicatorResult,
+        ttl: number = this.defaultTTL,
+    ): Promise<void> {
         const cacheKey = this.getCacheKey(key);
-        await this.cacheManager.set(cacheKey, {
-            result,
-            timestamp: Date.now(),
-        }, ttl);
+        await this.cacheManager.set(
+            cacheKey,
+            {
+                result,
+                timestamp: Date.now(),
+            },
+            ttl,
+        );
         this.logger.debug(`Health check cached for ${cacheKey}, TTL: ${ttl}ms`);
     }
 
     async get(key: string): Promise<HealthIndicatorResult | null> {
         const cacheKey = this.getCacheKey(key);
-        const cached = await this.cacheManager.get<{ result: HealthIndicatorResult; timestamp: number }>(cacheKey);
-        
+        const cached = await this.cacheManager.get<{
+            result: HealthIndicatorResult;
+            timestamp: number;
+        }>(cacheKey);
+
         if (!cached) {
             return null;
         }
@@ -57,7 +68,9 @@ export class HealthCacheService {
                 const cacheKey = this.getCacheKey(healthKey);
                 await this.cacheManager.del(cacheKey);
             }
-            this.logger.debug(`All known health check caches cleared for prefix: ${this.keyPrefix}`);
+            this.logger.debug(
+                `All known health check caches cleared for prefix: ${this.keyPrefix}`,
+            );
         }
     }
 
@@ -87,7 +100,7 @@ export class HealthCacheService {
         // 由于keys()方法可能在某些存储中不可用，我们返回已知的健康检查键
         const knownHealthKeys = ['database', 'redis'];
         const healthKeys = knownHealthKeys.map(key => this.getCacheKey(key));
-        
+
         // 检查这些键是否存在
         const existingKeys: string[] = [];
         for (const key of healthKeys) {
@@ -96,7 +109,7 @@ export class HealthCacheService {
                 existingKeys.push(key);
             }
         }
-        
+
         return {
             totalKeys: existingKeys.length,
             keys: existingKeys,

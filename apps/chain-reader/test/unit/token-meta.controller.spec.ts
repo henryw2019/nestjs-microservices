@@ -26,7 +26,7 @@ describe('TokenMetaController', () => {
         }).compile();
 
         controller = module.get<TokenMetaController>(TokenMetaController);
-        chainQueryService = module.get(ChainQueryService) as jest.Mocked<ChainQueryService>;
+        chainQueryService = module.get(ChainQueryService);
     });
 
     it('should be defined', () => {
@@ -173,7 +173,7 @@ describe('TokenMetaController', () => {
             chainQueryService.getTokenMetaByAddress.mockResolvedValue(null);
 
             await expect(controller.getTokenMeta(tokenAddress)).rejects.toThrow(
-                new NotFoundException(`Token metadata for ${tokenAddress} not found`)
+                new NotFoundException(`Token metadata for ${tokenAddress} not found`),
             );
 
             expect(chainQueryService.getTokenMetaByAddress).toHaveBeenCalledWith(tokenAddress);

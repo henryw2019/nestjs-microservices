@@ -141,7 +141,7 @@ describe('HealthCacheService', () => {
 
     describe('getStats', () => {
         it('should return stats for existing keys', async () => {
-            mockCacheManager.get.mockImplementation((key) => {
+            mockCacheManager.get.mockImplementation(key => {
                 if (key === 'auth:health:database') return Promise.resolve({});
                 return Promise.resolve(null);
             });

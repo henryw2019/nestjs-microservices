@@ -113,10 +113,7 @@ pnpm --filter chain-indexer proto:generate
 
 ```json
 {
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+    "workspaces": ["apps/*", "packages/*"]
 }
 ```
 

@@ -24,7 +24,7 @@ describe('AddressBalanceController', () => {
         }).compile();
 
         controller = module.get<AddressBalanceController>(AddressBalanceController);
-        chainQueryService = module.get(ChainQueryService) as jest.Mocked<ChainQueryService>;
+        chainQueryService = module.get(ChainQueryService);
     });
 
     it('should be defined', () => {

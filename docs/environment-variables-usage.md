@@ -13,7 +13,7 @@ ConfigModule.forRoot({
     cache: true,
     envFilePath: ['.env.docker', '.env'], // 自动查找根目录的 .env.docker
     expandVariables: true,
-})
+});
 ```
 
 ### 2. **配置读取方式**
@@ -44,7 +44,7 @@ export default registerAs('grpc', (): IGrpcConfig => {
         // AuthService 配置
         url: process.env.GRPC_AUTH_URL || process.env.GRPC_URL || '0.0.0.0:50051',
         package: process.env.GRPC_AUTH_PACKAGE || process.env.GRPC_PACKAGE || 'auth',
-        
+
         // UserService 配置 (同一服务，不同包)
         userUrl: process.env.GRPC_USER_URL || process.env.GRPC_URL || '0.0.0.0:50051',
         userPackage: process.env.GRPC_USER_PACKAGE || 'user',
@@ -62,11 +62,11 @@ export default registerAs('grpc', (): IGrpcConfig => {
         // 本服务作为gRPC服务器的配置 (如果需要)
         url: process.env.GRPC_URL || '',
         package: process.env.GRPC_PACKAGE || '',
-        
+
         // 连接外部 Auth Service
         authUrl: process.env.GRPC_CLIENT_AUTH_URL || 'auth-service:50051',
         authPackage: process.env.GRPC_AUTH_PACKAGE || 'auth',
-        
+
         // 连接外部 User Service (实际由 Auth Service 提供)
         userUrl: process.env.GRPC_CLIENT_USER_URL || 'auth-service:50051',
         userPackage: process.env.GRPC_USER_PACKAGE || 'user',
@@ -77,42 +77,54 @@ export default registerAs('grpc', (): IGrpcConfig => {
 ### 3. **各服务应用配置更新**
 
 #### Auth Service
+
 ```typescript
 // apps/auth/src/common/config/app.config.ts
-export default registerAs('app', (): IAppConfig => ({
-    name: process.env.AUTH_APP_NAME || 'auth',
-    http: {
-        port: parseInt(process.env.HTTP_PORT_AUTH || '9001', 10),
-        host: process.env.HTTP_HOST || '::',
-    },
-    // ... 其他配置
-}));
+export default registerAs(
+    'app',
+    (): IAppConfig => ({
+        name: process.env.AUTH_APP_NAME || 'auth',
+        http: {
+            port: parseInt(process.env.HTTP_PORT_AUTH || '9001', 10),
+            host: process.env.HTTP_HOST || '::',
+        },
+        // ... 其他配置
+    }),
+);
 ```
 
 #### Chain Service
+
 ```typescript
 // apps/chain-service/src/common/config/app.config.ts
-export default registerAs('app', (): IAppConfig => ({
-    name: process.env.CHAIN_SERVICE_APP_NAME || 'chain-service',
-    http: {
-        port: parseInt(process.env.HTTP_PORT_CHAIN_SERVICE || '9003', 10),
-        host: process.env.HTTP_HOST || '::',
-    },
-    // ... 其他配置
-}));
+export default registerAs(
+    'app',
+    (): IAppConfig => ({
+        name: process.env.CHAIN_SERVICE_APP_NAME || 'chain-service',
+        http: {
+            port: parseInt(process.env.HTTP_PORT_CHAIN_SERVICE || '9003', 10),
+            host: process.env.HTTP_HOST || '::',
+        },
+        // ... 其他配置
+    }),
+);
 ```
 
 #### Chain Reader Service
+
 ```typescript
 // apps/chain-reader/src/common/config/app.config.ts
-export default registerAs('app', (): IAppConfig => ({
-    name: process.env.CHAIN_READER_APP_NAME || 'chain-reader',
-    http: {
-        port: parseInt(process.env.HTTP_PORT_CHAIN_READER || '9004', 10),
-        host: process.env.HTTP_HOST || '::',
-    },
-    // ... 其他配置
-}));
+export default registerAs(
+    'app',
+    (): IAppConfig => ({
+        name: process.env.CHAIN_READER_APP_NAME || 'chain-reader',
+        http: {
+            port: parseInt(process.env.HTTP_PORT_CHAIN_READER || '9004', 10),
+            host: process.env.HTTP_HOST || '::',
+        },
+        // ... 其他配置
+    }),
+);
 ```
 
 ### 4. **Redis配置更新**
@@ -121,18 +133,24 @@ export default registerAs('app', (): IAppConfig => ({
 
 ```typescript
 // apps/auth/src/common/config/redis.config.ts
-export default registerAs('redis', (): IRedisConfig => ({
-    url: process.env.REDIS_URL || '',
-    keyPrefix: process.env.REDIS_KEY_PREFIX_AUTH || 'auth:',
-    ttl: parseInt(process.env.REDIS_TTL || '3600'),
-}));
+export default registerAs(
+    'redis',
+    (): IRedisConfig => ({
+        url: process.env.REDIS_URL || '',
+        keyPrefix: process.env.REDIS_KEY_PREFIX_AUTH || 'auth:',
+        ttl: parseInt(process.env.REDIS_TTL || '3600'),
+    }),
+);
 
 // apps/chain-service/src/common/config/redis.config.ts
-export default registerAs('redis', (): IRedisConfig => ({
-    url: process.env.REDIS_URL || '',
-    keyPrefix: process.env.REDIS_KEY_PREFIX_CHAIN_SERVICE || 'chain-service:',
-    ttl: parseInt(process.env.REDIS_TTL || '3600'),
-}));
+export default registerAs(
+    'redis',
+    (): IRedisConfig => ({
+        url: process.env.REDIS_URL || '',
+        keyPrefix: process.env.REDIS_KEY_PREFIX_CHAIN_SERVICE || 'chain-service:',
+        ttl: parseInt(process.env.REDIS_TTL || '3600'),
+    }),
+);
 ```
 
 ### 5. **数据库配置更新**
@@ -142,16 +160,16 @@ export default registerAs('redis', (): IRedisConfig => ({
 ```typescript
 // apps/auth/src/common/services/database.service.ts
 constructor() {
-    const pool = new Pool({ 
-        connectionString: process.env.AUTH_DATABASE_URL || process.env.DATABASE_URL 
+    const pool = new Pool({
+        connectionString: process.env.AUTH_DATABASE_URL || process.env.DATABASE_URL
     });
     // ...
 }
 
 // apps/chain-indexer/src/prisma.service.ts
 constructor() {
-    const pool = new Pool({ 
-        connectionString: process.env.INDEXER_DATABASE_URL || process.env.DATABASE_URL 
+    const pool = new Pool({
+        connectionString: process.env.INDEXER_DATABASE_URL || process.env.DATABASE_URL
     });
     // ...
 }
@@ -160,16 +178,19 @@ constructor() {
 ## 🚀 迁移步骤
 
 ### 第一阶段：环境变量准备
+
 1. ✅ 已创建 `.env.template` 模板文件
 2. ✅ 已更新 `.env.docker` 包含所有必要配置
 3. ✅ 已创建配置映射文档
 
 ### 第二阶段：代码更新
+
 1. 更新各服务的配置文件使用带前缀的环境变量
 2. 更新 gRPC 配置支持多服务连接
 3. 更新数据库和 Redis 配置使用专用 URL
 
 ### 第三阶段：测试验证
+
 1. 本地开发环境测试
 2. Docker 环境测试
 3. 服务间通信测试
@@ -184,6 +205,7 @@ constructor() {
 ## 📝 配置示例
 
 ### 开发环境 (.env.local)
+
 ```bash
 # 本地开发使用 localhost
 GRPC_CLIENT_AUTH_URL="localhost:50051"
@@ -192,6 +214,7 @@ ETH_RPC_URL="http://localhost:8545"
 ```
 
 ### Docker 环境 (.env.docker)
+
 ```bash
 # Docker 环境使用服务名
 GRPC_CLIENT_AUTH_URL="auth-service:50051"
@@ -200,6 +223,7 @@ ETH_RPC_URL="http://host.docker.internal:8545"
 ```
 
 ### 生产环境 (.env.production)
+
 ```bash
 # 生产环境使用实际的服务地址
 GRPC_CLIENT_AUTH_URL="auth-service.prod:50051"

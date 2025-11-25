@@ -175,7 +175,10 @@ describe('UserAdminService', () => {
             const userId = 'user-123';
             const mockUser = { id: userId };
             (databaseService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-            (databaseService.user.update as jest.Mock).mockResolvedValue({ ...mockUser, deletedAt: new Date() });
+            (databaseService.user.update as jest.Mock).mockResolvedValue({
+                ...mockUser,
+                deletedAt: new Date(),
+            });
 
             await userAdminService.deleteUser(userId);
 
@@ -199,7 +202,10 @@ describe('UserAdminService', () => {
             const updateDto = { firstName: 'Updated' };
             const mockUser = { id: userId };
             (databaseService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-            (databaseService.user.update as jest.Mock).mockResolvedValue({ ...mockUser, ...updateDto });
+            (databaseService.user.update as jest.Mock).mockResolvedValue({
+                ...mockUser,
+                ...updateDto,
+            });
 
             await userAdminService.updateUser(userId, updateDto);
 
@@ -214,7 +220,9 @@ describe('UserAdminService', () => {
             const updateDto = { firstName: 'Updated' };
             (databaseService.user.findUnique as jest.Mock).mockResolvedValue(null);
 
-            await expect(userAdminService.updateUser(userId, updateDto)).rejects.toThrow(NotFoundException);
+            await expect(userAdminService.updateUser(userId, updateDto)).rejects.toThrow(
+                NotFoundException,
+            );
         });
     });
 });

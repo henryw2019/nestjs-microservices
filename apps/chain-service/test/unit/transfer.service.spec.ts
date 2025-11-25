@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransferService } from '../../src/modules/keystore/transfer.service';
 import { KeyStoreService } from '../../src/modules/keystore/keystore.service';
 import { AmlService } from '../../src/modules/aml/aml.service';
-import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    InternalServerErrorException,
+    NotFoundException,
+} from '@nestjs/common';
 
 const mockSendTransaction = jest.fn();
 const mockTransfer = jest.fn();
@@ -10,7 +14,7 @@ const mockTransfer = jest.fn();
 // Mock ethers
 jest.mock('ethers', () => {
     return {
-        getAddress: jest.fn((addr) => addr),
+        getAddress: jest.fn(addr => addr),
         JsonRpcProvider: jest.fn(),
         Wallet: jest.fn().mockImplementation(() => ({
             sendTransaction: mockSendTransaction,
@@ -47,7 +51,7 @@ describe('TransferService', () => {
         }).compile();
 
         service = module.get<TransferService>(TransferService);
-        
+
         mockSendTransaction.mockReset();
         mockTransfer.mockReset();
     });
@@ -95,7 +99,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 body: JSON.stringify({ error: { message: 'Custom JSON error' } }),
             };
@@ -108,7 +112,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 error: { error: { message: 'Nested error' } },
             };
@@ -121,7 +125,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 code: 'UNPREDICTABLE_GAS_LIMIT',
                 message: 'Gas limit error',
@@ -135,7 +139,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 code: 'SERVER_ERROR',
                 message: 'execution reverted: insufficient funds',
@@ -149,28 +153,34 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 code: 'UNKNOWN_CODE',
                 message: 'Unknown error',
             };
             mockSendTransaction.mockRejectedValue(error);
 
-            await expect(service.sendNative('user-id', dto)).rejects.toThrow(InternalServerErrorException);
+            await expect(service.sendNative('user-id', dto)).rejects.toThrow(
+                InternalServerErrorException,
+            );
         });
 
         it('maps non-client error to InternalServerErrorException', async () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 message: 'Something bad happened',
             };
             mockSendTransaction.mockRejectedValue(error);
 
-            await expect(service.sendNative('user-id', dto)).rejects.toThrow(InternalServerErrorException);
-            await expect(service.sendNative('user-id', dto)).rejects.toThrow('Something bad happened');
+            await expect(service.sendNative('user-id', dto)).rejects.toThrow(
+                InternalServerErrorException,
+            );
+            await expect(service.sendNative('user-id', dto)).rejects.toThrow(
+                'Something bad happened',
+            );
         });
 
         it('ignores AML link failure', async () => {
@@ -188,7 +198,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 body: 'invalid-json',
             };
@@ -201,7 +211,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 message: "Error: reason='Custom Reason'",
             };
@@ -214,7 +224,7 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 code: -32005,
                 message: 'Range error',
@@ -228,18 +238,20 @@ describe('TransferService', () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {};
             mockSendTransaction.mockRejectedValue(error);
 
-            await expect(service.sendNative('user-id', dto)).rejects.toThrow('Blockchain transaction failed');
+            await expect(service.sendNative('user-id', dto)).rejects.toThrow(
+                'Blockchain transaction failed',
+            );
         });
 
         it('handles error.error.body', async () => {
             const dto = { from: '0xSender', to: '0xReceiver', amount: '100' };
             keyStoreService.getSecretByUserIdAndAddress.mockResolvedValue({ privateKey: '0xKey' });
             amlService.scanTransfer.mockResolvedValue({ scanId: 'scan-id', decision: 'pass' });
-            
+
             const error = {
                 error: { body: JSON.stringify({ error: { message: 'Deep body error' } }) },
             };

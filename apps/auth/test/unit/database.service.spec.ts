@@ -49,10 +49,7 @@ describe('DatabaseService', () => {
 
             await databaseService.onModuleDestroy();
             expect((databaseService as any).$disconnect).toHaveBeenCalled();
-            expect(errorSpy).toHaveBeenCalledWith(
-                'Error closing database connection',
-                mockError,
-            );
+            expect(errorSpy).toHaveBeenCalledWith('Error closing database connection', mockError);
         });
     });
 

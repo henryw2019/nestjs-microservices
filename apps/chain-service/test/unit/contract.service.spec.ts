@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ContractService } from '../../src/modules/contract/contract.service';
 import { DatabaseService } from '../../src/common/services/database.service';
 import { KeyStoreService } from '../../src/modules/keystore/keystore.service';
-import { BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+    BadRequestException,
+    NotFoundException,
+    InternalServerErrorException,
+} from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
@@ -19,7 +23,7 @@ jest.mock('fs', () => ({
 // Mock ethers
 jest.mock('ethers', () => {
     return {
-        getAddress: jest.fn((addr) => addr),
+        getAddress: jest.fn(addr => addr),
         Interface: jest.fn().mockImplementation(() => ({
             getFunction: jest.fn(),
         })),
@@ -99,11 +103,13 @@ describe('ContractService', () => {
 
             const result = await service.create(dto);
 
-            expect(result).toEqual(expect.objectContaining({
-                id: mockContract.id,
-                name: mockContract.name,
-                address: mockContract.address,
-            }));
+            expect(result).toEqual(
+                expect.objectContaining({
+                    id: mockContract.id,
+                    name: mockContract.name,
+                    address: mockContract.address,
+                }),
+            );
             expect(databaseService.contract.create).toHaveBeenCalled();
             expect(fs.writeFile).toHaveBeenCalled();
         });
@@ -140,7 +146,7 @@ describe('ContractService', () => {
                 abi: [{ type: 'function', name: 'test' }],
                 ownerId: 'owner-id',
             };
-            
+
             const { getAddress } = require('ethers');
             getAddress.mockImplementationOnce(() => {
                 throw new Error('Invalid address');
@@ -184,14 +190,18 @@ describe('ContractService', () => {
             databaseService.contract.findUnique.mockResolvedValue(mockContract);
             (fs.readFile as jest.Mock).mockRejectedValue(new Error('Read failed'));
 
-            await expect(service.findOne('contract-id', true)).rejects.toThrow(InternalServerErrorException);
+            await expect(service.findOne('contract-id', true)).rejects.toThrow(
+                InternalServerErrorException,
+            );
         });
 
         it('should throw InternalServerErrorException if ABI is not an array', async () => {
             databaseService.contract.findUnique.mockResolvedValue(mockContract);
             (fs.readFile as jest.Mock).mockResolvedValue(JSON.stringify({ not: 'array' }));
 
-            await expect(service.findOne('contract-id', true)).rejects.toThrow(InternalServerErrorException);
+            await expect(service.findOne('contract-id', true)).rejects.toThrow(
+                InternalServerErrorException,
+            );
         });
 
         it('should throw if contract not found', async () => {
@@ -215,7 +225,7 @@ describe('ContractService', () => {
             databaseService.contract.findUnique
                 .mockResolvedValueOnce(mockContract) // Initial check
                 .mockResolvedValueOnce(updatedContract); // Refreshed after update
-            
+
             databaseService.contract.findFirst.mockResolvedValue(null);
             databaseService.contract.update.mockResolvedValue(updatedContract);
             (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
@@ -254,7 +264,9 @@ describe('ContractService', () => {
 
             await service.remove('contract-id');
 
-            expect(databaseService.contract.delete).toHaveBeenCalledWith({ where: { id: 'contract-id' } });
+            expect(databaseService.contract.delete).toHaveBeenCalledWith({
+                where: { id: 'contract-id' },
+            });
             expect(fs.unlink).toHaveBeenCalled();
         });
 
@@ -294,16 +306,16 @@ describe('ContractService', () => {
         beforeEach(() => {
             databaseService.contract.findUnique.mockResolvedValue(mockContract);
             (fs.readFile as jest.Mock).mockResolvedValue(JSON.stringify(mockAbi));
-            
+
             // Reset mocks
             jest.clearAllMocks();
-            
+
             // Setup Ethers mocks
             const ethers = require('ethers');
             ethers.Interface.mockImplementation(() => ({
                 getFunction: jest.fn().mockReturnValue(mockFragment),
             }));
-            
+
             ethers.Contract.mockImplementation(() => ({
                 testFunc: mockFunction,
                 callStatic: {
@@ -379,16 +391,18 @@ describe('ContractService', () => {
 
             const result = await service.execute('contract-id', dto);
 
-            expect(result).toEqual(expect.objectContaining({
-                transaction: expect.objectContaining({
-                    hash: '0xHash',
-                    gasLimit: '100000',
+            expect(result).toEqual(
+                expect.objectContaining({
+                    transaction: expect.objectContaining({
+                        hash: '0xHash',
+                        gasLimit: '100000',
+                    }),
+                    receipt: expect.objectContaining({
+                        transactionHash: '0xHash',
+                        status: 1,
+                    }),
                 }),
-                receipt: expect.objectContaining({
-                    transactionHash: '0xHash',
-                    status: 1,
-                }),
-            }));
+            );
         });
 
         it('should throw BadRequestException for invalid BigInt in overrides', async () => {
@@ -602,10 +616,9 @@ describe('ContractService', () => {
             (fs.mkdir as jest.Mock).mockResolvedValue(undefined);
 
             await service.create(dto);
-            
+
             expect(fs.mkdir).toHaveBeenCalledWith('/tmp/abis', expect.any(Object));
             delete process.env.CONTRACT_ABI_DIR;
         });
     });
 });
-

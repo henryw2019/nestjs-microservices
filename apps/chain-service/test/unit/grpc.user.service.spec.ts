@@ -28,7 +28,7 @@ describe('GrpcUserService', () => {
 
         service = module.get<GrpcUserService>(GrpcUserService);
         clientGrpc = module.get('USER_GRPC');
-        
+
         service.onModuleInit();
     });
 
@@ -48,7 +48,9 @@ describe('GrpcUserService', () => {
         });
 
         it('should throw error when call fails', async () => {
-            userServiceClient.GetUserById.mockReturnValue(throwError(() => new Error('gRPC Error')));
+            userServiceClient.GetUserById.mockReturnValue(
+                throwError(() => new Error('gRPC Error')),
+            );
 
             await expect(service.getUserById('user-id')).rejects.toThrow('gRPC Error');
         });
@@ -62,11 +64,15 @@ describe('GrpcUserService', () => {
             const result = await service.getUserByEmail('test@example.com');
 
             expect(result).toEqual(mockResponse);
-            expect(userServiceClient.GetUserByEmail).toHaveBeenCalledWith({ email: 'test@example.com' });
+            expect(userServiceClient.GetUserByEmail).toHaveBeenCalledWith({
+                email: 'test@example.com',
+            });
         });
 
         it('should throw error when call fails', async () => {
-            userServiceClient.GetUserByEmail.mockReturnValue(throwError(() => new Error('gRPC Error')));
+            userServiceClient.GetUserByEmail.mockReturnValue(
+                throwError(() => new Error('gRPC Error')),
+            );
 
             await expect(service.getUserByEmail('test@example.com')).rejects.toThrow('gRPC Error');
         });

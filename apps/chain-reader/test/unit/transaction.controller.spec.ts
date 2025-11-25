@@ -26,7 +26,7 @@ describe('TransactionController', () => {
         }).compile();
 
         controller = module.get<TransactionController>(TransactionController);
-        chainQueryService = module.get(ChainQueryService) as jest.Mocked<ChainQueryService>;
+        chainQueryService = module.get(ChainQueryService);
     });
 
     it('should be defined', () => {
@@ -155,7 +155,7 @@ describe('TransactionController', () => {
             chainQueryService.getTransactionByHash.mockResolvedValue(null);
 
             await expect(controller.getTransaction(txHash)).rejects.toThrow(
-                new NotFoundException(`Transaction ${txHash} not found`)
+                new NotFoundException(`Transaction ${txHash} not found`),
             );
 
             expect(chainQueryService.getTransactionByHash).toHaveBeenCalledWith(txHash);

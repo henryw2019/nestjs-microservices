@@ -1,6 +1,11 @@
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { HealthCheck, HealthCheckService, MemoryHealthIndicator, DiskHealthIndicator } from '@nestjs/terminus';
+import {
+    HealthCheck,
+    HealthCheckService,
+    MemoryHealthIndicator,
+    DiskHealthIndicator,
+} from '@nestjs/terminus';
 import { PublicRoute } from 'src/common/decorators/public.decorator';
 
 import { DatabaseService } from 'src/common/services/database.service';
@@ -27,10 +32,21 @@ export class AppController {
     @PublicRoute()
     public async getHealth() {
         return this.healthCheckService.check([
-            () => this.healthCacheService.withCache('database', () => this.databaseService.isHealthy(), 5000),
-            () => this.healthCacheService.withCache('redis', () => this.redisService.isHealthy(), 5000),
+            () =>
+                this.healthCacheService.withCache(
+                    'database',
+                    () => this.databaseService.isHealthy(),
+                    5000,
+                ),
+            () =>
+                this.healthCacheService.withCache(
+                    'redis',
+                    () => this.redisService.isHealthy(),
+                    5000,
+                ),
             () => this.memoryHealthIndicator.checkHeap('memory_heap', 150 * 1024 * 1024), // 150MB
-            () => this.diskHealthIndicator.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
+            () =>
+                this.diskHealthIndicator.checkStorage('disk', { path: '/', thresholdPercent: 0.9 }),
         ]);
     }
 }

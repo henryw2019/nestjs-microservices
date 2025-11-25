@@ -19,37 +19,47 @@ docker run -d --name dev --network mynetwork --network-alias auth-service --netw
 docker run -d --name dev --network mynetwork --network-alias auth-service --network-alias chain-service --network-alias chain-reader --network-alias chain-indexer -v $(pwd):/app -p 9001:9001 -p 9003:9003 -p 9004:9004 node:22-alpine sh -c "tail -f /dev/null"
 
 # 制作开发镜像
+
 docker commit dev dev:1119
 docker save dev:1119-v1 | gzip > dev-1119-v1.tar.gz
 
-
 # 离线构建方法
+
 ## 导出构建镜像
+
 docker build -f Dockerfile.deps -t pnpm-deps-exporter .
+
 ## 创建一个临时容器（不需要运行）
+
 docker create --name temp-exporter pnpm-deps-exporter
+
 ## 从容器中复制 tar.gz 到当前目录
+
 docker cp temp-exporter:/pnpm-store.tar.gz ./pnpm-store.tar.gz
+
 ## 清理
+
 docker rm temp-exporter
 
-
 # 0 创建一个builder镜像
+
 docker build -f Dockerfile.builder -t my-builder:latest .
 
 # 1. 构建 Auth 服务
+
 docker build -f Dockerfile.app --target auth -t my-auth-service:offline .
 
 # 2. 构建 Chain Reader 服务
+
 docker build -f Dockerfile.app --target chain-reader -t my-chain-reader:offline .
 
 # 3. 构建 Chain Service 服务
+
 docker build -f Dockerfile.app --target chain-service -t my-chain-service:offline .
 
 # 4. 构建 Chain Indexer 服务
+
 docker build -f Dockerfile.app --target chain-indexer -t my-chain-indexer:offline .
-
-
 
 ## AML 反洗钱扫描（chain-service）
 
@@ -74,10 +84,12 @@ AML_ENFORCEMENT_MODE=block_on_fail
 ```
 
 数据库模型（Prisma）：
+
 - `aml_scans`：扫描主记录（双方用户、地址、请求快照、最后响应、状态、txHash、correlationId 等）。
 - `aml_scan_events`：事件流水（REQUEST/RESPONSE/ERROR）保存完整报文。
 
 主要代码：
+
 - `apps/chain-service/src/modules/aml/aml.soap.client.ts`：SOAP 客户端（实时扫描/结果查询）。
 - `apps/chain-service/src/modules/aml/aml.service.ts`：编排入库、状态映射、阻断策略与回填 txHash。
 - `apps/chain-service/src/modules/aml/aml.poller.ts`：每分钟轮询未终态记录更新结果。

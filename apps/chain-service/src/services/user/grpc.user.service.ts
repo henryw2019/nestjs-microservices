@@ -1,7 +1,12 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { GetUserByIdRequest, GetUserByIdResponse, GetUserByEmailRequest, GetUserByEmailResponse } from '../../generated/user';
+import {
+    GetUserByIdRequest,
+    GetUserByIdResponse,
+    GetUserByEmailRequest,
+    GetUserByEmailResponse,
+} from '../../generated/user';
 
 interface UserServiceClient {
     GetUserById(data: GetUserByIdRequest): any;
@@ -31,7 +36,10 @@ export class GrpcUserService implements OnModuleInit {
             this.logger.debug(`Get user by ID response: ${JSON.stringify(response)}`);
             return response;
         } catch (error) {
-            this.logger.error(`Get user by ID failed: ${(error as Error).message}`, (error as Error).stack);
+            this.logger.error(
+                `Get user by ID failed: ${(error as Error).message}`,
+                (error as Error).stack,
+            );
             throw error;
         }
     }
@@ -48,7 +56,10 @@ export class GrpcUserService implements OnModuleInit {
             this.logger.debug(`Get user by email response: ${JSON.stringify(response)}`);
             return response;
         } catch (error) {
-            this.logger.error(`Get user by email failed: ${(error as Error).message}`, (error as Error).stack);
+            this.logger.error(
+                `Get user by email failed: ${(error as Error).message}`,
+                (error as Error).stack,
+            );
             throw error;
         }
     }

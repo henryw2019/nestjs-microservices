@@ -1,4 +1,4 @@
-import { Injectable, Logger ,OnModuleDestroy,OnModuleInit} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { Prisma, PrismaClient } from '@repo/database/indexer';
 import { Pool } from 'pg';
