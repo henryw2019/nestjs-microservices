@@ -59,3 +59,59 @@ model AmlScan {
 
   @@map("aml_scans")
 }
+
+enum OrderType {
+  SUBSCRIPTION // User buys Stablecoin with Fiat
+  REDEMPTION   // User sells Stablecoin for Fiat
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model StablecoinOrder {
+  id        String      @id @default(uuid())
+  userId    String      @map("user_id")
+  
+  type      OrderType
+  status    OrderStatus @default(PENDING)
+  
+  // Amount in stablecoin units (raw value, e.g. wei)
+  amount    Decimal     @db.Decimal(78, 0) 
+  
+  // The stablecoin contract address
+  currencyContractAddress String @map("currency_contract_address")
+  
+  // Blockchain Transaction Hash
+  // Subscription: Admin -> User
+  // Redemption: User (Hosted) -> Issuer
+  txHash    String?     @map("tx_hash")
+  
+  // Addresses
+  // Subscription: The user's address receiving the tokens
+  // Redemption: The user's hosted address sending the tokens
+  walletAddress        String @map("wallet_address")
+
+  // Redemption: The issuer's address receiving the tokens
+  toAddress            String? @map("to_address")
+
+  // Redemption: Bank details for receiving fiat
+  bankName          String? @map("bank_name")
+  accountName       String? @map("account_name")
+  accountNumber     String? @map("account_number")
+  
+  // Financials & Audit
+  fee               Decimal? @default(0) @db.Decimal(78, 0)
+  exchangeRate      Decimal? @map("exchange_rate") @db.Decimal(36, 18)
+  network           String?  @default("ethereum") // e.g. "ethereum", "sepolia"
+  remark            String?  // Admin notes or error reasons
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("stablecoin_orders")
+}
