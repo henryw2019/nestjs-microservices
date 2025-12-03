@@ -3,10 +3,14 @@ import { DatabaseService } from 'src/common/services/database.service';
 import { Role } from '@repo/database/auth';
 import { UserResponseDto } from '../dtos/user.response.dto';
 import { UserUpdateDto } from '../dtos/user.update.dto';
+import { KycService } from 'src/common/services/kyc.service';
 
 @Injectable()
 export class UserAuthService {
-    constructor(private readonly databaseService: DatabaseService) {}
+    constructor(
+        private readonly databaseService: DatabaseService,
+        private readonly kycService: KycService,
+    ) {}
 
     async getUserProfile(userId: string): Promise<UserResponseDto | null> {
         const user = await this.databaseService.user.findUnique({
@@ -23,6 +27,12 @@ export class UserAuthService {
     }
 
     async updateUserProfile(userId: string, updateDto: UserUpdateDto): Promise<UserResponseDto> {
+        await this.kycService.validateProfile({
+            firstName: updateDto.firstName,
+            lastName: updateDto.lastName,
+            email: updateDto.email,
+        });
+
         const user = await this.getUserProfile(userId);
         if (!user) throw new NotFoundException('User not found');
 
@@ -41,6 +51,12 @@ export class UserAuthService {
     }
 
     async createUser(data: Partial<UserResponseDto>): Promise<UserResponseDto> {
+        await this.kycService.validateProfile({
+            firstName: data.firstName || undefined,
+            lastName: data.lastName || undefined,
+            email: data.email,
+        });
+
         const user = await this.databaseService.user.create({
             data: {
                 email: data.email!,

@@ -22,6 +22,7 @@ export class UserAdminUpdateDto extends UserUpdateDto {
     })
     @IsOptional()
     @Transform(({ value }) => {
+        if (typeof value === 'boolean') return value;
         if (typeof value === 'string') {
             if (value.toLowerCase() === 'true') return true;
             if (value.toLowerCase() === 'false') return false;

@@ -5,12 +5,14 @@ import { DatabaseService } from 'src/common/services/database.service';
 import { UserResponseDto } from '../dtos/user.response.dto';
 import { QueryBuilderService } from 'src/common/services/query-builder.service';
 import { UserAdminUpdateDto } from '../dtos/user.admin-update.dto';
+import { KycService } from 'src/common/services/kyc.service';
 
 @Injectable()
 export class UserAdminService {
     constructor(
         private readonly databaseService: DatabaseService,
         private readonly queryBuilder: QueryBuilderService,
+        private readonly kycService: KycService,
     ) {}
 
     async listUsers(listDto: UserListDto) {
@@ -38,6 +40,12 @@ export class UserAdminService {
     }
 
     async updateUser(userId: string, updateDto: UserAdminUpdateDto): Promise<UserResponseDto> {
+        await this.kycService.validateProfile({
+            firstName: updateDto.firstName,
+            lastName: updateDto.lastName,
+            email: updateDto.email,
+        });
+
         const user = await this.databaseService.user.findUnique({
             where: { id: userId, deletedAt: null },
         });

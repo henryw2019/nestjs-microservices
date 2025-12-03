@@ -18,6 +18,7 @@ import { RequestMiddleware } from './middlewares/request.middleware';
 import { QueryBuilderService } from './services/query-builder.service';
 import { RedisService } from './services/redis.service';
 import { HealthCacheService } from './services/health-cache.service';
+import { KycService } from './services/kyc.service';
 import Joi from 'joi';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, Keyv } from '@keyv/redis';
@@ -116,6 +117,7 @@ import { existsSync } from 'fs';
         QueryBuilderService,
         RedisService,
         HealthCacheService,
+        KycService,
 
         // JWT Strategies
         AuthJwtAccessStrategy,
@@ -149,6 +151,7 @@ import { existsSync } from 'fs';
         QueryBuilderService,
         RedisService,
         HealthCacheService,
+        KycService,
         AuthJwtAccessStrategy,
         AuthJwtRefreshStrategy,
     ],
