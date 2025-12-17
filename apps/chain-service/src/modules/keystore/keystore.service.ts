@@ -28,7 +28,7 @@ export class KeyStoreService {
             }
         }
 
-        const normalizedAddress = getAddress(address!);
+        const normalizedAddress = getAddress(address);
 
         const record = await (this.database as any).keyStore.create({
             data: {
