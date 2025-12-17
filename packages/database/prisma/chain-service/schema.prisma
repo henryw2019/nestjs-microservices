@@ -8,13 +8,37 @@ datasource db {
   provider = "postgresql"
 }
 
+// 1. 使用枚举表示密钥类型
+enum KeyType {
+  SELF_CUSTODY // 用户自管
+  HOSTED       // 平台托管
+  MPC          // 多方计算
+}
+
 model KeyStore {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  address    String   @unique
-  privateKey String   @map("privateKey")
-  accountName String?  @map("account_name")
-  createdAt  DateTime @default(now()) @map("createdAt")
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  // 允许同一地址在不同链上存在记录
+  address     String   @map("address") // 公钥/地址    
+  // 使用枚举
+  keyType     KeyType   @default(HOSTED) @map("key_type") 
+  
+  // 开发阶段明文存储，方便测试
+  privateKey String? @map("private_key") 
+  
+  accountName String?   @map("account_name")
+  
+  network     String?   @map("network") // e.g. "ethereum", "bitcoin"
+  chainId     Int?      @map("chain_id") // e.g. 1
+  
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@index([userId])
+  
+  // 同一用户同一网络下的同一地址只能存在一条记录
+  @@unique([userId, address, chainId], map: "unique_address_per_chain")
 
   @@map("keystore")
 }

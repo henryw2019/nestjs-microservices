@@ -56,7 +56,6 @@ export function SwaggerArrayResponse<TModel>(model: new () => TModel) {
     return SwaggerResponseType;
 }
 
-// Metadata DTO
 export class PaginationMetaDto {
     @ApiProperty({ example: 1 })
     page!: number;
@@ -77,25 +76,15 @@ export class PaginationMetaDto {
     hasPreviousPage!: boolean;
 }
 
-// Paginated API Response DTO
 export class PaginatedApiResponseDto<T> extends ApiBaseResponseDto {
-    @ApiProperty({ description: 'Response data array' })
+    @ApiProperty({ description: 'Response payload', isArray: true })
     data!: T[];
 
     @ApiProperty({ type: () => PaginationMetaDto })
+    @Type(() => PaginationMetaDto)
     meta!: PaginationMetaDto;
 }
 
-// Paginated Data interface for internal use
-export interface PaginatedData<T> {
-    data: T[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-}
-
-// SwaggerPaginatedResponse generator
 export function SwaggerPaginatedResponse<TModel>(model: new () => TModel) {
     class PaginatedResultDto {
         @ApiProperty({ isArray: true, type: () => model })
@@ -108,10 +97,7 @@ export function SwaggerPaginatedResponse<TModel>(model: new () => TModel) {
     }
 
     class SwaggerResponseType extends ApiResponseDto<PaginatedResultDto> {
-        @ApiProperty({
-            type: () => PaginatedResultDto,
-            description: 'Paginated response data',
-        })
+        @ApiProperty({ type: () => PaginatedResultDto })
         @Type(() => PaginatedResultDto)
         data!: PaginatedResultDto;
     }

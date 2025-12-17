@@ -1,6 +1,12 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from 'src/common/services/database.service';
 import { Wallet, getAddress } from 'ethers';
+import { CreateKeyStoreDto } from './dtos/create-keystore.dto';
+import { KeyType, Prisma } from '@repo/database/chain-service';
+import { plainToInstance } from 'class-transformer';
+import { KeystoreResponseDto } from './dtos/keystore.response.dto';
+import { KeystoreQueryDto } from './dtos/keystore.query.dto';
+import { PaginatedResult } from '@/common/interfaces/query-builder.interface';
 
 @Injectable()
 export class KeyStoreService {
@@ -8,20 +14,36 @@ export class KeyStoreService {
 
     constructor(private readonly database: DatabaseService) {}
 
-    async createForUser(userId: string, accountName?: string) {
-        const wallet = Wallet.createRandom();
-        const normalizedAddress = getAddress(wallet.address);
+    async createForUser(userId: string, dto: CreateKeyStoreDto) {
+        let address = dto.address;
+        let privateKey: string | null = null;
+
+        if (dto.keyType === KeyType.HOSTED || !dto.keyType) {
+            const wallet = Wallet.createRandom();
+            address = wallet.address;
+            privateKey = wallet.privateKey;
+        } else {
+            if (!address) {
+                throw new BadRequestException('Address is required for non-HOSTED keys');
+            }
+        }
+
+        const normalizedAddress = getAddress(address!);
+
         const record = await (this.database as any).keyStore.create({
             data: {
                 userId,
                 address: normalizedAddress,
-                privateKey: wallet.privateKey,
-                accountName: accountName || null,
+                privateKey: privateKey,
+                accountName: dto.accountName || null,
+                network: dto.network,
+                chainId: dto.chainId,
+                keyType: dto.keyType || KeyType.HOSTED,
             },
         });
 
-        this.logger.log(`Generated keystore for user ${userId} with address ${normalizedAddress}`);
-        return this.sanitize(record);
+        this.logger.log(`Created keystore for user ${userId} with address ${normalizedAddress}`);
+        return plainToInstance(KeystoreResponseDto, record, { excludeExtraneousValues: true });
     }
 
     async getPublicByUserId(userId: string) {
@@ -30,8 +52,58 @@ export class KeyStoreService {
             orderBy: { createdAt: 'asc' },
         });
 
-        if (!records.length) throw new NotFoundException('Keystore not found');
-        return records.map((record: any) => this.sanitize(record));
+        return plainToInstance(KeystoreResponseDto, records, { excludeExtraneousValues: true });
+    }
+
+    async findAll(query: KeystoreQueryDto): Promise<PaginatedResult<KeystoreResponseDto>> {
+        const {
+            page = 1,
+            limit = 25,
+            sortBy = 'createdAt',
+            sortOrder = 'desc',
+            search,
+            network,
+            keyType,
+        } = query;
+        const skip = (page - 1) * limit;
+
+        const where: Prisma.KeyStoreWhereInput = {
+            ...(network && { network }),
+            ...(keyType && { keyType }),
+            ...(search && {
+                OR: [
+                    { address: { contains: search, mode: 'insensitive' } },
+                    { accountName: { contains: search, mode: 'insensitive' } },
+                    { userId: { contains: search, mode: 'insensitive' } },
+                ],
+            }),
+        };
+
+        const [total, records] = await Promise.all([
+            (this.database as any).keyStore.count({ where }),
+            (this.database as any).keyStore.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { [sortBy]: sortOrder },
+            }),
+        ]);
+
+        const data = plainToInstance(KeystoreResponseDto, records, {
+            excludeExtraneousValues: true,
+        }) as unknown as KeystoreResponseDto[];
+
+        return {
+            items: data,
+            meta: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                hasNextPage: page * limit < total,
+                hasPreviousPage: page > 1,
+            },
+        };
     }
 
     async getByAddress(address: string) {
@@ -62,15 +134,5 @@ export class KeyStoreService {
         });
         if (!rec) throw new NotFoundException('Keystore not found for the provided address');
         return rec;
-    }
-
-    private sanitize(record: any) {
-        return {
-            id: record.id,
-            userId: record.userId,
-            address: record.address,
-            accountName: record.accountName || undefined,
-            createdAt: record.createdAt,
-        };
     }
 }

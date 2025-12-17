@@ -1,0 +1,75 @@
+# Database URLs for all services
+INDEXER_DATABASE_URL="postgresql://admin:master123@postgres:5432/indexer"
+AUTH_DATABASE_URL="postgresql://admin:master123@postgres:5432/auth"
+CHAIN_SERVICE_DATABASE_URL="postgresql://admin:master123@postgres:5432/chain_service"
+# Chain Reader Read-Only Database
+CHAIN_READER_DATABASE_URL="postgresql://admin:master123@postgres:5432/indexer"
+# Redis configuration
+REDIS_URL="redis://redis:6379"
+REDIS_KEY_PREFIX_AUTH="auth:"
+REDIS_KEY_PREFIX_CHAIN_SERVICE="chain-service:"
+REDIS_KEY_PREFIX_CHAIN_READER="chain-reader:"
+REDIS_TTL=3600
+
+# JWT configuration
+ACCESS_TOKEN_SECRET_KEY="EAJYjNJUnRGJ6uq1YfGw4NG1pd1z102J"
+ACCESS_TOKEN_EXPIRED="1d"
+REFRESH_TOKEN_SECRET_KEY="LcnlpiuHIJ6eS51u1mcOdk0P49r2Crwu"
+REFRESH_TOKEN_EXPIRED="7d"
+
+# gRPC configuration
+# Auth Service (提供 AuthService 和 UserService)
+GRPC_URL="0.0.0.0:50051"
+GRPC_PACKAGE="auth"
+GRPC_AUTH_URL="0.0.0.0:50051"
+GRPC_AUTH_PACKAGE="auth"
+GRPC_USER_URL="0.0.0.0:50051"
+GRPC_USER_PACKAGE="user"
+
+# Chain Reader Service (gRPC服务器)
+GRPC_CHAIN_READER_URL="0.0.0.0:50054"
+GRPC_CHAIN_READER_PACKAGE="chain-reader"
+
+# Chain Service (gRPC客户端连接配置)
+GRPC_CLIENT_AUTH_URL="auth-service:50051"
+GRPC_CLIENT_USER_URL="auth-service:50051"
+
+# Application configuration
+NODE_ENV="local"
+APP_NAME="nestjs-microservices"
+APP_CORS_ORIGINS="*"
+APP_DEBUG=true
+
+# HTTP configuration
+HTTP_ENABLE=true
+HTTP_HOST="::"
+HTTP_PORT=9001
+HTTP_VERSIONING_ENABLE=true
+HTTP_VERSION=1
+
+# Service-specific HTTP ports
+HTTP_PORT_AUTH=9001
+HTTP_PORT_CHAIN_SERVICE=9003
+HTTP_PORT_CHAIN_READER=9004
+
+# Documentation
+DOC_PREFIX="/docs"
+API_VERSION="1.0.0"
+
+# Cache Configuration
+CACHE_TTL_SECONDS=3
+CACHE_MAX_ITEMS=5000
+
+# Blockchain configuration
+ETH_RPC_URL=https://sepolia.drpc.org
+ETH_RPC_URL_DOCKER=http://host.docker.internal:8545
+CHAIN_ID=11155111
+POLL_INTERVAL_MS=5000
+BATCH_SIZE=5
+TRANSACTION_TIMEOUT_MS=600000
+CONFIRMATIONS=12
+GENESIS_JSON_PATH=./genesis.json
+ISSUER_WALLET_ADDRESS=0xb44cafb589eaebf0fb42e8646a8506a6a9f4f497
+
+# Sentry
+SENTRY_DSN=""
