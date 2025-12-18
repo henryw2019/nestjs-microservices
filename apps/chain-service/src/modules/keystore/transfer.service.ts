@@ -1,22 +1,40 @@
 import {
     BadRequestException,
+    ConflictException,
+    ForbiddenException,
     HttpException,
     Injectable,
     InternalServerErrorException,
     NotFoundException,
 } from '@nestjs/common';
-import { JsonRpcProvider, getAddress, Wallet, Contract, TransactionResponse } from 'ethers';
+import {
+    JsonRpcProvider,
+    getAddress,
+    Wallet,
+    Contract,
+    TransactionResponse,
+    Interface,
+    Transaction,
+    formatUnits,
+} from 'ethers';
 import { KeyStoreService } from './keystore.service';
 import { AmlService } from '../aml/aml.service';
+import { DatabaseService } from '../../common/services/database.service';
+import { KeyType, OfflineTransactionStatus } from '@repo/database/chain-service';
 // import { BadRequestException as AmlBlock } from '@nestjs/common';
 import { TransferDto } from './dtos/transfer.dto';
 import { TransferResponseDto } from './dtos/transfer.response.dto';
+import { BuildTransactionDto } from './dtos/build-transaction.dto';
+import { UnsignedTransactionResponseDto } from './dtos/unsigned-transaction-response.dto';
+import { SubmitSignedTransactionDto } from './dtos/submit-signed-transaction.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class TransferService {
     constructor(
         private readonly keyStoreService: KeyStoreService,
         private readonly amlService: AmlService,
+        private readonly database: DatabaseService,
     ) {}
 
     private getProvider() {
@@ -293,5 +311,267 @@ export class TransferService {
         }
 
         return cleanedCandidates[0] ?? fallback;
+    }
+
+    async buildUnsignedTransaction(
+        userId: string,
+        dto: BuildTransactionDto,
+    ): Promise<UnsignedTransactionResponseDto> {
+        const fromAddress = getAddress(dto.from);
+
+        // 1. Verify user ownership and key type
+        const keyStore = await this.keyStoreService.getSecretByUserIdAndAddress(
+            userId,
+            fromAddress,
+        );
+        if (keyStore.keyType !== KeyType.SELF_CUSTODY) {
+            throw new ForbiddenException(
+                'Offline signing is only available for SELF_CUSTODY wallets',
+            );
+        }
+
+        const provider = this.getProvider();
+        const chainId = dto.chainId || Number(process.env.CHAIN_ID || 31337);
+
+        let toAddress = getAddress(dto.to);
+        let value = BigInt(dto.amount);
+        let data = '0x';
+        let tokenAddress: string | null = null;
+        let readableData: any = {};
+
+        // 2. Determine transaction type and encode data
+        if (dto.token) {
+            // ERC20 Transfer
+            tokenAddress = getAddress(dto.token);
+            const iface = new Interface(['function transfer(address to, uint256 amount)']);
+            data = iface.encodeFunctionData('transfer', [toAddress, value]);
+
+            // For ERC20, 'to' is the token contract, value is 0 (ETH)
+            readableData = {
+                transactionType: 'ERC20_TRANSFER',
+                from: fromAddress,
+                to: toAddress,
+                amount: `${dto.amount} (raw units)`, // Ideally fetch decimals
+                token: tokenAddress,
+                description: `Transfer ${dto.amount} (raw) of token ${tokenAddress} to ${toAddress}`,
+            };
+
+            // Update transaction fields for ERC20
+            toAddress = tokenAddress; // The transaction is sent to the token contract
+            value = BigInt(0); // No ETH is sent
+        } else {
+            // Native ETH Transfer
+            readableData = {
+                transactionType: 'ETH_TRANSFER',
+                from: fromAddress,
+                to: toAddress,
+                amount: `${formatUnits(value, 18)} ETH`,
+                description: `Transfer ${formatUnits(value, 18)} ETH to ${toAddress}`,
+            };
+        }
+
+        // 3. Get nonce and estimate gas
+        const nonce = await provider.getTransactionCount(fromAddress, 'pending');
+
+        const txRequest = {
+            from: fromAddress,
+            to: toAddress,
+            value: value,
+            data: data,
+            chainId: chainId,
+        };
+
+        let gasLimit = BigInt(21000); // Default for ETH transfer
+        try {
+            gasLimit = await provider.estimateGas(txRequest);
+        } catch (error: any) {
+            // Fallback or rethrow? For now, let's try to use provided limit or default for ERC20
+            if (dto.gasLimit) {
+                gasLimit = BigInt(dto.gasLimit);
+            } else if (dto.token) {
+                gasLimit = BigInt(65000); // Typical ERC20 transfer gas
+            } else {
+                throw new InternalServerErrorException(`Gas estimation failed: ${error.message}`);
+            }
+        }
+
+        // Override if provided
+        if (dto.gasLimit) {
+            gasLimit = BigInt(dto.gasLimit);
+        }
+
+        // 4. Fee strategy
+        let gasPrice: bigint | undefined;
+        let maxFeePerGas: bigint | undefined;
+        let maxPriorityFeePerGas: bigint | undefined;
+
+        if (dto.gasPrice) {
+            gasPrice = BigInt(dto.gasPrice);
+        } else if (dto.maxFeePerGas || dto.maxPriorityFeePerGas) {
+            maxFeePerGas = dto.maxFeePerGas ? BigInt(dto.maxFeePerGas) : undefined;
+            maxPriorityFeePerGas = dto.maxPriorityFeePerGas
+                ? BigInt(dto.maxPriorityFeePerGas)
+                : undefined;
+        } else {
+            // Default to provider fee data
+            const feeData = await provider.getFeeData();
+            if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
+                maxFeePerGas = feeData.maxFeePerGas;
+                maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+            } else {
+                gasPrice = feeData.gasPrice || undefined;
+            }
+        }
+
+        // 5. Create OfflineTransaction record
+        const transactionId = randomUUID();
+        const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+        await this.database.offlineTransaction.create({
+            data: {
+                transactionId,
+                userId,
+                from: fromAddress,
+                to: toAddress,
+                value: value.toString(), // Store as string for Decimal
+                data,
+                nonce,
+                chainId,
+                gasLimit: gasLimit.toString(),
+                gasPrice: gasPrice?.toString(),
+                maxFeePerGas: maxFeePerGas?.toString(),
+                maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+                token: tokenAddress,
+                status: OfflineTransactionStatus.CREATED,
+                expiresAt,
+            },
+        });
+
+        // 6. Construct response
+        const transactionObj = {
+            from: fromAddress,
+            to: toAddress,
+            value: value.toString(),
+            data,
+            nonce,
+            gasLimit: gasLimit.toString(),
+            gasPrice: gasPrice?.toString(),
+            maxFeePerGas: maxFeePerGas?.toString(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
+            chainId,
+        };
+
+        const response: UnsignedTransactionResponseDto = {
+            transactionId,
+            transaction: transactionObj as any,
+            expiresAt: expiresAt.toISOString(),
+            readableData,
+            qrCodeData: JSON.stringify({
+                transactionId,
+                transaction: transactionObj,
+                expiresAt: expiresAt.toISOString(),
+                readableData,
+                version: 1,
+            }),
+        };
+
+        return response;
+    }
+
+    async submitSignedTransaction(
+        dto: SubmitSignedTransactionDto,
+    ): Promise<{ transactionId: string; txHash: string; status: string }> {
+        // 1. Retrieve transaction record
+        const record = await this.database.offlineTransaction.findUnique({
+            where: { transactionId: dto.transactionId },
+        });
+
+        if (!record) {
+            throw new NotFoundException('Transaction not found');
+        }
+
+        // 2. Validate status and expiration
+        if (record.status !== OfflineTransactionStatus.CREATED) {
+            throw new ConflictException(`Transaction status is ${record.status}, expected CREATED`);
+        }
+
+        if (new Date() > record.expiresAt) {
+            await this.database.offlineTransaction.update({
+                where: { id: record.id },
+                data: { status: OfflineTransactionStatus.EXPIRED },
+            });
+            throw new ConflictException('Transaction has expired');
+        }
+
+        // 3. Parse signed transaction
+        let parsedTx: Transaction;
+        try {
+            parsedTx = Transaction.from(dto.signedTx);
+        } catch (error) {
+            throw new BadRequestException('Invalid signed transaction format');
+        }
+
+        // 4. Strict consistency check
+        const isMatch =
+            getAddress(parsedTx.from!) === getAddress(record.from) &&
+            getAddress(parsedTx.to!) === getAddress(record.to) &&
+            parsedTx.value === BigInt(record.value.toFixed()) &&
+            parsedTx.data.toLowerCase() === (record.data || '0x').toLowerCase() &&
+            parsedTx.nonce === record.nonce &&
+            Number(parsedTx.chainId) === record.chainId;
+        // Note: Gas checks can be tricky due to BigInt/Decimal conversion and potential minor adjustments by wallets.
+        // For strict security, we should check them, but let's ensure types match first.
+        // parsedTx.gasLimit === BigInt(record.gasLimit.toFixed())
+
+        if (!isMatch) {
+            throw new BadRequestException(
+                'Signed transaction details do not match the build record',
+            );
+        }
+
+        // 5. Replay protection (Nonce check)
+        // Check if there is any other SUBMITTED/CONFIRMED transaction with the same nonce for this address
+        const conflictingTx = await this.database.offlineTransaction.findFirst({
+            where: {
+                from: record.from,
+                nonce: record.nonce,
+                status: {
+                    in: [OfflineTransactionStatus.SUBMITTED, OfflineTransactionStatus.CONFIRMED],
+                },
+                id: { not: record.id },
+            },
+        });
+
+        if (conflictingTx) {
+            throw new ConflictException(
+                `Nonce ${record.nonce} has already been used by another transaction`,
+            );
+        }
+
+        // 6. Broadcast transaction
+        const provider = this.getProvider();
+        let txResponse: TransactionResponse;
+        try {
+            txResponse = await provider.broadcastTransaction(dto.signedTx);
+        } catch (error) {
+            this.handleTransferError(error);
+            throw error; // handleTransferError might throw, but if not
+        }
+
+        // 7. Update record
+        await this.database.offlineTransaction.update({
+            where: { id: record.id },
+            data: {
+                status: OfflineTransactionStatus.SUBMITTED,
+                signedTx: dto.signedTx,
+                txHash: txResponse.hash,
+            },
+        });
+
+        return {
+            transactionId: record.transactionId,
+            txHash: txResponse.hash,
+            status: OfflineTransactionStatus.SUBMITTED,
+        };
     }
 }

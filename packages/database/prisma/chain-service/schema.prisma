@@ -139,3 +139,42 @@ model StablecoinOrder {
 
   @@map("stablecoin_orders")
 }
+
+enum OfflineTransactionStatus {
+  CREATED
+  SUBMITTED
+  CONFIRMED
+  EXPIRED
+  FAILED
+}
+
+model OfflineTransaction {
+  id                   String                   @id @default(uuid())
+  transactionId        String                   @unique @map("transaction_id")
+  userId               String                   @map("user_id")
+  
+  from                 String
+  to                   String
+  value                Decimal                  @db.Decimal(78, 0)
+  data                 String?
+  nonce                Int
+  chainId              Int                      @map("chain_id")
+  gasLimit             Decimal                  @map("gas_limit") @db.Decimal(78, 0)
+  gasPrice             Decimal?                 @map("gas_price") @db.Decimal(78, 0)
+  maxFeePerGas         Decimal?                 @map("max_fee_per_gas") @db.Decimal(78, 0)
+  maxPriorityFeePerGas Decimal?                 @map("max_priority_fee_per_gas") @db.Decimal(78, 0)
+  token                String?                  // ERC20 token address if applicable
+  
+  status               OfflineTransactionStatus @default(CREATED)
+  signedTx             String?                  @map("signed_tx")
+  txHash               String?                  @unique @map("tx_hash")
+  expiresAt            DateTime                 @map("expires_at")
+  
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @updatedAt @map("updated_at")
+
+  @@index([userId, status])
+  @@index([expiresAt])
+  @@index([from, nonce])
+  @@map("offline_transactions")
+}
